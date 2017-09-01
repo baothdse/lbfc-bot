@@ -62,9 +62,9 @@ function processPostback(event) {
             } else {
                 var bodyObj = JSON.parse(body);
                 name = bodyObj.first_name;
-                greeting = "hi " + name + ".";
+                greeting = "Hi " + name + ".";
             }
-            var message =  greeting + "Tui la bot cua anh Bao";
+            var message =  greeting + "Tui là bot được tạo ra bởi anh Bảo đẹp zai. Bạn cần tui giúp gì ko?";
             sendMessage(senderId, {text: message});
         })
     }
