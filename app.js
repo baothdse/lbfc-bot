@@ -35,8 +35,10 @@ app.post('/webhook', function(req, res) {
         req.body.entry.forEach(function(entry) {
             entry.messaging.forEach(function(event) {
                 if (event.postback) {
-                    console.log(event.postback + "baothd");
+                    console.log(event.postback);
                     processPostback(event);
+                } else if (event.message) {
+                    processMessage(event);
                 }
             });
         });
@@ -71,6 +73,25 @@ function processPostback(event) {
     };
 };
 
+function processMessage(event) {
+    if (!event.message.is_echo) {
+        var message = event.message;
+        var senderId = event.sender.id;
+
+        console.log("Message receive from sender Id:" + senderId);
+        console.log("Message is: " + JSON.stringify(message));
+
+        if(message.text) {
+            var formattedMsg = message.text.toLowerCase().trim();
+            if(formattedMsg == "hi") {
+                sendMessage(senderId, {text: "Bạn muốn tìm hiểu cửa hàng gì?"});
+            } else {
+                sendMessage(senderId, {text: "Xin lỗi tôi chưa thể hiểu bạn nói gì."});
+            }
+        }
+    }
+};
+
 // sends message to user
 function sendMessage(recipientId, message) {
   request({
@@ -86,6 +107,7 @@ function sendMessage(recipientId, message) {
       console.log("Error sending message: " + response.error);
     }
   });
-}
+};
+
 
 console.log("Server start on port " + port);
