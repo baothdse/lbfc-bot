@@ -35,6 +35,7 @@ app.post('/webhook', function(req, res) {
         req.body.entry.forEach(function(entry) {
             entry.messaging.forEach(function(event) {
                 if (event.postback) {
+                    console.log(event.postback);
                     processPostback(event);
                 }
             });
@@ -67,8 +68,8 @@ function processPostback(event) {
             var message =  greeting + "Tui là bot được tạo ra bởi anh Bảo đẹp zai. Bạn cần tui giúp gì ko?";
             sendMessage(senderId, {text: message});
         })
-    }
-}
+    };
+};
 
 // sends message to user
 function sendMessage(recipientId, message) {
