@@ -4,7 +4,7 @@ var bodyParser = require('body-parser');
 var morgan = require('morgan');
 
 var app = express();
-
+var apiaiApp = require(apiai)(fa60b3a3247e42c3a9bf870dcd78a7a3);
 var port = process.env.PORT || 3000;
 
 //morgan
@@ -16,12 +16,12 @@ app.use(bodyParser.json());
 
 app.listen(port);
 
-app.get('/', function(req, res) {
-    res.send('Facebook Chatbot Here'); 
+app.get('/', function (req, res) {
+    res.send('Facebook Chatbot Here');
 });
 
-app.get('/webhook', function(req, res) {
-    if(req.query["hub.verify_token"] === process.env.VERIFICATION_TOKEN) {
+app.get('/webhook', function (req, res) {
+    if (req.query["hub.verify_token"] === process.env.VERIFICATION_TOKEN) {
         console.log("Verified Webhook");
         res.status(200).send(req.query["hub.challenge"]);
     } else {
@@ -30,10 +30,10 @@ app.get('/webhook', function(req, res) {
     }
 });
 
-app.post('/webhook', function(req, res) {
+app.post('/webhook', function (req, res) {
     if (req.body.object == "page") {
-        req.body.entry.forEach(function(entry) {
-            entry.messaging.forEach(function(event) {
+        req.body.entry.forEach(function (entry) {
+            entry.messaging.forEach(function (event) {
                 if (event.postback) {
                     console.log(event.postback);
                     processPostback(event);
@@ -50,25 +50,25 @@ function processPostback(event) {
     var senderId = event.sender.id;
     var payload = event.postback.payload;
 
-    if(payload == 'Greeting') {
+    if (payload == 'Greeting') {
         request({
-            url : 'https://graph.facebook.com/v2.6/' + senderId,
+            url: 'https://graph.facebook.com/v2.6/' + senderId,
             qs: {
                 access_token: process.env.PAGE_ACCESS_TOKEN,
                 fields: "first_name"
             },
             method: 'GET',
-        }, function(error, response, body) {
+        }, function (error, response, body) {
             var greeting = "";
-            if(error) {
+            if (error) {
                 consonle.log("Error greeting user's name : " + error);
             } else {
                 var bodyObj = JSON.parse(body);
                 name = bodyObj.first_name;
                 greeting = "Hi " + name + ".";
             }
-            var message =  greeting + "Tui là bot được tạo ra bởi anh Bảo đẹp zai. Bạn cần tui giúp gì ko?";
-            sendMessage(senderId, {text: message});
+            var message = greeting + "Tui là bot được tạo ra bởi anh Bảo đẹp zai. Bạn cần tui giúp gì ko?";
+            sendMessage(senderId, { text: message });
         })
     };
 };
@@ -81,12 +81,12 @@ function processMessage(event) {
         console.log("Message receive from sender Id:" + senderId);
         console.log("Message is: " + JSON.stringify(message));
 
-        if(message.text) {
+        if (message.text) {
             var formattedMsg = message.text.toLowerCase().trim();
-            if(formattedMsg == "hi") {
-                sendMessage(senderId, {text: "Bạn muốn tìm hiểu cửa hàng gì?"});
+            if (formattedMsg == "hi") {
+                sendMessage(senderId, { text: "Bạn muốn tìm hiểu cửa hàng gì?" });
             } else {
-                sendMessage(senderId, {text: "Xin lỗi tôi chưa thể hiểu bạn nói gì."});
+                sendMessage(senderId, { text: "Xin lỗi tôi chưa thể hiểu bạn nói gì." });
             }
         }
     }
@@ -94,19 +94,33 @@ function processMessage(event) {
 
 // sends message to user
 function sendMessage(recipientId, message) {
-  request({
-    url: "https://graph.facebook.com/v2.6/me/messages",
-    qs: {access_token: process.env.PAGE_ACCESS_TOKEN},
-    method: "POST",
-    json: {
-      recipient: {id: recipientId},
-      message: message,
-    }
-  }, function(error, response, body) {
-    if (error) {
-      console.log("Error sending message: " + response.error);
-    }
-  });
+    let text = message.text;
+    let apiai = apiaiApp.textRequest(text, {
+        sessionId: "my_session"
+    });
+
+    apiai.on('response', (response) => {
+        let aiText = response.result.fulfillment.speech;
+        request({
+            url: "https://graph.facebook.com/v2.6/me/messages",
+            qs: { access_token: process.env.PAGE_ACCESS_TOKEN },
+            method: "POST",
+            json: {
+                recipient: { id: recipientId },
+                message: aiText,
+            }
+        }, function (error, response, body) {
+            if (error) {
+                console.log("Error sending message: " + response.error);
+            }
+        });
+    });
+
+    apiai.on('error', (error) => {
+        console.log(error);
+    });
+
+    apiai.end();
 };
 
 
