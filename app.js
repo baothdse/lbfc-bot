@@ -100,6 +100,7 @@ function sendMessage(recipientId, message) {
     });
 
     apiai.on('response', (response) => {
+        console.log("API.AI is on response state");
         let aiText = response.result.fulfillment.speech;
         request({
             url: "https://graph.facebook.com/v2.6/me/messages",
