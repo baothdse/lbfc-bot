@@ -34,11 +34,12 @@ app.post('/webhook', function (req, res) {
     if (req.body.object == "page") {
         req.body.entry.forEach(function (entry) {
             entry.messaging.forEach(function (event) {
-                if (event.postback) {
-                    console.log(event.postback);
-                    processPostback(event);
-                } else if (event.message) {
-                    processMessage(event);
+                // if (event.postback) {
+                //     console.log(event.postback);
+                //     processPostback(event);
+                // } else 
+                if (event.message) {
+                    sendMessage(event);
                 }
             });
         });
