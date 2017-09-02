@@ -4,7 +4,7 @@ var bodyParser = require('body-parser');
 var morgan = require('morgan');
 
 var app = express();
-var apiaiApp = require(apiai)(fa60b3a3247e42c3a9bf870dcd78a7a3);
+var apiaiApp = require('apiai')('fa60b3a3247e42c3a9bf870dcd78a7a3');
 var port = process.env.PORT || 3000;
 
 //morgan
