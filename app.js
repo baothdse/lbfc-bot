@@ -70,14 +70,13 @@ function sendMessage(event) {
     apiai.on('response', (response) => {
         console.log("API.AI is on response state");
         let aiText = response.result.fulfillment.speech;
-        let menu = getMenu();
         request({
             url: "https://graph.facebook.com/v2.6/me/messages",
             qs: { access_token: process.env.PAGE_ACCESS_TOKEN },
             method: "POST",
             json: {
                 recipient: { id: sender },
-                message: {text: aiText + menu}
+                message: {text: aiText}
             }
         }, function (error, response, body) {
             if (error) {
