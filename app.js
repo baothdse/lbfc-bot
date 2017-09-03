@@ -34,11 +34,12 @@ app.post('/webhook', function (req, res) {
     if (req.body.object == "page") {
         req.body.entry.forEach(function (entry) {
             entry.messaging.forEach(function (event) {
-                if (event.postback) {
-                    console.log(event.postback);
-                    processPostback(event);
-                } else if (event.message) {
-                    processMessage(event);
+                // if (event.postback) {
+                //     console.log(event.postback);
+                //     processPostback(event);
+                // } else
+                if (event.message) {
+                    sendMessage(event);
                 }
             });
         });
@@ -46,55 +47,12 @@ app.post('/webhook', function (req, res) {
     }
 });
 
-function processPostback(event) {
-    var senderId = event.sender.id;
-    var payload = event.postback.payload;
-
-    if (payload == 'Greeting') {
-        request({
-            url: 'https://graph.facebook.com/v2.6/' + senderId,
-            qs: {
-                access_token: process.env.PAGE_ACCESS_TOKEN,
-                fields: "first_name"
-            },
-            method: 'GET',
-        }, function (error, response, body) {
-            var greeting = "";
-            if (error) {
-                consonle.log("Error greeting user's name : " + error);
-            } else {
-                var bodyObj = JSON.parse(body);
-                name = bodyObj.first_name;
-                greeting = "Hi " + name + ".";
-            }
-            var message = greeting + "Tui là bot được tạo ra bởi anh Bảo đẹp zai. Bạn cần tui giúp gì ko?";
-            sendMessage(senderId, { text: message });
-        })
-    };
-};
-
-function processMessage(event) {
-    if (!event.message.is_echo) {
-        var message = event.message;
-        var senderId = event.sender.id;
-
-        console.log("Message receive from sender Id:" + senderId);
-        console.log("Message is: " + JSON.stringify(message));
-
-        if (message.text) {
-            var formattedMsg = message.text.toLowerCase().trim();
-            if (formattedMsg == "hi") {
-                sendMessage(senderId, { text: "Bạn muốn tìm hiểu cửa hàng gì?" });
-            } else {
-                sendMessage(senderId, { text: "Xin lỗi tôi chưa thể hiểu bạn nói gì." });
-            }
-        }
-    }
-};
-
 // sends message to user
-function sendMessage(recipientId, message) {
-    let text = message.text;
+function sendMessage(event) {
+
+    let text = event.message.text;
+    let sender = event.sender.id;
+
     let apiai = apiaiApp.textRequest(text, {
         sessionId: "my_session"
     });
@@ -107,8 +65,8 @@ function sendMessage(recipientId, message) {
             qs: { access_token: process.env.PAGE_ACCESS_TOKEN },
             method: "POST",
             json: {
-                recipient: { id: recipientId },
-                message: aiText,
+                recipient: { id: sender },
+                text: aiText,
             }
         }, function (error, response, body) {
             if (error) {
@@ -126,3 +84,48 @@ function sendMessage(recipientId, message) {
 
 
 console.log("Server start on port " + port);
+// function processPostback(event) {
+//     var senderId = event.sender.id;
+//     var payload = event.postback.payload;
+
+//     if (payload == 'Greeting') {
+//         request({
+//             url: 'https://graph.facebook.com/v2.6/' + senderId,
+//             qs: {
+//                 access_token: process.env.PAGE_ACCESS_TOKEN,
+//                 fields: "first_name"
+//             },
+//             method: 'GET',
+//         }, function (error, response, body) {
+//             var greeting = "";
+//             if (error) {
+//                 consonle.log("Error greeting user's name : " + error);
+//             } else {
+//                 var bodyObj = JSON.parse(body);
+//                 name = bodyObj.first_name;
+//                 greeting = "Hi " + name + ".";
+//             }
+//             var message = greeting + "Tui là bot được tạo ra bởi anh Bảo đẹp zai. Bạn cần tui giúp gì ko?";
+//             sendMessage(senderId, { text: message });
+//         })
+//     };
+// };
+
+// function processMessage(event) {
+//     if (!event.message.is_echo) {
+//         var message = event.message;
+//         var senderId = event.sender.id;
+
+//         console.log("Message receive from sender Id:" + senderId);
+//         console.log("Message is: " + JSON.stringify(message));
+
+//         if (message.text) {
+//             var formattedMsg = message.text.toLowerCase().trim();
+//             if (formattedMsg == "hi") {
+//                 sendMessage(senderId, { text: "Bạn muốn tìm hiểu cửa hàng gì?" });
+//             } else {
+//                 sendMessage(senderId, { text: "Xin lỗi tôi chưa thể hiểu bạn nói gì." });
+//             }
+//         }
+//     }
+// };
