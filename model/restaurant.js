@@ -1,11 +1,11 @@
 var mongoose = require('mongoose');
-var schema = mongoose.Schema;
+var Schema = mongoose.Schema;
 
 var restaurantSchema = new Schema({
     id: Number,
     restaurant_name : String,
     address: String, 
-    menu: [menu]
+    menu: String
 });
 
 var Restaurant = mongoose.model('Restaurant', restaurantSchema);

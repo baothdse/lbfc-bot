@@ -72,7 +72,7 @@ function sendMessage(event) {
             method: "POST",
             json: {
                 recipient: { id: sender },
-                message: {text: aiText + menu.toString()}
+                message: {text: aiText + menu}
             }
         }, function (error, response, body) {
             if (error) {
