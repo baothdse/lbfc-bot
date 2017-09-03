@@ -38,7 +38,7 @@ app.post('/webhook', function (req, res) {
                     console.log(event.postback);
                     processPostback(event);
                 } else if (event.message) {
-                    sendMessage(event);
+                    processMessage(event);
                 }
             });
         });
