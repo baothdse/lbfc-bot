@@ -7,6 +7,11 @@ var app = express();
 var apiaiApp = require('apiai')('fa60b3a3247e42c3a9bf870dcd78a7a3');
 var port = process.env.PORT || 3000;
 
+//mongooge
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost:27017/LBFC');
+
+var restaurantSchema = require('./model/restaurant')
 //morgan
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({
@@ -60,13 +65,14 @@ function sendMessage(event) {
     apiai.on('response', (response) => {
         console.log("API.AI is on response state");
         let aiText = response.result.fulfillment.speech;
+        let menu = getMenu();
         request({
             url: "https://graph.facebook.com/v2.6/me/messages",
             qs: { access_token: process.env.PAGE_ACCESS_TOKEN },
             method: "POST",
             json: {
                 recipient: { id: sender },
-                message: {text: aiText}
+                message: {text: aiText + menu.toString()}
             }
         }, function (error, response, body) {
             if (error) {
@@ -82,7 +88,16 @@ function sendMessage(event) {
     apiai.end();
 };
 
-
+function getMenu() {
+    restaurantSchema.findOne({restaurant_name: 'Uni'}, function(err, restaurant) {
+        if (err) {
+            return " ";
+        } else {
+            console.log(restaurant.menu);
+            return restaurant.menu;
+        }
+    })
+ }
 console.log("Server start on port " + port);
 // function processPostback(event) {
 //     var senderId = event.sender.id;
