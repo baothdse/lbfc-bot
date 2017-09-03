@@ -8,14 +8,14 @@ var apiaiApp = require('apiai')('fa60b3a3247e42c3a9bf870dcd78a7a3');
 var port = process.env.PORT || 3000;
 
 //mongooge
-var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/LBFC');
+// var mongoose = require('mongoose');
+// mongoose.connect('mongodb://localhost:27017/LBFC');
 
-mongoose.connection.on('connected',function(){
-    console.log('mongoose connected');
-});
+// mongoose.connection.on('connected',function(){
+//     console.log('mongoose connected');
+// });
 
-var Restaurant = require('./model/restaurant.js');
+// var Restaurant = require('./model/restaurant.js');
 //morgan
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({
@@ -92,13 +92,13 @@ function sendMessage(event) {
     apiai.end();
 };
 
-function getMenu() {
-    Restaurant.findOne(function(err, restaurant) {
-        console.log(restaurant.menu);
-        return restaurant.menu;
-    })
- }
-var menu = getMenu();
+// function getMenu() {
+//     Restaurant.findOne(function(err, restaurant) {
+//         console.log(restaurant.menu);
+//         return restaurant.menu;
+//     })
+//  }
+// var menu = getMenu();
 console.log("Server start on port " + port);
 // function processPostback(event) {
 //     var senderId = event.sender.id;
