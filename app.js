@@ -11,7 +11,11 @@ var port = process.env.PORT || 3000;
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost:27017/LBFC');
 
-var restaurantSchema = require('./model/restaurant')
+mongoose.connection.on('connected',function(){
+    console.log('mongoose connected');
+});
+
+var Restaurant = require('./model/restaurant.js');
 //morgan
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({
@@ -52,6 +56,7 @@ app.post('/webhook', function (req, res) {
     }
 });
 
+
 // sends message to user
 function sendMessage(event) {
 
@@ -89,15 +94,12 @@ function sendMessage(event) {
 };
 
 function getMenu() {
-    restaurantSchema.findOne({restaurant_name: 'Uni'}, function(err, restaurant) {
-        if (err) {
-            return " ";
-        } else {
-            console.log(restaurant.menu);
-            return restaurant.menu;
-        }
+    Restaurant.findOne(function(err, restaurant) {
+        console.log(restaurant.menu);
+        return restaurant.menu;
     })
  }
+var menu = getMenu();
 console.log("Server start on port " + port);
 // function processPostback(event) {
 //     var senderId = event.sender.id;
