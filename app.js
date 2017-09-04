@@ -67,6 +67,7 @@ function sendMessage(event) {
     let apiai = apiaiApp.textRequest(text, {
         sessionId: "my_session"
     });
+    console.log(apiai.request);
 
     apiai.on('response', (response) => {
         console.log("API.AI is on response state");
