@@ -71,10 +71,10 @@ function sendMessage(event) {
     apiai.on('response', (response) => {
         console.log("API.AI is on response state");
         let aiText = response.result.fulfillment.speech;
-        if(response.result.metadata.intentName === "Coffee") {
+        if(response.result.metadata.intentName === "Coffee", function() {
             let menu = getMenu();
             aiText = aiText + " " + menu;
-        }
+        })
         console.log(response.result)
         request({
             url: "https://graph.facebook.com/v2.6/me/messages",
@@ -102,8 +102,8 @@ function getMenu() {
     Restaurant.findOne({restaurant_name: "Effoc"}, function(err, restaurant) {
         console.log(restaurant.menu);
         return restaurant.menu;
-    })
- }
+    });
+ };
 // var menu = getMenu();
 console.log("Server start on port " + port);
 // function processPostback(event) {
