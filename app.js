@@ -67,8 +67,6 @@ function sendMessage(event) {
         restaurants.forEach(function (restaurant) {
             console.log(restaurant.menu);
         });
-    }).error(function (error) {
-        console.log(error);
     });
     console.log(promise);
     let apiai = apiaiApp.textRequest(text, {
