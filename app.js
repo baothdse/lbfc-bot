@@ -62,7 +62,9 @@ function sendMessage(event) {
 
     let text = event.message.text;
     let sender = event.sender.id;
-    var menu = getMenu(); 
+    var menu = Restaurant.findOne({restaurant_name: "Effoc"}).exec(function(err, restaurant) {
+        return restaurant.menu;
+    });
     console.log(menu);
     let apiai = apiaiApp.textRequest(text, {
         sessionId: "my_session"
@@ -100,12 +102,6 @@ function sendMessage(event) {
     apiai.end();
 };
 
-function getMenu() {
-    Restaurant.findOne({restaurant_name: "Effoc"}).exec(function(err, restaurant) {
-        return restaurant.menu;
-    });
- };
-var menu = getMenu();
 console.log("Server start on port " + port);
 // function processPostback(event) {
 //     var senderId = event.sender.id;
