@@ -68,9 +68,10 @@ function sendMessage(event) {
             console.log(err);
         } else {
             menu = restaurant;
+            console.log(menu);
         }
     });
-    
+
     let apiai = apiaiApp.textRequest(text, {
         sessionId: "my_session"
     });
@@ -115,8 +116,7 @@ function getMenu(callback) {
             callback(null, restaurant.menu)
         }
     });
-};;
-var menu = getMenu();
+};
 console.log("Server start on port " + port);
 // function processPostback(event) {
 //     var senderId = event.sender.id;
