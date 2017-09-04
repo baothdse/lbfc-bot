@@ -40,8 +40,9 @@ app.get('/webhook', function (req, res) {
 });
 
 app.post('/webhook', function (req, res) {
-    console.log(req.body.object)
     if (req.body.object == "page") {
+        console.log(Entry);
+        console.log(req.body.entry);
         req.body.entry.forEach(function (entry) {
             entry.messaging.forEach(function (event) {
                 // if (event.postback) {
@@ -67,6 +68,8 @@ function sendMessage(event) {
     let apiai = apiaiApp.textRequest(text, {
         sessionId: "my_session"
     });
+    console.log("APIAI");
+    console.log(apiai)
 
     apiai.on('response', (response) => {
         console.log("API.AI is on response state");
