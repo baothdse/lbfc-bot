@@ -63,6 +63,7 @@ function sendMessage(event) {
     let text = event.message.text;
     let sender = event.sender.id;
     var menu = Restaurant.findOne({restaurant_name: "Effoc"}).exec(function(err, restaurant) {
+        console.log(restaurant.menu);
         return restaurant.menu;
     });
     console.log(menu);
