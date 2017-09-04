@@ -62,7 +62,7 @@ function sendMessage(event) {
 
     let text = event.message.text;
     let sender = event.sender.id;
-    let menu = getMenu();
+    var menu = getMenu();
     let apiai = apiaiApp.textRequest(text, {
         sessionId: "my_session"
     });
@@ -74,6 +74,7 @@ function sendMessage(event) {
         if(response.result.metadata.intentName === "Coffee") {    
             console.log("true");
             aiText = aiText + " " + menu;
+            console.log(aiText);
         }
         console.log(response.result)
         request({
