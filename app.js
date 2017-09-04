@@ -62,7 +62,7 @@ function sendMessage(event) {
 
     let text = event.message.text;
     let sender = event.sender.id;
-
+    let menu = getMenu();
     let apiai = apiaiApp.textRequest(text, {
         sessionId: "my_session"
     });
@@ -71,10 +71,9 @@ function sendMessage(event) {
     apiai.on('response', (response) => {
         console.log("API.AI is on response state");
         let aiText = response.result.fulfillment.speech;
-        if(response.result.metadata.intentName === "Coffee", function() {
-            let menu = getMenu();
+        if(response.result.metadata.intentName === "Coffee") {    
             aiText = aiText + " " + menu;
-        })
+        }
         console.log(response.result)
         request({
             url: "https://graph.facebook.com/v2.6/me/messages",
