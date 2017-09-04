@@ -11,7 +11,7 @@ var port = process.env.PORT || 3000;
 var mongoose = require('mongoose');
 mongoose.connect(process.env.MONGODB_URI);
 
-mongoose.connection.on('connected',function(){
+mongoose.connection.on('connected', function () {
     console.log('mongoose connected');
 });
 
@@ -62,20 +62,24 @@ function sendMessage(event) {
 
     let text = event.message.text;
     let sender = event.sender.id;
-    var menu = Restaurant.findOne({restaurant_name: "Effoc"}).exec(function(err, restaurant) {
-        console.log(restaurant.menu);
-        return restaurant.menu;
+    var promise = getMenu();
+    promise.then(function (restaurants) {
+        restaurants.forEach(function (restaurant) {
+            console.log(restaurant.menu);
+        });
+    }).error(function (error) {
+        console.log(error);
     });
-    console.log(menu);
+    console.log(promise);
     let apiai = apiaiApp.textRequest(text, {
         sessionId: "my_session"
     });
-    
+
 
     apiai.on('response', (response) => {
         console.log("API.AI is on response state");
         let aiText = response.result.fulfillment.speech;
-        if(response.result.metadata.intentName === "Coffee") {    
+        if (response.result.metadata.intentName === "Coffee") {
             console.log("true");
             var reply = aiText + " " + menu;
             console.log(reply);
@@ -87,7 +91,7 @@ function sendMessage(event) {
             method: "POST",
             json: {
                 recipient: { id: sender },
-                message: {text: reply}
+                message: { text: reply }
             }
         }, function (error, response, body) {
             if (error) {
@@ -103,6 +107,11 @@ function sendMessage(event) {
     apiai.end();
 };
 
+function getMenu() {
+    var promise = Restaurant.findOne({ restaurant_name: "Effoc" }).exec();
+    return promise;
+};
+var menu = getMenu();
 console.log("Server start on port " + port);
 // function processPostback(event) {
 //     var senderId = event.sender.id;
