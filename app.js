@@ -16,7 +16,7 @@ mongoose.connection.on('connected',function(){
 });
 
 var Restaurant = require('./model/restaurant.js');
-morgan
+//morgan
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({
     extended: false
