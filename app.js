@@ -73,8 +73,8 @@ function sendMessage(event) {
         let aiText = response.result.fulfillment.speech;
         if(response.result.metadata.intentName === "Coffee") {    
             console.log("true");
-            aiText = aiText + " " + menu;
-            console.log(aiText);
+            var reply = aiText + " " + menu;
+            console.log(reply);
         }
         console.log(response.result)
         request({
@@ -83,7 +83,7 @@ function sendMessage(event) {
             method: "POST",
             json: {
                 recipient: { id: sender },
-                message: {text: aiText}
+                message: {text: reply}
             }
         }, function (error, response, body) {
             if (error) {
