@@ -63,6 +63,7 @@ function sendMessage(event) {
     let text = event.message.text;
     let sender = event.sender.id;
     var menu = getMenu();
+    console.log(menu);
     let apiai = apiaiApp.textRequest(text, {
         sessionId: "my_session"
     });
@@ -70,9 +71,8 @@ function sendMessage(event) {
 
     apiai.on('response', (response) => {
         console.log("API.AI is on response state");
-        
-        if(response.result.metadata.intentName === "Coffee") {   
-            let aiText = response.result.fulfillment.speech; 
+        let aiText = response.result.fulfillment.speech;
+        if(response.result.metadata.intentName === "Coffee") {    
             console.log("true");
             var reply = aiText + " " + menu;
             console.log(reply);
@@ -102,7 +102,6 @@ function sendMessage(event) {
 
 function getMenu() {
     Restaurant.findOne({restaurant_name: "Effoc"}, function(err, restaurant) {
-        console.log(restaurant.menu);
         return restaurant.menu;
     });
  };
