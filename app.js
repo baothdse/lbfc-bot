@@ -81,9 +81,7 @@ function sendMessage(event) {
         console.log("API.AI is on response state");
         let aiText = response.result.fulfillment.speech;
         if (response.result.metadata.intentName === "Coffee") {
-            console.log("true");
-            var reply = aiText + " " + menu;
-            console.log(reply);
+            aiText = aiText + " " + menu;
         }
         console.log(response.result)
         request({
@@ -92,7 +90,7 @@ function sendMessage(event) {
             method: "POST",
             json: {
                 recipient: { id: sender },
-                message: { text: reply }
+                message: { text: aiText }
             }
         }, function (error, response, body) {
             if (error) {
