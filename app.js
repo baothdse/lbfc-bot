@@ -62,13 +62,15 @@ function sendMessage(event) {
 
     let text = event.message.text;
     let sender = event.sender.id;
-    var promise = getMenu();
-    promise.then(function (restaurants) {
-        restaurants.forEach(function (restaurant) {
-            console.log(restaurant.menu);
-        });
+    var menu;
+    getMenu(function(err, restaurant) {
+        if (err) {
+            console.log(err);
+        } else {
+            menu = restaurant;
+        }
     });
-    console.log(promise);
+    
     let apiai = apiaiApp.textRequest(text, {
         sessionId: "my_session"
     });
@@ -105,10 +107,15 @@ function sendMessage(event) {
     apiai.end();
 };
 
-function getMenu() {
-    var promise = Restaurant.findOne({ restaurant_name: "Effoc" }).exec();
-    return promise;
-};
+function getMenu(callback) {
+    Restaurant.findOne({restaurant_name: "Effoc"}, function(err, restaurant) {
+        if (err) {
+            callback(err, null);
+        } else {
+            callback(null, restaurant.menu)
+        }
+    });
+};;
 var menu = getMenu();
 console.log("Server start on port " + port);
 // function processPostback(event) {
