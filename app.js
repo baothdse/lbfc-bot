@@ -40,11 +40,10 @@ app.get('/webhook', function (req, res) {
 });
 
 app.post('/webhook', function (req, res) {
-    console.log(req);
+    console.log(req.body.object)
     if (req.body.object == "page") {
         req.body.entry.forEach(function (entry) {
             entry.messaging.forEach(function (event) {
-                
                 // if (event.postback) {
                 //     console.log(event.postback);
                 //     processPostback(event);
