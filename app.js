@@ -71,6 +71,7 @@ function sendMessage(event) {
     apiai.on('response', (response) => {
         console.log("API.AI is on response state");
         let aiText = response.result.fulfillment.speech;
+        console.log(aiText);
         request({
             url: "https://graph.facebook.com/v2.6/me/messages",
             qs: { access_token: process.env.PAGE_ACCESS_TOKEN },
