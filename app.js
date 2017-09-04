@@ -101,9 +101,11 @@ function sendMessage(event) {
 };
 
 function getMenu() {
+    var menu;
     Restaurant.findOne({restaurant_name: "Effoc"}, function(err, restaurant) {
-        return restaurant.menu;
+        menu = restaurant.menu;
     });
+    return menu;
  };
 // var menu = getMenu();
 console.log("Server start on port " + port);
