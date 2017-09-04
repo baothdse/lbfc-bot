@@ -73,7 +73,7 @@ function sendMessage(event) {
         let aiText = response.result.fulfillment.speech;
         if(response.result.metadata.intentName === "Coffee") {
             let menu = getMenu();
-            aiText += menu;
+            aiText = aiText + " " + menu;
         }
         console.log(response.result)
         request({
@@ -99,7 +99,7 @@ function sendMessage(event) {
 };
 
 function getMenu() {
-    Restaurant.findOne(function(err, restaurant) {
+    Restaurant.findOne({restaurant_name: "Effoc"}, function(err, restaurant) {
         console.log(restaurant.menu);
         return restaurant.menu;
     })
