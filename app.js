@@ -40,7 +40,6 @@ app.get('/webhook', function (req, res) {
 });
 
 app.post('/webhook', function (req, res) {
-    console.log(req)
     if (req.body.object == "page") {
         req.body.entry.forEach(function (entry) {
             entry.messaging.forEach(function (event) {
@@ -72,7 +71,7 @@ function sendMessage(event) {
     apiai.on('response', (response) => {
         console.log("API.AI is on response state");
         let aiText = response.result.fulfillment.speech;
-        
+        console.log(response.result)
         request({
             url: "https://graph.facebook.com/v2.6/me/messages",
             qs: { access_token: process.env.PAGE_ACCESS_TOKEN },
