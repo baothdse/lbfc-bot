@@ -70,8 +70,9 @@ function sendMessage(event) {
 
     apiai.on('response', (response) => {
         console.log("API.AI is on response state");
-        let aiText = response.result.fulfillment.speech;
-        if(response.result.metadata.intentName === "Coffee") {    
+        
+        if(response.result.metadata.intentName === "Coffee") {   
+            let aiText = response.result.fulfillment.speech; 
             console.log("true");
             var reply = aiText + " " + menu;
             console.log(reply);
