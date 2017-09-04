@@ -7,16 +7,16 @@ var app = express();
 var apiaiApp = require('apiai')('fa60b3a3247e42c3a9bf870dcd78a7a3');
 var port = process.env.PORT || 3000;
 
-// //mongooge
-// var mongoose = require('mongoose');
-// mongoose.connect('mongodb://localhost:27017/LBFC');
+//mongooge
+var mongoose = require('mongoose');
+mongoose.connect(process.env.MONGODB_URI);
 
-// mongoose.connection.on('connected',function(){
-//     console.log('mongoose connected');
-// });
+mongoose.connection.on('connected',function(){
+    console.log('mongoose connected');
+});
 
-// var Restaurant = require('./model/restaurant.js');
-//morgan
+var Restaurant = require('./model/restaurant.js');
+morgan
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({
     extended: false
