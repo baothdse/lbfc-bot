@@ -72,6 +72,7 @@ function sendMessage(event) {
         console.log("API.AI is on response state");
         let aiText = response.result.fulfillment.speech;
         if(response.result.metadata.intentName === "Coffee") {    
+            console.log("true");
             aiText = aiText + " " + menu;
         }
         console.log(response.result)
