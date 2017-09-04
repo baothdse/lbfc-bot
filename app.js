@@ -41,7 +41,6 @@ app.get('/webhook', function (req, res) {
 
 app.post('/webhook', function (req, res) {
     if (req.body.object == "page") {
-        console.log(req.body.entry);
         req.body.entry.forEach(function (entry) {
             entry.messaging.forEach(function (event) {
                 console.log(entry.messaging);
