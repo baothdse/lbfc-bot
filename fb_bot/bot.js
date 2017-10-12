@@ -63,27 +63,29 @@ class BotAsync {
                     console.log('Hereeeeeeeeeeee')
                     fbAPI.sendTextMessage(senderId, output);
                     break;
-                // case BOT_REPLY_TYPE.POST:
-                //     if (output.length > 0) {
-                //         fbAPI.sendTextMessage(senderId, "Bạn xem thử mấy bài này nhé ;)");
-                //         fbAPI.sendGenericMessage(senderId, ulti.postsToPayloadElements(output));
-                //     }
-                //     else {
-                //         fbAPI.sendTextMessage(senderId, "Xin lỗi mình không tim được bài nào ;)");
-                //     }
-                //     break;
+                case BOT_REPLY_TYPE.POST:
+                    console.log('type post');
+                    if (output.length > 0) {
+                        fbAPI.sendTextMessage(senderId, "Bạn xem thử mấy bài này nhé ;)");
+                        fbAPI.sendGenericMessage(senderId, ulti.postsToPayloadElements(output));
+                    }
+                    else {
+                        fbAPI.sendTextMessage(senderId, "Xin lỗi mình không tim được bài nào ;)");
+                    }
+                    break;
                 // case BOT_REPLY_TYPE.VIDEOS:
                 //     fbAPI.sendTextMessage(senderId, "Có ngay đây. Xem thoải mái ;)");
                 //     fbAPI.sendGenericMessage(senderId, ulti.videosToPayloadElements(output));
                 //     break;
                 case BOT_REPLY_TYPE.BUTTONS:
                     let buttons = botReply.buttons;
+                    console.log('type button');
                     fbAPI.sendButtonMessage(senderId, output, buttons);
                     break;
-                // case BOT_REPLY_TYPE.IMAGE:
-                //     fbAPI.sendTextMessage(senderId, "Đợi tí có liền, đồ dại gái hà ^^");
-                //     fbAPI.sendImage(senderId, output);
-                //     break;
+                case BOT_REPLY_TYPE.IMAGE:
+                    fbAPI.sendTextMessage(senderId, "Đợi tí có liền, đồ dại gái hà ^^");
+                    fbAPI.sendImage(senderId, output);
+                    break;
                 default:
             }
         })();
