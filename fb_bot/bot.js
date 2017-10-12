@@ -50,6 +50,7 @@ class BotAsync {
     reply(senderId, textInput) {
         async(() => {
             console.log('bot is here')
+            console.log('textInput')
             var sender = await(fbAPI.getSenderName(senderId));
             this.setSender(sender);
 
