@@ -57,7 +57,7 @@ class BotAsync {
             var botReply = await(this.chat(textInput));
             var output = botReply.output;
             console.log(output)
-            console.log(botReply.type)
+            console.log(sender)
             switch (botReply.type) {
                 case BOT_REPLY_TYPE.TEXT:
                     console.log('Hereeeeeeeeeeee')
