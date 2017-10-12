@@ -28,10 +28,6 @@ class BotAsync {
                 title: "Nhãn hiệu",
                 type: BUTTON_TYPE.POSTBACK,
                 payload: PAYLOAD.GENERIC_POST
-            }, {
-                title: "Khuyến mãi của bạn",
-                type: BUTTON_TYPE.POSTBACK,
-                payload: PAYLOAD.SEE_CATEGORIES
             }
         ]);
 
