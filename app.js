@@ -134,7 +134,8 @@ function addPersistentMenu() {
                         {
                             "title": "Trang chủ",
                             "type": "web_url",
-                            "payload": "http://google.com"
+                            "url": "http://tiki.vn",
+                            "webview_height_ratio": "tall"
                         },
                         {
                             "title": "Về chúng tôi",
