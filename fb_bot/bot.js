@@ -56,7 +56,7 @@ class BotAsync {
 
             var botReply = await(this.chat(textInput));
             var output = botReply.output;
-            console.log(output)
+            console.log(botReply.type)
             console.log(sender)
             switch (botReply.type) {
                 case BOT_REPLY_TYPE.TEXT:
@@ -66,11 +66,11 @@ class BotAsync {
                 case BOT_REPLY_TYPE.POST:
                     console.log('type post');
                     if (output.length > 0) {
-                        fbAPI.sendTextMessage(senderId, "Bạn xem thử mấy bài này nhé ;)");
+                        fbAPI.sendTextMessage(senderId, "Bạn xem thử mấy bài này nhé)");
                         fbAPI.sendGenericMessage(senderId, ulti.postsToPayloadElements(output));
                     }
                     else {
-                        fbAPI.sendTextMessage(senderId, "Xin lỗi mình không tim được bài nào ;)");
+                        fbAPI.sendTextMessage(senderId, "Xin lỗi mình không tim được bài nào)");
                     }
                     break;
                 // case BOT_REPLY_TYPE.VIDEOS:
