@@ -168,7 +168,7 @@ function addPersistentMenu() {
                 },
                 {
                     "locale": "zh_CN",
-                    "composer_input_disabled": true
+                    "composer_input_disabled": false
                 }
             ]
         }
