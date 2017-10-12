@@ -19,7 +19,7 @@ class BotAsync {
             "Chào bạn, mềnh là bot LBFB hiehie, bạn muốn mình giúp gì nào :3", [{
                 title: "Sản phẩm",
                 type: BUTTON_TYPE.POSTBACK,
-                payload: PAYLOAD.TECHNICAL_POST
+                payload: PAYLOAD.GENERIC_POST
             }, {
                 title: "Khuyến mãi",
                 type: BUTTON_TYPE.POSTBACK,
@@ -74,13 +74,14 @@ class BotAsync {
                         fbAPI.sendTextMessage(senderId, "Xin lỗi mình không tim được bài nào)");
                     }
                     break;
-                // case BOT_REPLY_TYPE.VIDEOS:
-                //     fbAPI.sendTextMessage(senderId, "Có ngay đây. Xem thoải mái ;)");
-                //     fbAPI.sendGenericMessage(senderId, ulti.videosToPayloadElements(output));
-                //     break;
+                case BOT_REPLY_TYPE.VIDEOS:
+                    fbAPI.sendTextMessage(senderId, "Có ngay đây. Xem thoải mái )");
+                    fbAPI.sendGenericMessage(senderId, ulti.videosToPayloadElements(output));
+                    break;
                 case BOT_REPLY_TYPE.BUTTONS:
                     let buttons = botReply.buttons;
                     console.log('type button');
+                    fbAPI.sendImage(senderId, "https://images.unsplash.com/photo-1482275548304-a58859dc31b7?dpr=1&auto=compress,format&fit=crop&w=1000&h=&q=80&cs=tinysrgb&crop=")
                     fbAPI.sendButtonMessage(senderId, output, buttons);
                     break;
                 case BOT_REPLY_TYPE.IMAGE:
