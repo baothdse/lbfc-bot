@@ -161,14 +161,14 @@ function addPersistentMenu() {
                         {
                             "type": "web_url",
                             "title": "Menu",
-                            "url": "http://foxnews.com",
+                            "url": "http://zing.vn",
                             "webview_height_ratio": "full"
                         }
                     ]
                 },
                 {
                     "locale": "zh_CN",
-                    "composer_input_disabled": false
+                    "composer_input_disabled": true
                 }
             ]
         }
