@@ -132,16 +132,16 @@ function addPersistentMenu() {
                     "composer_input_disabled": true,
                     "call_to_actions": [
                         {
-                            "title": "Home",
-                            "type": "postback",
-                            "payload": "HOME"
+                            "title": "Trang chủ",
+                            "type": "web_url",
+                            "payload": "http://google.com"
                         },
                         {
-                            "title": "Nested Menu Example",
+                            "title": "Về chúng tôi",
                             "type": "nested",
                             "call_to_actions": [
                                 {
-                                    "title": "Who am I",
+                                    "title": "LBFC",
                                     "type": "postback",
                                     "payload": "WHO"
                                 },
@@ -159,7 +159,7 @@ function addPersistentMenu() {
                         },
                         {
                             "type": "web_url",
-                            "title": "Latest News",
+                            "title": "Menu",
                             "url": "http://foxnews.com",
                             "webview_height_ratio": "full"
                         }
