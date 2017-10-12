@@ -56,6 +56,7 @@ class BotAsync {
             var output = botReply.output;
             switch (botReply.type) {
                 case BOT_REPLY_TYPE.TEXT:
+                    console.log('Hereeeeeeeeeeee')
                     fbAPI.sendTextMessage(senderId, output);
                     break;
                 // case BOT_REPLY_TYPE.POST:
