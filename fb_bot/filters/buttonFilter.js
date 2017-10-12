@@ -9,7 +9,6 @@ class ButtonFilter extends SimpleFilter {
         super(inputText, output);
         this._buttons = buttons;
     }
-l
     reply(input) {
         return new Promise((resolve, reject) => resolve({
             output: this._output,
