@@ -82,6 +82,7 @@ class BotAsync {
                     let buttons = botReply.buttons;
                     console.log('type button');
                     fbAPI.sendImage(senderId, "https://images.unsplash.com/photo-1482275548304-a58859dc31b7?dpr=1&auto=compress,format&fit=crop&w=1000&h=&q=80&cs=tinysrgb&crop=")
+                    fbAPI.sendTyping(senderId);
                     fbAPI.sendButtonMessage(senderId, output, buttons);
                     break;
                 case BOT_REPLY_TYPE.IMAGE:

@@ -6,7 +6,7 @@ var atob = require("atob");
 class FacebookAPI {
     constructor() {
         this._token = process.env.FB_TOKEN;
-           
+
         this._storedUsers = {};
     }
 
@@ -30,6 +30,28 @@ class FacebookAPI {
                     that._storedUsers[senderId] = person;
                     resolve(person);
                 });
+            }
+        });
+    }
+
+    sendTyping(senderId) {
+        request({
+            url: 'https://graph.facebook.com/v2.6/me/messages',
+            qs: {
+                access_token: this._token
+            },
+            method: 'POST',
+            json: {
+                recipient: {
+                    id: senderId
+                },
+                sender_action: "typing_on"
+            }
+        }, function (error, response, body) {
+            if (error) {
+                console.log('Error sending typing')
+            } else if (response.body.error) {
+                console.log('Error: ' + response.body.error)
             }
         });
     }
