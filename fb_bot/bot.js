@@ -34,7 +34,7 @@ class BotAsync {
     }
 
     setSender(sender) {
-        this._helloFilter.setOutput('Chào ${sender.first_name},');
+        this._helloFilter.setOutput('Chào ' + sender.first_name + ', mềnh là bot LBFB hiehie, bạn muốn mình giúp gì nào :3');
         //this._goodbyeFilter.setOutput('Tạm biệt ${sender.first_name}, hẹn gặp lại)');
     }
 
