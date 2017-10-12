@@ -105,7 +105,7 @@ console.log('Server start on port: ' + port)
 
 function addPersistentMenu() {
     request({
-        url: 'https://graph.facebook.com/v2.6/me/messenger_profile',
+        url: 'https://graph.facebook.com/v2.6/me',
         qs: { access_token: process.env.FB_TOKEN },
         method: 'POST',
         json: {
@@ -122,7 +122,7 @@ function addPersistentMenu() {
         }
     })
     request({
-        url: 'https://graph.facebook.com/v2.6/me/messenger_profile',
+        url: 'https://graph.facebook.com/v2.6/me',
         qs: { access_token: process.env.FB_TOKEN },
         method: 'POST',
         json: {
