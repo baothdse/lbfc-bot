@@ -2,20 +2,14 @@ var express = require('express');
 var request = require('request');
 var bodyParser = require('body-parser');
 var morgan = require('morgan');
+var log = require('simple-node-logger').createSimpleLogger('project.log');
 
 var app = express();
 var apiaiApp = require('apiai')('fa60b3a3247e42c3a9bf870dcd78a7a3');
 var port = process.env.PORT || 3000;
 
-//mongooge
-var mongoose = require('mongoose');
-mongoose.connect(process.env.MONGODB_URI);
+var bot = require("./fb_bot/bot");
 
-mongoose.connection.on('connected', function () {
-    console.log('mongoose connected');
-});
-
-var Restaurant = require('./model/restaurant.js');
 //morgan
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({
@@ -26,7 +20,7 @@ app.use(bodyParser.json());
 app.listen(port);
 
 app.get('/', function (req, res) {
-    res.send('Facebook Chatbot Here');
+    res.send('LBFC Chatbot Here');
 });
 
 app.get('/webhook', function (req, res) {
@@ -40,82 +34,28 @@ app.get('/webhook', function (req, res) {
 });
 
 app.post('/webhook', function (req, res) {
-    if (req.body.object == "page") {
-        req.body.entry.forEach(function (entry) {
-            entry.messaging.forEach(function (event) {
-                // if (event.postback) {
-                //     console.log(event.postback);
-                //     processPostback(event);
-                // } else
-                if (event.message) {
-                    sendMessage(event);
+    var entries = req.body.entry;
+    for (var entry of entries) {
+        log.info(entries)
+        var messaging = entry.messaging;
+        for (var message of messaging) {
+            var senderId = message.sender.id;
+            if (message.message) {
+                //if user send text
+                if(message.message.text) {
+                    bot.reply(senderId, message.message.text)
                 }
-            });
-        });
-        res.sendStatus(200);
+            } else if (message.postback) {
+                var payload = message.postback.payload;
+            }
+        }
     }
+    res.status(200).send("OK");
 });
 
-
-// sends message to user
-function sendMessage(event) {
-
-    let text = event.message.text;
-    let sender = event.sender.id;
-    var menu;
-    getMenu(function(err, restaurant) {
-        if (err) {
-            console.log(err);
-        } else {
-            menu = restaurant;
-            console.log(menu);
-        }
-    });
-
-    let apiai = apiaiApp.textRequest(text, {
-        sessionId: "my_session"
-    });
+console.log('Server start on port: ' + port)
 
 
-    apiai.on('response', (response) => {
-        console.log("API.AI is on response state");
-        let aiText = response.result.fulfillment.speech;
-        if (response.result.metadata.intentName === "Coffee") {
-            aiText = aiText + " " + menu;
-        }
-        console.log(response.result)
-        request({
-            url: "https://graph.facebook.com/v2.6/me/messages",
-            qs: { access_token: process.env.PAGE_ACCESS_TOKEN },
-            method: "POST",
-            json: {
-                recipient: { id: sender },
-                message: { text: aiText }
-            }
-        }, function (error, response, body) {
-            if (error) {
-                console.log("Error sending message: " + response.error);
-            }
-        });
-    });
-
-    apiai.on('error', (error) => {
-        console.log(error);
-    });
-
-    apiai.end();
-};
-
-function getMenu(callback) {
-    Restaurant.findOne({restaurant_name: "Effoc"}, function(err, restaurant) {
-        if (err) {
-            callback(err, null);
-        } else {
-            callback(null, restaurant.menu)
-        }
-    });
-};
-console.log("Server start on port " + port);
 // function processPostback(event) {
 //     var senderId = event.sender.id;
 //     var payload = event.postback.payload;

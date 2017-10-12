@@ -11,10 +11,14 @@
   "license": "ISC",
   "dependencies": {
     "apiai": "^4.0.3",
+    "async": "^2.5.0",
+    "asyncawait": "^1.0.6",
+    "atob": "^2.0.3",
     "body-parser": "^1.17.2",
     "express": "^4.15.4",
-    "mongoose": "^4.11.9",
     "morgan": "^1.8.2",
-    "request": "^2.81.0"
+    "request": "^2.81.0",
+    "simple-node-logger": "^0.93.30",
+    "underscore": "^1.8.3"
   }
 }
