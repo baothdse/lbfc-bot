@@ -74,10 +74,10 @@ class BotAsync {
                 //     fbAPI.sendTextMessage(senderId, "Có ngay đây. Xem thoải mái ;)");
                 //     fbAPI.sendGenericMessage(senderId, ulti.videosToPayloadElements(output));
                 //     break;
-                // case BOT_REPLY_TYPE.BUTTONS:
-                //     let buttons = botReply.buttons;
-                //     fbAPI.sendButtonMessage(senderId, output, buttons);
-                //     break;
+                case BOT_REPLY_TYPE.BUTTONS:
+                    let buttons = botReply.buttons;
+                    fbAPI.sendButtonMessage(senderId, output, buttons);
+                    break;
                 // case BOT_REPLY_TYPE.IMAGE:
                 //     fbAPI.sendTextMessage(senderId, "Đợi tí có liền, đồ dại gái hà ^^");
                 //     fbAPI.sendImage(senderId, output);
