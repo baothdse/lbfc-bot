@@ -43,6 +43,7 @@ app.post('/webhook', function (req, res) {
             if (message.message) {
                 //if user send text
                 if(message.message.text) {
+                    console.log('Here you are')
                     bot.reply(senderId, message.message.text)
                 }
             } else if (message.postback) {
