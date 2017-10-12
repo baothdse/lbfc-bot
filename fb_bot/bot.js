@@ -10,6 +10,7 @@ var PAYLOAD = require("./constants").PAYLOAD;
 var async = require("asyncawait/async");
 var await = require("asyncawait/await");
 
+var fbAPI = require("./api/facebookAPI");
 var util = require("./utilities");
 
 class BotAsync {
