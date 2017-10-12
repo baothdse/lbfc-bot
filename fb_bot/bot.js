@@ -29,6 +29,8 @@ class BotAsync {
                 type: BUTTON_TYPE.POSTBACK,
                 payload: PAYLOAD.GENERIC_POST
             }]);
+
+        this._filters = [this._helloFilter];
     }
 
     setSender(sender) {
