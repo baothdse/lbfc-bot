@@ -13,7 +13,7 @@ class ButtonFilter extends SimpleFilter {
         return new Promise((resolve, reject) => resolve({
             output: this._output,
             buttons: this._buttons,
-            type: BOT_REPLY_TYPE
+            type: BOT_REPLY_TYPE.BUTTONS
         }))
     }
 }
