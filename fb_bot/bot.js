@@ -17,24 +17,29 @@ class BotAsync {
     constructor() {
         this._helloFilter = new ButtonFilter(["hi", "halo", "hế nhô", "he lo", "hello", "chào", "xin chào", "helo", "alo", "ê mày"],
             "Chào bạn, mềnh là bot LBFB hiehie, bạn muốn mình giúp gì nào :3", [{
-                title: "Nâng cao trình độ",
+                title: "Sản phẩm",
                 type: BUTTON_TYPE.POSTBACK,
                 payload: PAYLOAD.TECHNICAL_POST
             }, {
-                title: "Tìm hiểu nghề nghiệp",
+                title: "Khuyến mãi",
                 type: BUTTON_TYPE.POSTBACK,
                 payload: PAYLOAD.CAREER_POST
             }, {
-                title: "Các thứ linh tinh",
+                title: "Nhãn hiệu",
                 type: BUTTON_TYPE.POSTBACK,
                 payload: PAYLOAD.GENERIC_POST
-            }]);
+            }, {
+                title: "Khuyến mãi của bạn",
+                type: BUTTON_TYPE.POSTBACK,
+                payload: PAYLOAD.SEE_CATEGORIES
+            }
+        ]);
 
         this._filters = [this._helloFilter];
     }
 
     setSender(sender) {
-        this._helloFilter.setOutput('Chào ' + sender.first_name + ', mềnh là bot LBFB hiehie, bạn muốn mình giúp gì nào :3');
+        this._helloFilter.setOutput('Chào ' + sender.first_name + ', mềnh là bot LBFB ^.^, bạn muốn mình giúp gì nào :3');
         //this._goodbyeFilter.setOutput('Tạm biệt ${sender.first_name}, hẹn gặp lại)');
     }
 
