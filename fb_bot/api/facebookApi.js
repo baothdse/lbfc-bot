@@ -5,8 +5,8 @@ var atob = require("atob");
 
 class FacebookAPI {
     constructor() {
-        this._token = process.env.FB_TOKEN ||
-            atob("EAACEdEose0cBAGI99rNvqlZBulriZAXD35F7Wu84K5RHEIhlZAq0HSKVlrp72sZAZAtRpsWi23QviFNDALr6XkAppa9tFox1CVG9nM1NS3coEQ2WV27Vk1pZAghWdMFWcaEsyZAksZBhQg2YX7d76ZAHYDVnx6hBalAXVwockxUdbZA9FQ6Jos8nbcnZA1GDsQ19oc3PwEWF5LKHwZDZD");
+        this._token = process.env.FB_TOKEN;
+           
         this._storedUsers = {};
     }
 
