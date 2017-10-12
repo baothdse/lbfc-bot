@@ -41,7 +41,6 @@ app.post('/webhook', function (req, res) {
         for (var message of messaging) {
             var senderId = message.sender.id;
             if (message.message) {
-                addPersistentMenu()
                 //if user send text
                 if (message.message.text) {
                     console.log('Here you are')
@@ -183,3 +182,4 @@ function addPersistentMenu() {
     })
 }
 
+addPersistentMenu()
