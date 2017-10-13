@@ -31,7 +31,10 @@ class BotAsync {
             }
         ]);
 
-        this._filters = [this._helloFilter];
+        var contactFilter = new SimpleFilter(["Contact Info", "Thông tin liên hệ", "Liên hệ", "Thông tin công ty", 
+        "About Company", "Liên lạc", " thông tin liên hệ", "thông tin liên lạc"], "LBFC là dự án chatbot giúp mọi người có thể tiếp cận với các doanh nghiệp dễ dàng thông qua Facebook Messenger")
+
+        this._filters = [this._helloFilter, contactFilter];
     }
 
     setSender(sender) {
