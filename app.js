@@ -7,7 +7,7 @@ var log = require('simple-node-logger').createSimpleLogger('project.log');
 var app = express();
 var port = process.env.PORT || 3000;
 
-var bot = require("./fb_bot/ai/brain");
+var bot = require("./facebook_bot/ai/brain");
 var brain = new bot.Brain();
 
 //morgan
