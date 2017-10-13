@@ -10,7 +10,6 @@
   "author": "baothd",
   "license": "ISC",
   "dependencies": {
-    "apiai": "^4.0.3",
     "async": "^2.5.0",
     "asyncawait": "^1.0.6",
     "atob": "^2.0.3",

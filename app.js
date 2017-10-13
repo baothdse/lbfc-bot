@@ -5,10 +5,10 @@ var morgan = require('morgan');
 var log = require('simple-node-logger').createSimpleLogger('project.log');
 
 var app = express();
-var apiaiApp = require('apiai')('fa60b3a3247e42c3a9bf870dcd78a7a3');
 var port = process.env.PORT || 3000;
 
-var bot = require("./fb_bot/bot");
+var bot = require("./fb_bot/ai/brain");
+var brain = new bot.Brain();
 
 //morgan
 app.use(morgan('dev'));
@@ -44,7 +44,8 @@ app.post('/webhook', function (req, res) {
                 //if user send text
                 if (message.message.text) {
                     console.log('Here you are')
-                    bot.reply(senderId, message.message.text)
+                   // bot.reply(senderId, message.message.text)
+                    brain.response(senderId, message.message.text)
                 }
             } else if (message.postback) {
                 var payload = message.postback.payload;
