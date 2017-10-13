@@ -129,7 +129,6 @@ function addPersistentMenu() {
             "persistent_menu": [
                 {
                     "locale": "default",
-                    "composer_input_disabled": true,
                     "call_to_actions": [
                         {
                             "title": "Trang chủ",
