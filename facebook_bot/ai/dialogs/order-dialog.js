@@ -62,16 +62,16 @@ class OrderDialog extends Dialog {
         return new response.Response("Bạn muốn gọi món gì?", true);
     }
 
-    orderProduct() {
-        var request = new Request();
-        var result = null;
-        var that = this;
-        var s = "Bạn muốn gọi thêm gì?";
-        await request.sendGetRequestAsync('/LBFC/Store/SearchProductByStoreId', {'storeId' : '36', 'keyword': ''}, "");
-        that.orders.push(new order.Order(1, 2));
-        return new response.Response(s, true);
+    // orderProduct() {
+    //     var request = new Request();
+    //     var result = null;
+    //     var that = this;
+    //     var s = "Bạn muốn gọi thêm gì?";
+    //     await request.sendGetRequestAsync('/LBFC/Store/SearchProductByStoreId', {'storeId' : '36', 'keyword': ''}, "");
+    //     that.orders.push(new order.Order(1, 2));
+    //     return new response.Response(s, true);
         
-    }
+    // }
 
     finishOrder() {
         var s = "";
