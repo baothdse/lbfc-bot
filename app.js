@@ -172,7 +172,6 @@ function addPersistentMenu() {
                 }
             ]
         }
-
     }, function (error, response, body) {
         console.log(response)
         if (error) {
