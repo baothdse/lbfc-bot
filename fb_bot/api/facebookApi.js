@@ -17,7 +17,6 @@ class FacebookAPI {
                 resolve(that._storedUsers[senderId]);
             }
             else {
-
                 request({
                     url: `https://graph.facebook.com/v2.6/${senderId}`,
                     qs: {
@@ -206,6 +205,8 @@ class FacebookAPI {
             }
         });
     }
+
+    
 }
 
 module.exports = new FacebookAPI();
