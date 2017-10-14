@@ -1,23 +1,25 @@
 {
-  "name": "facebook-bot",
+  "name": "chatbot",
   "version": "1.0.0",
-  "description": "",
+  "description": "no",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js"
+    "test": "hello",
+    "start": "package.json"
   },
-  "author": "baothd",
+  "repository": {
+    "type": "git",
+    "url": "nothing"
+  },
+  "keywords": [
+    "chatbot"
+  ],
+  "author": "khang",
   "license": "ISC",
   "dependencies": {
-    "async": "^2.5.0",
-    "asyncawait": "^1.0.6",
-    "atob": "^2.0.3",
-    "body-parser": "^1.17.2",
-    "express": "^4.15.4",
-    "morgan": "^1.8.2",
-    "request": "^2.81.0",
-    "simple-node-logger": "^0.93.30",
-    "underscore": "^1.8.3"
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "request": "^2.83.0",
+    "request-promise": "^4.2.2"
   }
 }

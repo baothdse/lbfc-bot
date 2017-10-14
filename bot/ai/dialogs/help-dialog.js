@@ -20,8 +20,9 @@ class HelpDialog extends Dialog {
         this.patterns.push(new Pattern.Pattern("hiểu rồi", 2));
     }
 
-    continue() {
-        var result = "Tôi không hiểu";
+    continue(input) {
+        console.log("help dialog status = " + this.status);
+        var result = new Response.Response("tôi không hiểu", true);
         switch(this.step) {
             case 1: result = this.getHelp(); break;
             case 2: result = this.end(); break;
@@ -32,7 +33,7 @@ class HelpDialog extends Dialog {
     }
 
     getHelp() {
-        return new Response.Response("Bạn làm như vậy nè. Bạn đã hiểu chưa?", true);
+        return new Response.Response("Bạn có thể nhập \"tôi muốn mua 2 ly cà phê\". Bạn đã hiểu chưa?", true);
     }
 
     getName() {

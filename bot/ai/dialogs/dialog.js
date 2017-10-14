@@ -1,13 +1,51 @@
-"use strict";
-var request = require("request");
-var atob = require("atob");
+"use strict"
+var Response = require('./entities/response');
+let ClassParser = require('../utils/class-parser');
+let Pattern = require('./entities/pattern');
 
+let request = require('request');
 
-class FacebookAPI {
+const FACEBOOK_ACCESS_TOKEN = 'EAAFHmBXhaYoBAL2yFSGcdsPAsqfVd9GCBbAW4UUfnZCMj8OFBkkcZC6svxFsZA4J81zopxZAzrqHpiDlpdM22ainLm7SzvIsGJhpuhagH0OPkuyFP6CYHZCK3MwIFE9iJCY2vCI4M6hl9cytLdUWEylHnmMAfWXnWr3BA1dqEDQZDZD';
+
+class Dialog {
     constructor() {
-        this._token = process.env.FB_TOKEN;
+        this.step = 1;
+        this.patterns = [];
+        this.status = "new"; //new hoặc end
+        this.posToAnalyze = 0;
+    }
 
-        this._storedUsers = {};
+    isMatch(input) {
+        var result = false;
+        var that = this;
+        this.patterns.some(function (pattern) {
+            var p = pattern.isMatch(input);
+            if (p != null) {
+                that.posToAnalyze = p[0].length + 1;
+                that.step = pattern.getStep();
+                result = true;
+                return true;
+            }
+        }, this);
+        return result;
+    }
+
+    addPatterns(arrayOfClassName, step) {
+        var parser = new ClassParser.ClassParser(arrayOfClassName);
+        var patternParsed = parser.parse();
+        var that = this;
+        patternParsed.forEach(function (p) {
+            that.patterns.push(new Pattern.Pattern(p, step));
+        }, this);
+    }
+
+    end(senderId) {
+        this.status = "end";
+        this.reply(senderId, { 'text': 'Oke' });
+    }
+
+    continue(input) {
+
     }
 
     getSenderName(senderId) {
@@ -33,24 +71,27 @@ class FacebookAPI {
         });
     }
 
+    reply(senderId, message) {
+
+        request({
+            url: 'https://graph.facebook.com/v2.6/me/messages',
+            qs: { access_token: FACEBOOK_ACCESS_TOKEN },
+            method: 'POST',
+            json: {
+                recipient: { id: senderId },
+                message: message,
+            }
+        });
+    };
+
     sendTyping(senderId) {
         request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
-            qs: {
-                access_token: this._token
-            },
+            qs: { access_token: FACEBOOK_ACCESS_TOKEN },
             method: 'POST',
             json: {
-                recipient: {
-                    id: senderId
-                },
-                sender_action: "typing_on"
-            }
-        }, function (error, response, body) {
-            if (error) {
-                console.log('Error sending typing')
-            } else if (response.body.error) {
-                console.log('Error: ' + response.body.error)
+                recipient: { id: senderId },
+                sender_action: 'typing_on',
             }
         });
     }
@@ -206,7 +247,6 @@ class FacebookAPI {
         });
     }
 
-    
 }
 
-module.exports = new FacebookAPI();
+module.exports = Dialog
