@@ -9,6 +9,4 @@ DongTu.prototype.getWords = function () {
     return this.words;
 }
 
-module.exports = {
-    DongTu: DongTu,
-}
+module.exports = DongTu;

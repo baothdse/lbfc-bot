@@ -9,6 +9,4 @@ class Entity {
     }
 }
 
-module.exports = {
-    Entity : Entity
-}
+module.exports = Entity;

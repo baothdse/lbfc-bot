@@ -5,7 +5,7 @@ let Pattern = require('./entities/pattern');
 class ShowMenuDialog extends Dialog {
     constructor() {
         super();
-        this.patterns.push(new Pattern.Pattern("cho tôi xem menu", 1));
+        this.patterns.push(new Pattern("cho tôi xem menu", 1));
     }
 
     continue(input, senderId) {

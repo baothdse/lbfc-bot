@@ -2,6 +2,10 @@
 
 var request = require('request');
 let RequestPromise = require('request-promise');
+var querystring = require('querystring');
+let async = require("asyncawait/async");
+let await = require("asyncawait/await");
+var http = require('http');
 
 function Request() {
 
@@ -42,7 +46,8 @@ Request.prototype.sendPostRequest = function (url, data) {
 }
 
 
-Request.prototype.sendGetRequest = async function (url, query, data) {
+Request.prototype.sendGetRequest =  function (url, query, data) {
+    
     var result = null;
     var options = {
         url: 'http://localhost:42013' + url,
@@ -54,21 +59,31 @@ Request.prototype.sendGetRequest = async function (url, query, data) {
     };
     console.log("query = === " + options.qs);
 
-    var httpRequest = await RequestPromise(options, function (error, response, body) {
+    var httpRequest =  RequestPromise(options, function (error, response, body) {
         if (error) {
             console.log("Error");
         } else {
+            result = body;
             console.log("No error");
         }
     });
-
-
-    //httpRequest.write(data);
-    // httpRequest.end();
-
+    // var httpRequest = http.request(options, function (response) {
+    //     response.setEncoding('utf8');
+    //     response.on('data', function (response) {
+    //         console.log("body: " + response);
+    //         result = response;
+    //         //callback(chunk);
+    //     });
+    //     response.on('error', function (chunk) {
+    //         console.log("error: " + chunk);
+    //         reject(chunk);
+    //     });
+    //     response.on('end', function (response) {
+    //         //response.send('ok');
+    //     })
+    // });
+    
     return Promise.resolve(httpRequest);
-
-
 }
 
 

@@ -17,8 +17,12 @@
   "author": "khang",
   "license": "ISC",
   "dependencies": {
+    "async": "^2.5.0",
+    "asyncawait": "^1.0.6",
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
+    "http": "0.0.0",
+    "querystring": "^0.2.0",
     "request": "^2.83.0",
     "request-promise": "^4.2.2"
   }

@@ -1,6 +1,6 @@
 let Entity = require('./entity');
 
-class End extends Entity.Entity {
+class End extends Entity {
     constructor() {
         super();
         this.words.push("xong rồi");

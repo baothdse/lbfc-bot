@@ -3,6 +3,7 @@ function DatHang(){
     this.words = [];
     this.words.push("đặt hàng");
     this.words.push("gọi món");
+    this.words.push("đặt");
 }
 
 DatHang.prototype.getWords = function () {
@@ -10,5 +11,5 @@ DatHang.prototype.getWords = function () {
 }
 
 module.exports = {
-    DatHang: DatHang,
+    DatHang: DatHang
 }

@@ -11,29 +11,29 @@ class HelpDialog extends Dialog {
     }
 
     push() {
-        this.patterns.push(new Pattern.Pattern("help", 1));
-        this.patterns.push(new Pattern.Pattern("cứu tôi", 1));
-        this.patterns.push(new Pattern.Pattern("trợ giúp", 1));
-        this.patterns.push(new Pattern.Pattern("tôi không hiểu", 1));
-        this.patterns.push(new Pattern.Pattern("tôi cũng không hiểu", 1));
-        this.patterns.push(new Pattern.Pattern("tôi hiểu rồi", 2));
-        this.patterns.push(new Pattern.Pattern("hiểu rồi", 2));
+        this.patterns.push(new Pattern("help", 1));
+        this.patterns.push(new Pattern("cứu tôi", 1));
+        this.patterns.push(new Pattern("trợ giúp", 1));
+        this.patterns.push(new Pattern("tôi không hiểu", 1));
+        this.patterns.push(new Pattern("tôi cũng không hiểu", 1));
+        this.patterns.push(new Pattern("tôi hiểu rồi", 2));
+        this.patterns.push(new Pattern("hiểu rồi", 2));
     }
 
-    continue(input) {
+    continue(input,senderId) {
         console.log("help dialog status = " + this.status);
-        var result = new Response.Response("tôi không hiểu", true);
+        //var result = this.reply(senderId, {"text" : "Bạn cần giúp gì"})
         switch(this.step) {
-            case 1: result = this.getHelp(); break;
-            case 2: result = this.end(); break;
+            case 1: this.getHelp(senderId); break;
+            case 2: this.end(); break;
             default: break;
 
         }
-        return result;
     }
 
-    getHelp() {
-        return new Response.Response("Bạn có thể nhập \"tôi muốn mua 2 ly cà phê\". Bạn đã hiểu chưa?", true);
+    getHelp(senderId) {
+        this.step = 2;
+        this.reply(senderId, {'text' : 'Bạn cần mình giúp gì không nè?'});
     }
 
     getName() {
@@ -42,6 +42,4 @@ class HelpDialog extends Dialog {
 
 }
 
-module.exports = {
-    HelpDialog : HelpDialog,
-}
+module.exports = HelpDialog;

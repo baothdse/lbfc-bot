@@ -5,7 +5,7 @@ let Pattern = require('./entities/pattern');
 
 let request = require('request');
 
-const FACEBOOK_ACCESS_TOKEN = 'EAAFHmBXhaYoBAL2yFSGcdsPAsqfVd9GCBbAW4UUfnZCMj8OFBkkcZC6svxFsZA4J81zopxZAzrqHpiDlpdM22ainLm7SzvIsGJhpuhagH0OPkuyFP6CYHZCK3MwIFE9iJCY2vCI4M6hl9cytLdUWEylHnmMAfWXnWr3BA1dqEDQZDZD';
+const FACEBOOK_ACCESS_TOKEN = 'EAAFHmBXhaYoBAFdbrN3n2nazaGfq3UOdzqvr2ZA750TZBaEi2rKorkMlZCXIo6Yl7pn9tZBBBwt6iAmV9VyKKqyX5pmB05zBLZC3iBwqgFth4ClGhWE7EPqvDsHjULGBGj4oG7qIcecqwzxoQ4w4NmCO5EAZALIvj1cgerF5nTCwZDZD';
 
 class Dialog {
     constructor() {
@@ -13,6 +13,11 @@ class Dialog {
         this.patterns = [];
         this.status = "new"; //new hoặc end
         this.posToAnalyze = 0;
+        this._storedUsers = {};
+    }
+
+    pause() {
+        this.step--;
     }
 
     isMatch(input) {
@@ -21,6 +26,7 @@ class Dialog {
         this.patterns.some(function (pattern) {
             var p = pattern.isMatch(input);
             if (p != null) {
+                console.log('dialog: ------> pattern = ' + pattern.string + ', input = ' + input);
                 that.posToAnalyze = p[0].length + 1;
                 that.step = pattern.getStep();
                 result = true;
@@ -29,13 +35,16 @@ class Dialog {
         }, this);
         return result;
     }
+    reset() {
+        this.status = "new";
+    }
 
     addPatterns(arrayOfClassName, step) {
         var parser = new ClassParser.ClassParser(arrayOfClassName);
         var patternParsed = parser.parse();
         var that = this;
         patternParsed.forEach(function (p) {
-            that.patterns.push(new Pattern.Pattern(p, step));
+            that.patterns.push(new Pattern(p, step));
         }, this);
     }
 
@@ -48,6 +57,54 @@ class Dialog {
 
     }
 
+    sendReceipt(senderId, recipientName, orderNumber, paymentMethod, orderUrl, address, summary, adjustments, elements) {
+        console.log("đã chạy vào send receipt")
+        request({
+            url: 'https://graph.facebook.com/v2.6/me/messages',
+            qs: { access_token: FACEBOOK_ACCESS_TOKEN },
+            method: 'POST',
+            json: {
+                recipient: { id: senderId },
+                message: {
+                    attachment: {
+                        type: "template",
+                        payload: {
+                            template_type: "receipt",
+                            recipient_name: recipientName,
+                            order_number: orderNumber,
+                            currency: "VND",
+                            payment_method : "Visa 2345", 
+                            order_url: orderUrl,
+                            timestamp: "1428444852",
+                            address: address,
+                            summary: summary,
+                            adjustments: adjustments,
+                            elements: elements
+                        }
+                    }
+                }
+            } 
+        })
+    }
+
+    sendQuickReply(senderId, text, quickReplyElement) {
+        console.log("đã vô quick reply")
+        var messageData = {
+            "text": text,
+            "quick_replies": quickReplyElement
+        }
+        request({
+            url: 'https://graph.facebook.com/v2.6/me/messages',
+            qs: { access_token: FACEBOOK_ACCESS_TOKEN },
+            method: 'POST',
+            json: {
+                recipient: { id: senderId },
+                message: messageData
+            }
+        });
+    };
+
+
     getSenderName(senderId) {
         var that = this;
         return new Promise((resolve, reject) => {
@@ -58,7 +115,7 @@ class Dialog {
                 request({
                     url: `https://graph.facebook.com/v2.6/${senderId}`,
                     qs: {
-                        access_token: that._token
+                        access_token: FACEBOOK_ACCESS_TOKEN
                     },
                     method: 'GET',
 
@@ -72,7 +129,7 @@ class Dialog {
     }
 
     reply(senderId, message) {
-
+        
         request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: { access_token: FACEBOOK_ACCESS_TOKEN },
@@ -103,7 +160,7 @@ class Dialog {
         request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: {
-                access_token: this._token
+                access_token: FACEBOOK_ACCESS_TOKEN
             },
             method: 'POST',
             json: {
@@ -137,7 +194,7 @@ class Dialog {
         request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: {
-                access_token: this._token
+                access_token: FACEBOOK_ACCESS_TOKEN
             },
             method: 'POST',
             json: {
@@ -163,7 +220,7 @@ class Dialog {
         request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: {
-                access_token: this._token
+                access_token: FACEBOOK_ACCESS_TOKEN
             },
             method: 'POST',
             json: {
@@ -194,7 +251,7 @@ class Dialog {
         request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: {
-                access_token: this._token
+                access_token: FACEBOOK_ACCESS_TOKEN
             },
             method: 'POST',
             json: {
@@ -214,6 +271,7 @@ class Dialog {
     }
 
     sendGenericMessage(senderId, payloadElements) {
+        
         var messageData = {
             "attachment": {
                 "type": "template",
@@ -228,7 +286,7 @@ class Dialog {
         request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: {
-                access_token: this._token
+                access_token: FACEBOOK_ACCESS_TOKEN
             },
             method: 'POST',
             json: {
