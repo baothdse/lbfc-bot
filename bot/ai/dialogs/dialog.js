@@ -1,9 +1,9 @@
 "use strict"
-var Response = require('./entities/response');
 let ClassParser = require('../utils/class-parser');
-let Pattern = require('./entities/pattern');
+let Intent = require('../intents/intent');
 
-let request = require('request');
+
+let request = require('request-promise');
 
 const FACEBOOK_ACCESS_TOKEN = 'EAAFHmBXhaYoBAFdbrN3n2nazaGfq3UOdzqvr2ZA750TZBaEi2rKorkMlZCXIo6Yl7pn9tZBBBwt6iAmV9VyKKqyX5pmB05zBLZC3iBwqgFth4ClGhWE7EPqvDsHjULGBGj4oG7qIcecqwzxoQ4w4NmCO5EAZALIvj1cgerF5nTCwZDZD';
 
@@ -14,52 +14,77 @@ class Dialog {
         this.status = "new"; //new hoặc end
         this.posToAnalyze = 0;
         this._storedUsers = {};
+        this.intents = [];
+        this.session = []
     }
 
     pause() {
         this.step--;
     }
 
-    isMatch(input) {
-        var result = false;
+    isMatch(input, senderId) {
+        var result = null;
         var that = this;
-        this.patterns.some(function (pattern) {
-            var p = pattern.isMatch(input);
-            if (p != null) {
-                console.log('dialog: ------> pattern = ' + pattern.string + ', input = ' + input);
-                that.posToAnalyze = p[0].length + 1;
-                that.step = pattern.getStep();
-                result = true;
+
+        this.intents.some(function(intent) {
+            result = intent.match(input);
+            
+            if (result != null) {
+                that.step = result.step;
+                that.exception = result.exception;
+                that.continue(input, senderId, result);
                 return true;
             }
         }, this);
-        return result;
+        return result != null;
     }
+
     reset() {
         this.status = "new";
     }
 
-    addPatterns(arrayOfClassName, step) {
-        var parser = new ClassParser.ClassParser(arrayOfClassName);
-        var patternParsed = parser.parse();
-        var that = this;
-        patternParsed.forEach(function (p) {
-            that.patterns.push(new Pattern(p, step));
-        }, this);
+    addIntent(intent) {
+        this.intents.push(intent);
     }
 
-    end(senderId) {
+    end() {
         this.status = "end";
-        this.reply(senderId, { 'text': 'Oke' });
     }
 
-    continue(input) {
+    /**
+     * Nhắc lại cho user khi nhập không đúng format text cho bước tiếp theo
+     * @param {string} input 
+     * @param {int} senderId 
+     * @param {int} returnStep step để trở về
+     */
+    remindFormat(remindText, senderId, returnStep) {
+        this.reply(senderId, new SimpleTextTemplate(remindText).template);
+        this.step = returnStep;
+        this.continue('', senderId);
+    }
 
+    sendLocation(senderId) {
+        return request({
+            url: 'https://graph.facebook.com/v2.6/me/messages',
+            qs: { access_token: FACEBOOK_ACCESS_TOKEN },
+            method: 'POST',
+            json: {
+                recipient: { id: senderId },
+                message: {
+                    text: "Vui lòng cho chúng tôi biết địa điểm để có thể hỗ trợ bạn tốt hơn",
+                    quick_replies: [
+                        {
+                            content_type: "location"
+                        }
+                    ]                    
+                }
+            }
+        })
     }
 
     sendReceipt(senderId, recipientName, orderNumber, paymentMethod, orderUrl, address, summary, adjustments, elements) {
         console.log("đã chạy vào send receipt")
-        request({
+        return request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: { access_token: FACEBOOK_ACCESS_TOKEN },
             method: 'POST',
@@ -130,7 +155,7 @@ class Dialog {
 
     reply(senderId, message) {
         
-        request({
+        return request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: { access_token: FACEBOOK_ACCESS_TOKEN },
             method: 'POST',
@@ -153,6 +178,11 @@ class Dialog {
         });
     }
 
+    /**
+     * Gửi text message thông thường
+     * @param {number} senderId 
+     * @param {string} text text muốn gửi
+     */
     sendTextMessage(senderId, text) {
         var messageData = {
             text: text
@@ -288,6 +318,11 @@ class Dialog {
             qs: {
                 access_token: FACEBOOK_ACCESS_TOKEN
             },
+            body: 
+            { whitelisted_domains: 
+               [ 
+                 'https://www.foody.vn/',
+             ] },
             method: 'POST',
             json: {
                 recipient: {
