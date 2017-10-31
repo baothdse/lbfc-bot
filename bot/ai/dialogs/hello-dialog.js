@@ -1,15 +1,16 @@
 "use strict";
 
-let Dialog = require('./dialog');
 
+let Dialog = require('./dialog');
 let async = require("asyncawait/async");
 let await = require("asyncawait/await");
-
 let HelloIntent = require('../intents/hello/hello-intent');
+let Request = require('../utils/request');
+const googleAPIkey = 'AIzaSyC2atcNmGkRy3pzTskzsPbV6pW68qe_drY'
 
 class HelloDialog extends Dialog {
-    constructor() {
-        super();
+    constructor(session) {
+        super(session);
         this.push();
     }
 
@@ -30,9 +31,16 @@ class HelloDialog extends Dialog {
     }
 
     showOption(input, senderId) {
-        console.log(input)
+        // console.log(input[0].payload.coordinates)
+        // var latlng = coordinates.lat + ',' + coordinates.long
+        // var address = await(new Request().sendHttpsGetRequest(' ', {'latlng': latlng, 'key' : process.env.googleAPIkey}, ''))
+        // var currentAddress = JSON.parse(address);
+        // console.log(currentAddress.results[0])
+        // var coordinates = input[0].payload.coordinates
+        this.session.coordinates = input[0].payload.coordinates
+        console.log(this.session)
         var that = this;
-        this.getSenderName(senderId).then(function(sender){
+        this.getSenderName(senderId).then(function (sender) {
             var result = that.reply(senderId, { "text": "Chào " + sender.first_name + ", bạn cần mình giúp gì không?" });
             that.sendTyping(senderId);
             that.sendGenericMessage(senderId, [{

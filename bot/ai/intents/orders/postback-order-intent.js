@@ -6,7 +6,6 @@ class PostbackOrderIntent extends Intent{
         this.addPatterns(['Đặt'], 1, true, false);
     }
 
-
     /**
      * Như trên
      * @param {string} input 
@@ -18,6 +17,7 @@ class PostbackOrderIntent extends Intent{
         var result = null;
         switch (which) {
             case 1: result = this.matchPattern1(input, match, pattern); break;
+            //case 2: result = this.matchPattern2(input, metch, pattern); break;
             default: break;
         }
         return result;
@@ -41,6 +41,11 @@ class PostbackOrderIntent extends Intent{
             exception : this.exception,
         }
     }
+
+    // matchPattern2(input, match, pattern) {
+    //     var storeId = input.split("$" , 1)[0];
+    //     return {storeId : storeId};
+    // }
 }
 
 module.exports = PostbackOrderIntent

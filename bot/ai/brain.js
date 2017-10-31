@@ -13,15 +13,13 @@ let ConsoleLog = require('./utils/console-log');
 let async = require('asyncawait/async')
 let await = require('asyncawait/await')
 
-
 class Brain {
-
     constructor() {
         this.usingDialog = [];
-        this.freeDialogs = [new OrderDialog(), new ShowMenuDialog(), new ShowPromotionDialog(), new SearchDialog()
-            , new HelloDialog()];
-        this.vietnameseConverter = new VietnameseConverter();
-        this.session = []
+        this.session = {}
+        this.freeDialogs = [new OrderDialog(this.session), new ShowMenuDialog(this.session), new ShowPromotionDialog(this.session), new SearchDialog(this.session)
+            , new HelloDialog(this.session)];
+        this.vietnameseConverter = new VietnameseConverter();       
     }
 
     receive(req, res) {
@@ -62,6 +60,7 @@ class Brain {
                 case 'attachments': message = event.message.attachments; break;
                 default: message = event.message.quick_reply.payload; break;
             }
+            console.log("Message ở trogn response dòng 63")
             console.log(message)
             var that = this;
             const senderId = event.sender.id;
@@ -170,7 +169,5 @@ class Brain {
 
 
 }
-
-
 
 module.exports = Brain

@@ -1,21 +1,19 @@
 "use strict"
 let ClassParser = require('../utils/class-parser');
 let Intent = require('../intents/intent');
-
-
 let request = require('request-promise');
-
+let key = process.env.googleAPIkey || 'AIzaSyC2atcNmGkRy3pzTskzsPbV6pW68qe_drY';
 const FACEBOOK_ACCESS_TOKEN = 'EAAFHmBXhaYoBAFdbrN3n2nazaGfq3UOdzqvr2ZA750TZBaEi2rKorkMlZCXIo6Yl7pn9tZBBBwt6iAmV9VyKKqyX5pmB05zBLZC3iBwqgFth4ClGhWE7EPqvDsHjULGBGj4oG7qIcecqwzxoQ4w4NmCO5EAZALIvj1cgerF5nTCwZDZD';
 
 class Dialog {
-    constructor() {
+    constructor(session) {
         this.step = 1;
         this.patterns = [];
         this.status = "new"; //new hoặc end
         this.posToAnalyze = 0;
         this._storedUsers = {};
         this.intents = [];
-        this.session = []
+        this.session = session;
     }
 
     pause() {
@@ -28,7 +26,8 @@ class Dialog {
 
         this.intents.some(function(intent) {
             result = intent.match(input);
-            
+            console.log("MATCH RESULTSMATCH RESULTS")
+            console.log(result)
             if (result != null) {
                 that.step = result.step;
                 that.exception = result.exception;
@@ -82,7 +81,7 @@ class Dialog {
         })
     }
 
-    sendReceipt(senderId, recipientName, orderNumber, paymentMethod, orderUrl, address, summary, adjustments, elements) {
+    sendReceipt(senderId, recipientName, orderNumber, orderUrl, address, summary, adjustments, elements) {
         console.log("đã chạy vào send receipt")
         return request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
@@ -98,7 +97,7 @@ class Dialog {
                             recipient_name: recipientName,
                             order_number: orderNumber,
                             currency: "VND",
-                            payment_method : "Visa 2345", 
+                            payment_method : "Tiền mặt", 
                             order_url: orderUrl,
                             timestamp: "1428444852",
                             address: address,

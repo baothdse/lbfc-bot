@@ -1,4 +1,4 @@
-let Dialog = require('./dialog');  
+let Dialog = require('./dialog');
 let ClassParser = require('../utils/class-parser');
 var Request = require('../utils/request');
 let async = require("asyncawait/async");
@@ -8,6 +8,7 @@ let await = require("asyncawait/await");
 let SearchProductIntent = require('../intents/products/search-product-intent');
 let SearchProductFilterIntent = require('../intents/products/search-product-filter-intent');
 let ProductPriceFilterIntent = require('../intents/products/product-price-filter-intent');
+let SearchPriceIntent = require('../intents/search/search-price-intent')
 /*-----------------End intent------------------*/
 
 class SearchDialog extends Dialog {
@@ -19,13 +20,11 @@ class SearchDialog extends Dialog {
     push() {
         this.addIntent(new SearchProductIntent(1, 0));
         this.addIntent(new SearchProductFilterIntent(2, 0));
-        this.addIntent(new ProductPriceFilterIntent(3.2, 0));
+        //this.addIntent(new ProductPriceFilterIntent(3.2, 0));
+        this.addIntent(new SearchPriceIntent(3.2, 0))
     }
 
     continue(input, senderId, info = null) {
-        console.log('In search dialog');
-        console.log("Step")
-        console.log(this.step)
         switch (this.step) {
             case 1:
                 this.askSearchOption(input, senderId);
@@ -37,14 +36,11 @@ class SearchDialog extends Dialog {
                 this.showProductByName(input, senderId);
                 break;
             case 3.2:
-                this.showProductByPriceRange(input, senderId);
+                this.showProductByPriceRange(input, senderId, info);
             default: break;
         }
     }
     askSearchOption(input, senderId) {
-        console.log('search.js ===========> 50')
-        console.log(input)
-        //this.reply(senderId, {"text" : "Bạn muốn tìm theo tên hay giá tiền?"});
         this.step = 2;
         this.sendQuickReply(senderId, "Bạn muốn tìm theo tên sản phẩm hay giá tiền?",
             [{
@@ -60,8 +56,7 @@ class SearchDialog extends Dialog {
             }])
     }
 
-    askProductName(input, senderId) {        
-        console.log('search-dialog 32 -----> input = ' + input);
+    askProductName(input, senderId) {
         var message = input.toLowerCase();
 
         if (message == "tên sản phẩm" || message == "tên") {
@@ -74,64 +69,80 @@ class SearchDialog extends Dialog {
     }
 
     showProductByName(input, senderId) {
-        // console.log('ShowProductNAme')
-        // console.log(input)
         var listProduct = null;
         var output = '';
         var that = this;
         if (input != null) {
             this.sendTyping(senderId);
             new Request().sendGetRequest('/LBFC/Product/GetBrandHasProduct', { 'keyword': input }, "")
-            .then(function(data){
-                if (data.length == 0) {
-                    output = "Hệ thống không có món đó";
-                } else {
-                    listProduct = JSON.parse(data);   
-                    console.log(listProduct)            
-                    var top4Product = [];
-                    for (var i = 0; i < 4; i++) {
-                        var element = {
-                            title: listProduct[i].Name,
-                            image_url: listProduct[i].Product.PicURL,
-                            subtitle: listProduct[i].Product.ProductName,
-                            default_action: {
-                                "type": "web_url",
-                                "url": "https://foody.vn",
-                                "messenger_extensions": true,
-                                "webview_height_ratio": "tall"
-                            },
-                            buttons: [
-                                {
-                                    type: "postback",
-                                    title: "Đặt sản phẩm",
-                                    payload: "Đặt $" + listProduct[i].Product.ProductID + " $" + listProduct[i].Product.ProductName + " $" + listProduct[i].Product.Price + " $" + listProduct[i].Product.PicURL + " $" + listProduct[i].Id,
-                                }
-                            ]
+                .then(function (data) {
+                    if (data.length == 0) {
+                        output = "Hệ thống không có món đó";
+                    } else {
+                        listProduct = JSON.parse(data);
+                        var top4Product = [];
+                        for (var i = 0; i < 4; i++) {
+                            var element = {
+                                title: listProduct[i].Name,
+                                image_url: listProduct[i].Product.PicURL,
+                                subtitle: listProduct[i].Product.ProductName,
+                                default_action: {
+                                    "type": "web_url",
+                                    "url": "https://foody.vn",
+                                    "messenger_extensions": true,
+                                    "webview_height_ratio": "tall"
+                                },
+                                buttons: [
+                                    {
+                                        type: "postback",
+                                        title: "Đặt sản phẩm",
+                                        payload: "Đặt $" + listProduct[i].Product.ProductID + " $" + listProduct[i].Product.ProductName + " $" + listProduct[i].Product.Price + " $" + listProduct[i].Product.PicURL + " $" + listProduct[i].Id,
+                                    }
+                                ]
+                            }
+                            top4Product.push(element);
                         }
-                        top4Product.push(element);
+                        that.sendGenericMessage(senderId, top4Product)
                     }
-                    that.sendGenericMessage(senderId, top4Product)
-                }
 
-            });
-            // new Request().sendGetRequest('/LBFC/Product/GetShopHasProductOutdoor', { 'keyword': input }
-            //     .then(function (data) {
-            // console.log("82-------------------------")
-            // console.log(data)
-            // }))
+                });
         }
-        
+
     }
 
-    showProductByPriceRange(input, senderId) {
+    showProductByPriceRange(input, senderId, info) {
+        console.log("ĐANG SEARCH PRODUCT THEO PRICE")
+        console.log(info)
         this.step = 4;
-        var output = '';
-        var listProduct = null;
-        var that = this;
-        if (input != null) {
-            this.sendTyping(senderId);
-            new Request().sendGetRequest('/LBFC/Product/GetShopHasProductOutdoor', { 'keyword': input }, "");
-            
+        let that = this;
+        let top4Product = [];
+        if(info != null) {
+            let condition = info.listProduct.length;
+            if (info.listProduct.length > 4) {
+                condition = 4
+            }
+            for (let i = 0; i < condition; i++) {
+                let element = {
+                    title: info.listProduct[i].Product.ProductName,
+                    image_url: info.listProduct[i].Product.PicURL,
+                    subtitle: "Sản phẩm này được làm từ ... \n" + info.listProduct[i].Product.Price + "VND",
+                    default_action: {
+                        "type": "web_url",
+                        "url": "https://pinterest.com",
+                        "messenger_extensions": true,
+                        "webview_height_ratio": "tall"
+                    },
+                    buttons: [
+                        {
+                            type: "postback",
+                            title: "Đặt sản phẩm",
+                            payload: "Đặt $" + info.listProduct[i].Product.ProductID + " $" + info.listProduct[i].Product.ProductName + " $" + info.listProduct[i].Product.Price + " $" + info.listProduct[i].Product.PicURL + " $" + info.listProduct[i].Id,
+                        }
+                    ]
+                }
+                top4Product.push(element);
+            }
+            that.sendGenericMessage(senderId, top4Product)
         }
     }
 
