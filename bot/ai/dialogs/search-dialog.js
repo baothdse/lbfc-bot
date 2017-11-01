@@ -5,6 +5,12 @@ var Request = require('../utils/request');
 let async = require("asyncawait/async");
 let await = require("asyncawait/await");
 
+/*-------------------Intent---------------------*/
+let SearchProductIntent = require('../intents/products/search-product-intent');
+let SearchProductFilterIntent = require('../intents/products/search-product-filter-intent');
+let ProductPriceFilterIntent = require('../intents/products/product-price-filter-intent');
+/*-----------------End intent------------------*/
+
 class SearchDialog extends Dialog {
     constructor() {
         super();
@@ -12,33 +18,27 @@ class SearchDialog extends Dialog {
     }
 
     push() {
-        this.addPatterns(["DaiTu", "DongTu", "Tim"], 1, 0);
-        this.addPatterns(["Tim"], 1, 0);
-        this.patterns.push(new Pattern("Tìm sản phẩm", 1, 0));
-        this.patterns.push(new Pattern("Tên sản phẩm", 2, 0));
-        this.patterns.push(new Pattern("Giá tiền", 2, 0));
-        this.patterns.push(new Pattern("Giá", 2, 0));
-        this.patterns.push(new Pattern(["Adverb", "Number", "Abverd", "Number"], 3.2, 0));
-        this.patterns.push(new Pattern(["Adverb", "Number"], 3.2, 0));
-        this.patterns.push(new Pattern(["Number", "Number"], 3.2, 0));
+        this.addIntent(new SearchProductIntent(1, 0));
+        this.addIntent(new SearchProductFilterIntent(2, 0));
+        this.addIntent(new ProductPriceFilterIntent(3.2, 0));
     }
 
-    continue(input, senderId) {
+    continue(input, senderId, info = null) {
         console.log('In search dialog');
         console.log("Step")
         console.log(this.step)
         switch (this.step) {
             case 1:
-                this.askSearchOption(input.message, senderId);
+                this.askSearchOption(input, senderId);
                 break;
             case 2:
-                this.askProductName(input.message, senderId);
+                this.askProductName(input, senderId);
                 break;
             case 3.1:
-                this.showProductByName(input.message, senderId);
+                this.showProductByName(input, senderId);
                 break;
             case 3.2:
-                this.showProductByPriceRange(input.message, senderId);
+                this.showProductByPriceRange(input, senderId);
             default: break;
         }
     }
@@ -82,39 +82,43 @@ class SearchDialog extends Dialog {
         var that = this;
         if (input != null) {
             this.sendTyping(senderId);
-            var data = await(new Request().sendGetRequest('/LBFC/Product/GetShopHasProductOutdoor', { 'keyword': input }, ""));
+            new Request().sendGetRequest('/LBFC/Product/GetShopHasProductOutdoor', { 'keyword': input }, "")
+            .then(function(data){
+                if (data.length == 0) {
+                    output = "Hệ thống không có món đó";
+                } else {
+                    listProduct = JSON.parse(data);
+                    console.log(listProduct);               
+                    var top4Product = [];
+                    for (var i = 0; i < 4; i++) {
+                        var element = {
+                            title: listProduct[i].Name,
+                            image_url: listProduct[i].Product.PicURL,
+                            subtitle: listProduct[i].Product.ProductName,
+                            default_action: {
+                                "type": "web_url",
+                                "url": "https://foody.vn",
+                                "messenger_extensions": true,
+                                "webview_height_ratio": "tall"
+                            },
+                            buttons: [
+                                {
+                                    type: "postback",
+                                    title: "Đặt sản phẩm",
+                                    payload: "Đặt $" + listProduct[i].Product.ProductID + " $" + listProduct[i].Product.ProductName + " $" + listProduct[i].Product.Price + " $" + listProduct[i].Product.PicURL,
+                                }
+                            ]
+                        }
+                        top4Product.push(element);
+                    }
+                    that.sendGenericMessage(senderId, top4Product)
+                }
+
+            });
             // new Request().sendGetRequest('/LBFC/Product/GetShopHasProductOutdoor', { 'keyword': input }
             //     .then(function (data) {
             // console.log("82-------------------------")
             // console.log(data)
-            if (data.length == 0) {
-                output = "Hệ thống không có món đó";
-            } else {
-                listProduct = JSON.parse(data);                
-                var top4Product = [];
-                for (var i = 0; i < 4; i++) {
-                    var element = {
-                        title: listProduct[i].Name,
-                        image_url: listProduct[i].Product.PicURL,
-                        subtitle: listProduct[i].Product.ProductName,
-                        default_action: {
-                            "type": "web_url",
-                            "url": "https://foody.vn",
-                            "messenger_extensions": true,
-                            "webview_height_ratio": "tall"
-                        },
-                        buttons: [
-                            {
-                                type: "postback",
-                                title: "Đặt sản phẩm",
-                                payload: "Đặt $" + listProduct[i].Product.ProductID + " $" + listProduct[i].Product.ProductName + " $" + listProduct[i].Product.Price + " $" + listProduct[i].Product.PicURL,
-                            }
-                        ]
-                    }
-                    top4Product.push(element);
-                }
-                that.sendGenericMessage(senderId, top4Product)
-            }
             // }))
         }
         
@@ -127,7 +131,7 @@ class SearchDialog extends Dialog {
         var that = this;
         if (input != null) {
             this.sendTyping(senderId);
-            var data = await(new Request().sendGetRequest('/LBFC/Product/GetShopHasProductOutdoor', { 'keyword': input }, ""));
+            new Request().sendGetRequest('/LBFC/Product/GetShopHasProductOutdoor', { 'keyword': input }, "");
             
         }
     }

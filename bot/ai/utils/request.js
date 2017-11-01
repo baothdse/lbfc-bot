@@ -45,7 +45,9 @@ Request.prototype.sendPostRequest = function (url, data) {
     return result;
 }
 
-
+/**
+ * url bỏ http://localhost:42013
+ */
 Request.prototype.sendGetRequest =  function (url, query, data) {
     
     var result = null;
@@ -64,7 +66,6 @@ Request.prototype.sendGetRequest =  function (url, query, data) {
             console.log("Error");
         } else {
             result = body;
-            console.log("No error");
         }
     });
     // var httpRequest = http.request(options, function (response) {

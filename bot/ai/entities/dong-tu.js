@@ -1,12 +1,11 @@
 
-function DongTu(){
-    this.words = [];
-    this.words.push("muốn");
-    this.words.push("xin");
+class DongTu {
+    constructor() {
+        this.words = ['uống', 'ăn', 'đặt', 'hủy', 'biết', 'nhìn', 'mua', 'bỏ', 'xóa', 'thêm', 'hiểu', 'xem'
+            , 'ship', 'thêm', 'ở', 'show', 'thanh toán', 'đóng', 'sử dụng', 'dùng'];
+
+    }
 }
 
-DongTu.prototype.getWords = function () {
-    return this.words;
-}
 
-module.exports = DongTu;
+module.exports = DongTu
