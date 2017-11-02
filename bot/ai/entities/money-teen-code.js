@@ -1,6 +1,6 @@
 class MoneyTeenCode {
     constructor() {
-        this.words = ['\\d+\\w']
+        this.words = ['\\d+k']
     }
 }
 module.exports = MoneyTeenCode;
