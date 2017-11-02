@@ -10,8 +10,8 @@ let DateParser = require('../utils/date-parser');
 
 class ShowOrderHistoryDialog extends Dialog {
 
-    constructor(){
-        super();
+    constructor(session){
+        super(session);
         this.push();
     }
 

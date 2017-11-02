@@ -3,8 +3,8 @@ let ShowMyPromotionIntent = require('../intents/promotions/show-my-promotion-int
 
 class ShowMyPromotionDialog extends Dialog{
 
-    constructor(){
-        super();
+    constructor(session){
+        super(session);
         this.push();
     }
 

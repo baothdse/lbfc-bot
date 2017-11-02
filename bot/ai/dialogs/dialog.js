@@ -1,23 +1,20 @@
 "use strict"
-var Response = require('./entities/response');
 let ClassParser = require('../utils/class-parser');
-let Pattern = require('./entities/pattern');
 let Intent = require('../intents/intent');
-
-
 let request = require('request-promise');
-
-const FACEBOOK_ACCESS_TOKEN = 'EAAGrlOZA1cX8BAGv1JEGcgIb113aXfCa987vUARBhfR5pmZCKo7x4h2uvBA9hT318sfTmfFRDxss7JnuOgR0axYHZCp6qWteXOzdRqLmNrz0cZCzG4oIWUhjGZAlm53Oavp04Wjt3wHdEcZA9tuBMCEqZAFn5EiJCqD5TuCZCEUhZAZBNtgkCqQjaZC';
+let key = process.env.googleAPIkey || 'AIzaSyC2atcNmGkRy3pzTskzsPbV6pW68qe_drY';
+const FACEBOOK_ACCESS_TOKEN = 'EAAGrlOZA1cX8BAN7yxgcc3MdMtUybTlMlLgEhsAPX20dYRbJ9TIz68fs18ac9QwHdwhn0L2oWabdcc6eBOx7ryA17Tcq3wtMczG46ixZAUTZC4YqpJBPWGVufDyWTZCfi2M0hxBdDSPXLFlHKP4eun4FIfPvva13VZAhZBS5MeHTG6IZARLF5t7';
 
 class Dialog {
-    constructor() {
+    constructor(session) {
         this.step = 1;
         this.patterns = [];
         this.status = "new"; //new hoặc end
         this.posToAnalyze = 0;
         this._storedUsers = {};
         this.intents = [];
-        this.session = [];
+        this.session = session;
+        this.exception = 0;
     }
 
     pause() {
@@ -64,8 +61,26 @@ class Dialog {
         this.continue('', senderId);
     }
 
+    sendLocation(senderId) {
+        return request({
+            url: 'https://graph.facebook.com/v2.6/me/messages',
+            qs: { access_token: FACEBOOK_ACCESS_TOKEN },
+            method: 'POST',
+            json: {
+                recipient: { id: senderId },
+                message: {
+                    text: "Vui lòng cho chúng tôi biết địa điểm để có thể hỗ trợ bạn tốt hơn",
+                    quick_replies: [
+                        {
+                            content_type: "location"
+                        }
+                    ]                    
+                }
+            }
+        })
+    }
 
-    sendReceipt(senderId, recipientName, orderNumber, paymentMethod, orderUrl, address, summary, adjustments, elements) {
+    sendReceipt(senderId, recipientName, orderNumber, orderUrl, address, summary, adjustments, elements) {
         console.log("đã chạy vào send receipt")
         return request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
@@ -81,7 +96,7 @@ class Dialog {
                             recipient_name: recipientName,
                             order_number: orderNumber,
                             currency: "VND",
-                            payment_method : "Visa 2345", 
+                            payment_method : "Tiền mặt", 
                             order_url: orderUrl,
                             timestamp: "1428444852",
                             address: address,
@@ -128,6 +143,7 @@ class Dialog {
                     method: 'GET',
 
                 }, function (error, response, body) {
+                    console.log(body);
                     var person = JSON.parse(body);
                     that._storedUsers[senderId] = person;
                     resolve(person);
@@ -170,7 +186,7 @@ class Dialog {
         var messageData = {
             text: text
         };
-        return request({
+        request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: {
                 access_token: FACEBOOK_ACCESS_TOKEN
@@ -192,12 +208,6 @@ class Dialog {
         });
     }
 
-    /**
-     * 
-     * @param {number} senderId 
-     * @param {string} text Chuỗi text hiện phía trên button
-     * @param {{title, payload, type}} buttons Nút bấm
-     */
     sendButtonMessage(senderId, text, buttons) {
         var messageData = {
             "attachment": {

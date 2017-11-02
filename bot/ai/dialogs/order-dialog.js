@@ -1,17 +1,16 @@
-
-
 var Order = require('./entities/order');
-var response = require('./entities/response');
 let Dialog = require('./dialog');
 let Pattern = require('../intents/patterns/pattern');
 let ClassParser = require('../utils/class-parser');
 let Request = require('../utils/request');
 let ConsoleLog = require('../utils/console-log');
+var await = require('asyncawait/await')
 
 /*-------------------Import intents-------------------*/
 let ReceiveFullOrderIntent = require('../intents/orders/receive-full-order-intent');
 let BeginOrderIntent = require('../intents/orders/begin-order-intent');
 let PostbackOrderIntent = require('../intents/orders/postback-order-intent');
+let ReceiveStoreNameIntent = require('../intents/orders/receive-store-name-intent')
 /*----------------------------------------------------*/
 
 /*-------------------Template-------------------------*/
@@ -19,8 +18,8 @@ let SimpleTextTemplate = require('./templates/simple-text-template');
 let ButtonTemplate = require('./templates/button-template');
 
 class OrderDialog extends Dialog {
-    constructor() {
-        super();
+    constructor(session) {
+        super(session);
         this.orders = [];
         this.tmpOrder = new Order();
         this.push();
@@ -30,11 +29,12 @@ class OrderDialog extends Dialog {
         this.addIntent(new ReceiveFullOrderIntent(0, 1));
         this.addIntent(new BeginOrderIntent(2, 0));
         this.addIntent(new PostbackOrderIntent(0, 2));
+        this.addIntent(new ReceiveStoreNameIntent(10, 0, this.session));
+
     }
 
     continue(input, senderId, info = null) {
         console.log("đang ở order dialog")
-        console.log(input);
         console.log("Standing at STEP ====== " + this.step)
         switch (this.step) {
             case 0: this.continueException(input, senderId, info); break;
@@ -47,13 +47,15 @@ class OrderDialog extends Dialog {
             case 7: this.receiveMoreProduct(input, senderId); break;
             case 8: this.askOrderType(input, senderId); break;
             case 9: this.receiveOrderType(input, senderId); break;
-            case 10: this.askForConfimation(input, senderId); break;
-            case 11: this.receiveConfirmation(input, senderId); break;
-            case 12: this.end(); break;
+            case 10: this.receiveStore(input, senderId, info); break;
+            case 10.1: this.receiveConfirmStore(input, senderId); break;
+            case 10.2: this.receiveEditStoreName(input, senderId); break;
+            case 11: this.askForConfirmation(input, senderId); break;
+            case 12: this.receiveConfirmation(input, senderId); break;
+            case 13: this.end(); break;
             default: break;
         }
     }
-
 
     /**
      * Xử lý các tình huống user nhập tắt, không theo từng bước
@@ -141,14 +143,14 @@ class OrderDialog extends Dialog {
      * @param {int} senderId id fb của user
      */
     receiveQuantity(input, senderId) {
+        var currentProduct = this.session.products[this.session.totalProductInList - 1]
         var that = this;
         if (input.match(/^\d+$/g)) {
-            this.orders.push(new Order(this.session[0].productId, this.session[0].productName, input));
+            currentProduct.quantity = input
             this.step = 6;
             this.reply(senderId,
-                new SimpleTextTemplate('Ok ' + input + ' phần ' + this.session[0].productName).template)
+                new SimpleTextTemplate('Ok ' + input + ' phần ' + currentProduct.productName).template)
                 .then(function (data) {
-                    that.session = [];
                     that.continue(input, senderId);
                 });
         } else {
@@ -173,7 +175,7 @@ class OrderDialog extends Dialog {
       * @param {int} senderId 
       */
     receiveMoreProduct(input, senderId) {
-        if (input.match(/(hết rồi|hết|không|không còn)/i)) {
+        if (input.match(/(hết rồi|hết|không|không còn|ko)/i)) {
 
             this.step = 8;
             this.continue(input, senderId);
@@ -192,7 +194,6 @@ class OrderDialog extends Dialog {
     askOrderType(input, senderId) {
         console.log("đang ở ask order type");
         this.step = 9;
-
         this.sendQuickReply(senderId, "Vui lòng chọn phương thức nhận hàng?",
             [{
                 content_type: "text",
@@ -214,65 +215,144 @@ class OrderDialog extends Dialog {
      * @param {number} senderId 
      */
     receiveOrderType(input, senderId) {
-        if (input == 'Tại cửa hàng') {
-            this.step = 10;
-            this.sendTextMessage(senderId, 'ok tới uni space lấy nha');
-            this.continue(input, senderId);
+        var that = this;
+        if (input.toLowerCase() == 'tại cửa hàng') {
+            this.step = 10
+            var currentProduct = this.session.products[this.session.totalProductInList - 1]
+            console.log(this.session)
+            var data = await(new Request().sendGetRequest('/LBFC/Store/GetNearbyStoreOutdoor', { "lat": this.session.coordinates.lat, "lon": this.session.coordinates.long, "brandId": this.session.products[this.session.totalProductInList - 1].brandId }))
+            var listStoreNearBy = JSON.parse(data)
+            var top4NearByStore = []
+            for (var i = 0; i < 4; i++) {
+                var element = {
+                    title: listStoreNearBy[i].Name,
+                    image_url: listStoreNearBy[i].LogoUrl,
+                    subtitle: listStoreNearBy[i].Address,
+                    default_action: {
+                        "type": "web_url",
+                        "url": "https://foody.vn",
+                        "messenger_extensions": true,
+                        "webview_height_ratio": "tall"
+                    },
+                    buttons: [
+                        {
+                            type: "postback",
+                            title: "Chọn cửa hàng",
+                            payload: "Chọn cửa hàng " + "$" + listStoreNearBy[i].ID + " $" + listStoreNearBy[i].Name
+                        }
+                    ]
+                }
+                top4NearByStore.push(element);
+            }
+            that.sendGenericMessage(senderId, top4NearByStore)
+            // this.continue(input, senderId);
         } else {
             this.sendTextMessage(senderId, 'Chức năng đang phát triển');
         }
     }
 
+    receiveConfirmStore(input, senderId) {
+        console.log("đã chạy vào hàm receiveConfirmStore")
+        var that = this;
+        if(input.match(/(ok|đúng rồi|đúng| chính nó| nó đó |chuẩn luôn| chính xác)/i)) {
+            this.step = 11
+            that.continue(input, senderId)
+        }
+    }
+
+    receiveEditStoreName(input, senderId) {
+        this.step = 10;
+        this.continue(input, senderId)
+    }
+
     /**
-     * Step 10: confirm lại order
+     * Step 10: Hỏi User chọn cửa hàng nào
+     * + Nếu có cửa hàng => step 11
+     * + Nếu sai chính tả trong giới hạn cho phép => step 10.1
+     * + Nếu sai quá nhiều => không hiểu => step 10.2
+     * @param {*} input 
+     * @param {*} senderId 
+     * @param {*} info 
+     */
+    receiveStore(input, senderId, info) {
+        var that = this
+        //Nếu user click button "Chọn cửa hàng"
+        if (info.storeId && info.storeName) {
+            that.step = 11;
+            var storeId = info.storeId;
+            var storeName = info.storeName;
+            this.continue(input, senderId);
+        }
+        //Nếu user nhập tay tên cửa hàng
+        else if (info.listStoreMatching) {
+            var listStoreMatching = info.listStoreMatching;
+            var replyText = "";
+            if (listStoreMatching.length == 1) {
+                that.step = 10.1;
+                that.sendTextMessage(senderId, "Có phải ý của bạn là cửa hàng " + listStoreMatching[0].storeName)
+
+            } else if (listStoreMatching.length > 1) {
+                for (var i = 0; i < listStoreMatching.length; i++) {
+                    replyText += i + ". " + listStoreMatching[i].storeName + "\n"
+                }
+                that.sendTextMessage(senderId, "Ý của bạn là cửa hàng nào?")
+                that.sendTextMessage(senderId, replyText)
+                that.step = 10.2;
+            } else if (listStoreMatching.length < 1) {
+                that.sendTextMessage(senderId, "Xin lỗi cửa hàng này không có trong hệ thống! Vui lòng chọn cửa hàng khác ^.^")
+            }
+        }
+    }
+
+    /**
+     * Step 11: confirm lại order
      * @param {number} senderId 
      */
-    askForConfimation(input, senderId) {
+    askForConfirmation(input, senderId) {
+        this.step = 12
         var that = this;
-        this.getSenderName(senderId).then(function(sender){
-            var recipientName = sender.first_name + " " + sender.last_name;
-            var orderNumber = "1234";
-            var total = that.calculateTotalPrice(that.orders);
-            var paymentMethod = input
-            var orderUrl = "https://tiki.vn/sales/order/view?code=75179106"
-            var address = {
-                street_1: "252 Nguyễn Thị Minh Khai",
-                street_2: "",
-                city: "Quy Nhơn",
-                postal_code: "65789",
-                state: "Bình Định",
-                country: "US"
+        var sender = await(this.getSenderName(senderId))
+
+        var recipientName = sender.first_name + " " + sender.last_name;
+        var orderNumber = "1234";
+        var total = that.calculateTotalPrice(this.session.products)
+        var orderUrl = "https://tiki.vn/sales/order/view?code=75179106"
+        var address = {
+            street_1: "252 Nguyễn Thị Minh Khai",
+            street_2: "",
+            city: "Quy Nhơn",
+            postal_code: "65789",
+            state: "Bình Định",
+            country: "US"
+        }
+        var summary = {
+            subtotal: 75.00,
+            shipping_cost: 50.00,
+            total_tax: 10.00,
+            total_cost: total
+        }
+        var adjustments = [
+            {
+                name: "abc",
+                amount: 10
             }
-            var summary = {
-                subtotal: 75.00,
-                shipping_cost: 50.00,
-                total_tax: 10.00,
-                total_cost: total
+        ]
+        var elements = []
+        for (var i = 0; i < that.session.products.length; i++) {
+            var element = {
+                title: that.session.products[i].productName,
+                subtitle: "Sản phẩm được làm từ abc xyz",
+                quantity: that.session.products[i].quantity,
+                price: that.session.products[i].price.trim() + ".00",
+                currency: "VND",
+                image_url: that.session.products[i].productUrl
             }
-            var adjustments = [
-                {
-                    name: "abc",
-                    amount: 10
-                }
-            ]
-            var elements = []
-            for (var i = 0; i < that.orders.length; i++) {
-                var element = {
-                    title: that.orders[i].productName,
-                    subtitle: "Sản phẩm được làm từ abc xyz",
-                    quantity: that.orders[i].quantity,
-                    price: that.orders[i].price.trim() + ".00",
-                    currency: "VND",
-                    image_url: that.orders[i].productUrl
-                }
-                elements.push(element)
-            }
-            ConsoleLog.log(elements, 'order-dialog.js', '341');
-            that.sendReceipt(senderId, recipientName, orderNumber, paymentMethod, orderUrl, address, summary, adjustments, elements)
-            .then(function(data){
+            elements.push(element)
+        }
+        this.sendReceipt(senderId, recipientName, orderNumber, orderUrl, address, summary, adjustments, elements)
+            .then(function (data) {
                 that.sendTextMessage(senderId, 'Đồng ý đặt hàng?');
             });
-        });
     }
 
     /**
@@ -281,8 +361,10 @@ class OrderDialog extends Dialog {
      * @param {number} senderId 
      */
     receiveConfirmation(input, senderId) {
-        if (input == 'ok') {
-            this.sendTextMessage(senderId, 'Đã đặt hàng');
+        if (input.match(/(ok|đồng ý|đúng rồi|có|yes)/i)) {
+            this.sendTextMessage(senderId, 'Đơn hàng của bạn đã thành công.')
+            this.sendTextMessage(senderId, 'Vui lòng đợi trong ít phút nhân viên cửa hàng sẽ gọi điện cho bạn')
+            this.sendTextMessage(senderId, 'Chúc bạn một ngày vui vẻ')
             this.step = 12;
         }
     }
@@ -331,12 +413,23 @@ class OrderDialog extends Dialog {
      * @param {int} senderId 
      */
     receiveProductFromPostback(input, senderId, info) {
-        this.session.push({ 'productId': info.productId, 'productName': info.productName });
+        var count = 0
+        this.session.products = []
+        this.session.products.push(
+            {
+                productId: info.productId,
+                productName: info.productName,
+                price: info.price,
+                productUrl: info.productUrl,
+                brandId: info.brandId
+            }
+        )
+        this.session.totalProductInList = count + 1;
         this.step = 4;
         this.continue(input, senderId);
     }
 
-    /*-------------------------End exception section-----------------------*/    
+    /*-------------------------End exception section-----------------------*/
 
 
     /*------------------------------Error handler----------------------- */

@@ -11,6 +11,8 @@ let SearchDialog = require('./dialogs/search-dialog');
 let HelloDialog = require('./dialogs/hello-dialog');
 let ShowOrderHistoryDialog = require('./dialogs/show-order-history-dialog');
 let ShowOrderDetailDialog = require('./dialogs/show-order-detail-dialog');
+let SearchProductNameDialog = require('./dialogs/search-product-name-dialog');
+let SearchProductPriceDialog = require('./dialogs/search-product-price-dialog');
 
 var Response = require('./dialogs/entities/response');
 let Dialog = require('./dialogs/dialog');
@@ -31,6 +33,7 @@ class Brain {
          * @type {[{'senderId' : number, 'freeDialogs' : [], 'usingDialogs' : []}]}
          */
         this.senders = [];
+        this.session = {};
 
     }
 
@@ -39,11 +42,12 @@ class Brain {
             req.body.entry.forEach(entry => {
                 entry.messaging.forEach(event => {
                     if (event.message && event.message.text) {
-                        console.log(event);
                         this.response(event, 'message');
                     }
                     else if (event.message && event.message.quick_reply) {
                         this.response(event, 'quick_reply');
+                    } else if (event.message && event.message.attachments) {
+                        this.response(event, 'attachments');
                     }
                     else if (event.postback && event.postback.payload) {
                         this.response(event, 'postback');
@@ -66,6 +70,7 @@ class Brain {
             // case 'message': message = this.vietnameseConverter.convert(event.message.text); break;
             case 'message': message = event.message.text; break;
             case 'postback': message = event.postback.payload; break;
+            case 'attachments': message = event.message.attachments; break;
             default: message = event.message.quick_reply.payload; break;
         }
 
@@ -202,8 +207,17 @@ class Brain {
         if (!result) {
             this.senders.push({
                 senderId: senderId,
-                freeDialogs: [new OrderDialog(), new ShowMenuDialog(), new ShowPromotionDialog(), new SearchDialog()
-                    , new HelloDialog(), new ShowOrderHistoryDialog(), new ShowOrderDetailDialog()],
+                freeDialogs: [
+                    new OrderDialog(this.session),
+                    new ShowMenuDialog(this.session),
+                    new ShowPromotionDialog(this.session),
+                    new SearchDialog(this.session),
+                    new HelloDialog(this.session),
+                    new SearchProductNameDialog(this.session),
+                    new SearchProductPriceDialog(this.session),
+                    new ShowOrderHistoryDialog(this.session),
+                    new ShowOrderDetailDialog(this.session)
+                ],
                 usingDialogs: [],
             });
         }
@@ -215,7 +229,7 @@ class Brain {
      */
     getFreeDialogs(senderId) {
         var result = null;
-        this.senders.some(function(sender){
+        this.senders.some(function (sender) {
             if (sender.senderId == senderId) {
                 result = sender.freeDialogs;
                 return true;
@@ -230,7 +244,7 @@ class Brain {
      */
     getUsingDialogs(senderId) {
         var result = null;
-        this.senders.some(function(sender){
+        this.senders.some(function (sender) {
             if (sender.senderId == senderId) {
                 result = sender.usingDialogs;
                 return true;

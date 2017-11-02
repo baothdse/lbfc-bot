@@ -5,7 +5,7 @@ class SearchProductIntent extends Intent {
         super(step, exception);
         this.addPatterns(["DaiTu", "DongTu", "DongTuTimKiem"], 1);
         this.addPatterns(["DongTuTimKiem"], 1, true, false);
-        this.addPatterns(['Tìm sản phẩm'], 1);
+        this.addPatterns(['Tìm sản phẩm'], 1, true, true);
     }
 
     /**

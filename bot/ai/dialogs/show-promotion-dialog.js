@@ -5,8 +5,8 @@ let MyRequest = require('../utils/request');
 
 class ShowPromotionDialog extends Dialog{
 
-    constructor(){
-        super();
+    constructor(session){
+        super(session);
         this.push();
     }
 

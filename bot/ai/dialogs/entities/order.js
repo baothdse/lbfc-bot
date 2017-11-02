@@ -1,12 +1,12 @@
 
 class Order {
-    constructor(productId, productName, price, quantity, orderType, productUrl) {
+    constructor(productId, productName, price, quantity, productUrl, brandId) {
         this.productId = productId;
         this.productName = productName;
         this.price = price;
         this.quantity = quantity;
-        this.orderType = orderType;
-        this.productUrl = productUrl
+        this.productUrl = productUrl;
+        this.brandId = brandId;
     }
 }
 

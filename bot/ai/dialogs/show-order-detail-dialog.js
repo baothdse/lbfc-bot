@@ -4,8 +4,8 @@ let Request = require('../utils/request');
 
 class ShowOrderDetailDialog extends Dialog {
 
-    constructor() {
-        super();
+    constructor(session) {
+        super(session);
         this.push();
     }
 

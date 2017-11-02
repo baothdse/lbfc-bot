@@ -1,8 +1,6 @@
 "use strict";
 
 let Dialog = require('./dialog');
-let Pattern = require('./entities/pattern');
-let Response = require('./entities/response');
 
 class HelpDialog extends Dialog {
     constructor() {
