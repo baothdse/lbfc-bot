@@ -1,9 +1,7 @@
 let Dialog = require('./dialog');
-let Pattern = require('../intents/patterns/pattern');
-let PromotionListTemplate = require('./templates/promotion-list-template');
-let MyRequest = require('../utils/request');
+let ShowMyPromotionIntent = require('../intents/promotions/show-my-promotion-intent');
 
-class ShowPromotionDialog extends Dialog{
+class ShowMyPromotionDialog extends Dialog{
 
     constructor(session){
         super(session);
@@ -11,7 +9,7 @@ class ShowPromotionDialog extends Dialog{
     }
 
     push() {
-        ////this.addPatterns(['KhuyenMai'], false, false, 1, 0);
+        this.addIntent(new ShowMyPromotionIntent(1, 0));
     }
 
     pause() {
@@ -68,4 +66,4 @@ class ShowPromotionDialog extends Dialog{
     }
 }
 
-module.exports = ShowPromotionDialog
+module.exports = ShowMyPromotionDialog

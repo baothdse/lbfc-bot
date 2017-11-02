@@ -144,6 +144,7 @@ class Dialog {
                     method: 'GET',
 
                 }, function (error, response, body) {
+                    console.log(body);
                     var person = JSON.parse(body);
                     that._storedUsers[senderId] = person;
                     resolve(person);

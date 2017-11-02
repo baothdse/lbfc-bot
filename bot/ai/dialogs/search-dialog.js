@@ -12,8 +12,8 @@ let SearchPriceIntent = require('../intents/search/search-price-intent')
 /*-----------------End intent------------------*/
 
 class SearchDialog extends Dialog {
-    constructor() {
-        super();
+    constructor(session) {
+        super(session);
         this.push();
     }
 
@@ -30,6 +30,7 @@ class SearchDialog extends Dialog {
                 this.askSearchOption(input, senderId);
                 break;
             case 2:
+                this.end(); break;
                 this.askProductName(input, senderId);
                 break;
             case 3.1:
@@ -40,6 +41,12 @@ class SearchDialog extends Dialog {
             default: break;
         }
     }
+
+    /**
+     * Step 1
+     * @param {*} input 
+     * @param {*} senderId 
+     */
     askSearchOption(input, senderId) {
         this.step = 2;
         this.sendQuickReply(senderId, "Bạn muốn tìm theo tên sản phẩm hay giá tiền?",
@@ -54,6 +61,7 @@ class SearchDialog extends Dialog {
                 payload: "Giá tiền",
                 image_url: "https://image.flaticon.com/icons/png/128/189/189093.png"
             }])
+        this.continue(input, senderId);
     }
 
     askProductName(input, senderId) {

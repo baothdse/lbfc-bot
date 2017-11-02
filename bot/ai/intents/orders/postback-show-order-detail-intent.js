@@ -1,14 +1,10 @@
 let Intent = require('../intent');
 
-class BeginOrderIntent extends Intent{
+class PostbackShowOrderDetailIntent extends Intent {
     constructor(step, exception) {
         super(step, exception);
-        this.addPatterns(['DaiTu', 'DongTuYChi', 'DongTuDatHang'], 1);
-        this.addPatterns(['DongTuDatHang'], 1);
+        this.addPatterns(["order see_detail \\$"], 1, true, false);
     }
-
-
-
 
     /**
      * Như trên
@@ -26,13 +22,20 @@ class BeginOrderIntent extends Intent{
         return result;
     }
 
+    /**
+     * Trả về id của order muốn xem
+     * @param {*} input 
+     * @param {*} match 
+     * @param {*} pattern 
+     */
     matchPattern1(input, match, pattern) {
+        var orderId = input.substring(18, input.length);
         return {
             step: this.step,
             exception: this.exception,
+            orderId: orderId
         }
     }
-    
 }
 
-module.exports = BeginOrderIntent
+module.exports = PostbackShowOrderDetailIntent

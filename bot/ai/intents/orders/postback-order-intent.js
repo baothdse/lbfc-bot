@@ -17,35 +17,32 @@ class PostbackOrderIntent extends Intent{
         var result = null;
         switch (which) {
             case 1: result = this.matchPattern1(input, match, pattern); break;
-            //case 2: result = this.matchPattern2(input, metch, pattern); break;
             default: break;
         }
         return result;
     }
 
     matchPattern1(input, match, pattern) {
+        var tmp = input.match(/^Đặt .+?(?=\d+)/g);
+        var productName = tmp[0].substring(4, tmp[0].length - 1);
+        var productId = input.match(/\d+/g);
         var info = (input.slice(5, input.length)).split("$", 5);
-        var productId = info[0]
-        var productName = info[1]
-        var price = info[2]
-        var productUrl = info[3]
-        var brandId = info[4]
+        // var productId = info[0]
+        // var productName = info[1]
+        // var price = info[2]
+        // var productUrl = info[3]
+        // var brandId = info[4]
 
         return {
             productId : productId,
             productName : productName,
-            price : price,
-            productUrl: productUrl,
-            brandId : brandId,
+            // price : price,
+            // productUrl: productUrl,
+            // brandId : brandId,
             step : this.step,
             exception : this.exception,
         }
     }
-
-    // matchPattern2(input, match, pattern) {
-    //     var storeId = input.split("$" , 1)[0];
-    //     return {storeId : storeId};
-    // }
 }
 
 module.exports = PostbackOrderIntent

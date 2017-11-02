@@ -1,14 +1,11 @@
 let Intent = require('../intent');
 
-class BeginOrderIntent extends Intent{
+class ShowMyPromotionIntent extends Intent {
     constructor(step, exception) {
         super(step, exception);
-        this.addPatterns(['DaiTu', 'DongTuYChi', 'DongTuDatHang'], 1);
-        this.addPatterns(['DongTuDatHang'], 1);
+        this.addPatterns(["Khuyến mãi của tôi"], 1, true, true);
+        this.addPatterns(["DanhTuKhuyenMai", "QuanHeTu", "DaiTu"], 1);
     }
-
-
-
 
     /**
      * Như trên
@@ -32,7 +29,6 @@ class BeginOrderIntent extends Intent{
             exception: this.exception,
         }
     }
-    
 }
 
-module.exports = BeginOrderIntent
+module.exports = ShowMyPromotionIntent

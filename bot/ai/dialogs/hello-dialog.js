@@ -1,6 +1,4 @@
 "use strict";
-
-
 let Dialog = require('./dialog');
 let async = require("asyncawait/async");
 let await = require("asyncawait/await");
@@ -21,15 +19,26 @@ class HelloDialog extends Dialog {
     continue(input, senderId, info = null) {
         switch (this.step) {
             case 1: this.askLocation(senderId); break;
-            case 2: this.showOption(input, senderId); break
+            case 2: this.showOption(input, senderId); break;
+            case 3: this.end(); break;
+            default: this.end(); break;
         }
     }
 
+    /**
+     * Step 1
+     * @param {*} senderId 
+     */
     askLocation(senderId) {
         this.step = 2;
         this.sendLocation(senderId);
     }
 
+    /**
+     * Step 2
+     * @param {*} input 
+     * @param {*} senderId 
+     */
     showOption(input, senderId) {
         // console.log(input[0].payload.coordinates)
         // var latlng = coordinates.lat + ',' + coordinates.long
@@ -37,9 +46,12 @@ class HelloDialog extends Dialog {
         // var currentAddress = JSON.parse(address);
         // console.log(currentAddress.results[0])
         // var coordinates = input[0].payload.coordinates
-        this.session.coordinates = input[0].payload.coordinates
+        console.log(input);
+        var coordinates = input[0].payload.coordinates
+        this.session.coordinates = coordinates;
         console.log(this.session)
         var that = this;
+        
         this.getSenderName(senderId).then(function (sender) {
             var result = that.reply(senderId, { "text": "Chào " + sender.first_name + ", bạn cần mình giúp gì không?" });
             that.sendTyping(senderId);
@@ -70,8 +82,10 @@ class HelloDialog extends Dialog {
                         payload: "Nhãn hiệu"
                     }
                 ]
-            }]);
+            }]);            
         });
+        that.step = 3;
+        that.continue(input, senderId);
     }
 
     getName() {

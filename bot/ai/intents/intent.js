@@ -3,6 +3,7 @@ let Brain = require('../brain');
 let Pattern = require('./patterns/pattern');
 
 class Intent {
+    // constructor(step, exception) {
     constructor(step, exception, session) {
 
         /**

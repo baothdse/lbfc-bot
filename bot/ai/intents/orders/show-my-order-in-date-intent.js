@@ -1,14 +1,12 @@
 let Intent = require('../intent');
+let ConsoleLog = require('../../utils/console-log');
+let DateParser = require('../../utils/date-parser');
 
-class BeginOrderIntent extends Intent{
+class ShowMyOrderInDateIntent extends Intent {
     constructor(step, exception) {
         super(step, exception);
-        this.addPatterns(['DaiTu', 'DongTuYChi', 'DongTuDatHang'], 1);
-        this.addPatterns(['DongTuDatHang'], 1);
+        this.addPatterns(["xem", "DanhTuDonHang", "ngày", "\\w+"], 1);
     }
-
-
-
 
     /**
      * Như trên
@@ -27,12 +25,22 @@ class BeginOrderIntent extends Intent{
     }
 
     matchPattern1(input, match, pattern) {
+        var dateStr = input.substring(input.indexOf("ngày") + 5, input.length);
+        var d = new Date(dateStr);
+        ConsoleLog.log("Date = " + d, "show-my-order-in-date.js", 29);
+        if (d == "Invalid Date") {
+            return {
+                step: this.step,
+                exception: this.exception,
+                date: null,
+            }
+        }
         return {
             step: this.step,
             exception: this.exception,
+            date: DateParser.toCSharpFormat(d),
         }
     }
-    
 }
 
-module.exports = BeginOrderIntent
+module.exports = ShowMyOrderInDateIntent
