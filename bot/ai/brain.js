@@ -1,7 +1,6 @@
-let VietnameseConverter = require('../vietnamese/vietnamese-converter');
-
-let OrderDialog = require('./dialogs/order-dialog');
-let HelpDiaglog = require('./dialogs/help-dialog');
+var VietnameseConverter = require('../vietnamese/vietnamese-converter');
+var OrderDialog = require('./dialogs/order-dialog');
+var HelpDiaglog = require('./dialogs/help-dialog');
 let ShowMenuDialog = require('./dialogs/show-menu-dialog');
 let ShowPromotionDialog = require('./dialogs/show-promotion-dialog');
 let SearchDialog = require('./dialogs/search-dialog');
@@ -12,14 +11,14 @@ let SearchProductNameDialog = require('./dialogs/search-product-name-dialog');
 let SearchProductPriceDialog = require('./dialogs/search-product-price-dialog');
 
 let Dialog = require('./dialogs/dialog');
-
 let ConsoleLog = require('./utils/console-log');
-
 
 let async = require('asyncawait/async')
 let await = require('asyncawait/await')
 
+
 class Brain {
+
     constructor() {
         // this.usingDialog = [];
         // this.freeDialogs = [new OrderDialog(), new ShowMenuDialog(), new ShowPromotionDialog(), new SearchDialog()
@@ -31,17 +30,14 @@ class Brain {
          * @type {[{'senderId' : number, 'freeDialogs' : [], 'usingDialogs' : []}]}
          */
         this.senders = [];
-        this.usingDialog = [];
-        this.session = {}
-        this.freeDialogs = [new OrderDialog(this.session), new ShowMenuDialog(this.session), new ShowPromotionDialog(this.session), new SearchDialog(this.session)
-            , new HelloDialog(this.session)];
+        this.session = {};
+
     }
 
     receive(req, res) {
         if (req.body.object === 'page') {
             req.body.entry.forEach(entry => {
                 entry.messaging.forEach(event => {
-
                     if (event.message && event.message.text) {
                         this.response(event, 'message');
                     }
@@ -75,23 +71,25 @@ class Brain {
                 case 'attachments': message = event.message.attachments; break;
                 default: message = event.message.quick_reply.payload; break;
             }
-            console.log("Message ở trogn response dòng 63")
-            console.log(message)
-            var that = this;
+
             const senderId = event.sender.id;
             this.insertSender(senderId);
+
             var usingDialogs = this.getUsingDialogs(senderId);
             var freeDialogs = this.getFreeDialogs(senderId);
 
+            ConsoleLog.log('text = ' + message, 'brain.js', 59);
+            var that = this;
             var currentDialog = usingDialogs[usingDialogs.length - 1];
-            var beginNewDialog = false;
 
-            this.freeDialogs.some(function (dialog) {
+            var beginNewDialog = false;
+            freeDialogs.some(function (dialog) {
                 var match = dialog.isMatch(message, senderId);
+                ConsoleLog.log('dialog ' + dialog.getName() + ' match = ' + match, 'brain.js', 66);
                 if (match == true) {
-                    if (!that.isInStack(dialog)) {
-                        that.usingDialog.push(dialog);
-                        that.removeFromFreeList(dialog);
+                    if (!that.isInStack(usingDialogs, dialog)) {
+                        usingDialogs.push(dialog);
+                        that.removeFromFreeList(freeDialogs, dialog);
                         if (currentDialog != null) currentDialog.pause();
                     }
                     if (dialog.status == "end") {
@@ -115,15 +113,14 @@ class Brain {
                     currentDialog.continue(message, senderId);
                 }
                 if (currentDialog.status == "end") {
-                    var d = that.removeFromUsingList(currentDialog);
-                    that.freeDialogs.push(currentDialog);
+                    var d = that.removeFromUsingList(usingDialogs, currentDialog);
+                    freeDialogs.push(currentDialog);
                     if (d != null) {
                         d.continue(null, senderId);
                     }
-                    dialog.reset();
+                    currentDialog.reset();
                 }
-                beginNewDialog = true;
-                return true;
+
             }
         })()
     }

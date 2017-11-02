@@ -30,7 +30,6 @@ class SearchDialog extends Dialog {
                 this.askSearchOption(input, senderId);
                 break;
             case 2:
-                this.end(); break;
                 this.askProductName(input, senderId);
                 break;
             case 3.1:
