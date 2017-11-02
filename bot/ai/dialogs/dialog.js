@@ -3,7 +3,7 @@ let ClassParser = require('../utils/class-parser');
 let Intent = require('../intents/intent');
 let request = require('request-promise');
 let key = process.env.googleAPIkey || 'AIzaSyC2atcNmGkRy3pzTskzsPbV6pW68qe_drY';
-const FACEBOOK_ACCESS_TOKEN = 'EAAGrlOZA1cX8BAN7yxgcc3MdMtUybTlMlLgEhsAPX20dYRbJ9TIz68fs18ac9QwHdwhn0L2oWabdcc6eBOx7ryA17Tcq3wtMczG46ixZAUTZC4YqpJBPWGVufDyWTZCfi2M0hxBdDSPXLFlHKP4eun4FIfPvva13VZAhZBS5MeHTG6IZARLF5t7';
+const FACEBOOK_ACCESS_TOKEN = 'EAAFHmBXhaYoBAFdbrN3n2nazaGfq3UOdzqvr2ZA750TZBaEi2rKorkMlZCXIo6Yl7pn9tZBBBwt6iAmV9VyKKqyX5pmB05zBLZC3iBwqgFth4ClGhWE7EPqvDsHjULGBGj4oG7qIcecqwzxoQ4w4NmCO5EAZALIvj1cgerF5nTCwZDZD';
 
 class Dialog {
     constructor(session) {
@@ -14,7 +14,6 @@ class Dialog {
         this._storedUsers = {};
         this.intents = [];
         this.session = session;
-        this.exception = 0;
     }
 
     pause() {
@@ -27,6 +26,8 @@ class Dialog {
 
         this.intents.some(function(intent) {
             result = intent.match(input);
+            console.log("MATCH RESULTSMATCH RESULTS")
+            console.log(result)
             if (result != null) {
                 that.step = result.step;
                 that.exception = result.exception;

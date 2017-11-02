@@ -5,8 +5,8 @@ let RequestPromise = require('request-promise');
 var querystring = require('querystring');
 let async = require("asyncawait/async");
 let await = require("asyncawait/await");
-var http = require('http');
-
+let http = require('http');
+let https = require('https')
 function Request() {
 
 }
@@ -59,13 +59,14 @@ Request.prototype.sendGetRequest =  function (url, query, data) {
             'Content-Type': 'application/x-www-form-urlencoded'
         }
     };
-    console.log("query = === " + options.qs);
 
     var httpRequest =  RequestPromise(options, function (error, response, body) {
         if (error) {
             console.log("Error");
         } else {
             result = body;
+            console.log(body)
+            console.log("No error");
         }
     });
     // var httpRequest = http.request(options, function (response) {
@@ -85,6 +86,31 @@ Request.prototype.sendGetRequest =  function (url, query, data) {
     // });
     
     return Promise.resolve(httpRequest);
+}
+
+Request.prototype.sendHttpsGetRequest =  function (url, query, data) {
+   // var url = 'https://maps.googleapis.com/maps/api/' + query + '&key=' + googleAPIkey
+    var result = null;
+    var options = {
+        url: 'https://maps.googleapis.com/maps/api/' + url,
+        qs: query,
+        method: 'Get',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+    };
+    console.log("query = === " + options.qs);
+
+    var httpsRequest =  RequestPromise(options, function (error, response, body) {
+        if (error) {
+            console.log("Error");
+        } else {
+            result = body;
+            console.log("No error");
+        }
+    });
+
+    return Promise.resolve(httpsRequest);
 }
 
 

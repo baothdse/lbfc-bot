@@ -1,6 +1,4 @@
 "use strict";
-
-
 let Dialog = require('./dialog');
 let async = require("asyncawait/async");
 let await = require("asyncawait/await");
@@ -84,8 +82,7 @@ class HelloDialog extends Dialog {
                         payload: "Nhãn hiệu"
                     }
                 ]
-            }]);
-            
+            }]);            
         });
         that.step = 3;
         that.continue(input, senderId);

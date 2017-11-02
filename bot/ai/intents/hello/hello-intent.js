@@ -29,6 +29,7 @@ class HelloIntent extends Intent {
         var result = null;
         switch (which) {
             case 1: result = this.matchPattern1(input, match, pattern); break;
+
             default: break;
         }
         return result;

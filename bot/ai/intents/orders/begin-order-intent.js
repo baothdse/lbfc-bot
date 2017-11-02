@@ -4,6 +4,7 @@ class BeginOrderIntent extends Intent{
     constructor(step, exception) {
         super(step, exception);
         this.addPatterns(['DaiTu', 'DongTuYChi', 'DongTuDatHang'], 1);
+        this.addPatterns(['DongTuDatHang'], 1);
     }
 
 

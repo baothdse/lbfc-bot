@@ -3,7 +3,8 @@ let Brain = require('../brain');
 let Pattern = require('./patterns/pattern');
 
 class Intent {
-    constructor(step, exception) {
+    // constructor(step, exception) {
+    constructor(step, exception, session) {
 
         /**
          * @type {[{pattern: Pattern, group : number}]}
@@ -19,6 +20,8 @@ class Intent {
          * @type {number}
          */
         this.exception = exception;
+        
+        this.session = session
     }
 
     /**
