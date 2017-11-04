@@ -8,7 +8,6 @@ let await = require("asyncawait/await");
 let SearchProductIntent = require('../intents/products/search-product-intent');
 let SearchProductFilterIntent = require('../intents/products/search-product-filter-intent');
 let ProductPriceFilterIntent = require('../intents/products/product-price-filter-intent');
-let SearchPriceIntent = require('../intents/search/search-price-intent')
 /*-----------------End intent------------------*/
 
 class SearchDialog extends Dialog {
@@ -21,7 +20,7 @@ class SearchDialog extends Dialog {
         this.addIntent(new SearchProductIntent(1, 0));
         this.addIntent(new SearchProductFilterIntent(2, 0));
         //this.addIntent(new ProductPriceFilterIntent(3.2, 0));
-        this.addIntent(new SearchPriceIntent(3.2, 0))
+        //this.addIntent(new SearchPriceIntent(3.2, 0))
     }
 
     continue(input, senderId, info = null) {

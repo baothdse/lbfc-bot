@@ -40,18 +40,15 @@ class HelloDialog extends Dialog {
      * @param {*} senderId 
      */
     showOption(input, senderId) {
-        // console.log(input[0].payload.coordinates)
-        // var latlng = coordinates.lat + ',' + coordinates.long
-        // var address = await(new Request().sendHttpsGetRequest(' ', {'latlng': latlng, 'key' : process.env.googleAPIkey}, ''))
-        // var currentAddress = JSON.parse(address);
-        // console.log(currentAddress.results[0])
-        // var coordinates = input[0].payload.coordinates
-        console.log(input);
-        var coordinates = input[0].payload.coordinates
-        this.session.coordinates = coordinates;
-        console.log(this.session)
+        console.log(input)
+
+        if (input.constructor === Array) {
+            var coordinates = input[0].payload.coordinates
+            this.session.coordinates = coordinates;
+            
+        }
         var that = this;
-        
+
         this.getSenderName(senderId).then(function (sender) {
             var result = that.reply(senderId, { "text": "Chào " + sender.first_name + ", bạn cần mình giúp gì không?" });
             that.sendTyping(senderId);
@@ -75,14 +72,9 @@ class HelloDialog extends Dialog {
                         type: "postback",
                         title: "Khuyến mãi",
                         payload: "Khuyến mãi"
-                    },
-                    {
-                        type: "postback",
-                        title: "Nhãn hiệu",
-                        payload: "Nhãn hiệu"
                     }
                 ]
-            }]);            
+            }]);
         });
         that.step = 3;
         that.continue(input, senderId);

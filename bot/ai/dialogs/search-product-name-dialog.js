@@ -1,6 +1,7 @@
 let Dialog = require('./dialog');
 let SearchProductByNameIntent = require('../intents/products/search-product-by-name-intent');
 let Request = require('../utils/request');
+var await = require('asyncawait/await')
 
 class SearchProductNameDialog extends Dialog {
     constructor(session) {
@@ -14,24 +15,19 @@ class SearchProductNameDialog extends Dialog {
     }
 
     continue(input, senderId, info = null) {
-        switch(this.step) {
+        switch (this.step) {
             case 0: this.continueException(input, step, info); break;
-            case 1: this.askForProductName(senderId); break;
+            case 1: this.askForProductName(input, senderId); break;
             case 2: this.receiveProductName(input, senderId); break;
-            case 3: this.askForPriceFilter(senderId); break;
-            case 4: this.receivePriceFilterConfirmation(input, senderId); break;
-            case 5: this.askForBottomPrice(senderId); break;
-            case 6: this.receiveBottomPrice(input, senderId); break;
-            case 7: this.askForTopPrice(senderId); break;
-            case 8: this.receiveTopPrice(input, senderId); break;
-            case 9: this.search(input, senderId); break;
-            case 10: this.end(); break;
+            case 3: this.confirmEditKeyword(input, senderId); break;
+            case 4: this.showProductByName(input, senderId); break;
+            case 5: this.end(); break;
             default: break;
         }
     }
 
     continueException(input, senderId, info = null) {
-        switch(this.exception) {
+        switch (this.exception) {
 
         }
     }
@@ -40,9 +36,14 @@ class SearchProductNameDialog extends Dialog {
      * Step 1
      * @param {} senderId 
      */
-    askForProductName(senderId) {
-        this.sendTextMessage(senderId, "Bạn muốn tìm món gì?");
+    askForProductName(input, senderId) {
         this.step = 2;
+        let that = this
+        if (!this.session.findingProduct) {
+            that.sendTextMessage(senderId, "Bạn muốn tìm món gì?"); 
+        } else {
+            that.continue(input, senderId)
+        }
     }
 
     /**
@@ -51,123 +52,110 @@ class SearchProductNameDialog extends Dialog {
      * @param {*} senderId 
      */
     receiveProductName(input, senderId) {
-        this.session.searchProductDialog.productName = input;
-        this.step = 3;
-        this.continue(input, senderId);
-    }
-    
-    /**
-     * Step 3
-     * @param {*} senderId 
-     */
-    askForPriceFilter(senderId) {
-        this.sendTextMessage(senderId, "Bạn có muốn lọc theo giá không?");
-        this.step = 4;
-    }
+        var keywords = ['cafe', 'coffee', 'matcha', 'tea', 'iced', 'olong', 'blended', 'hot', 'soda', 'pineaple', 'strawberry', 'nho', 'dâu', 'muffin', 'chocolate', 'chicken', 'mocha', 'expresso', 'mojito', 'trà sữa', 'kem', 'milk', 'sữa', 'cookie', 'cream', 'socola', 'sô cô la']
+        let reply = ""
+        let listProductMatching = [];
 
-
-    /**
-     * Step 4
-     * @param {*} input 
-     * @param {*} sender 
-     */
-    receivePriceFilterConfirmation(input, senderId) {
-        if (input.match(/(không|ko|hông|nô|no)/i)) {
-            this.step = 10;
-        } else {
-            this.step = 5;
-        }
-        this.continue(input, senderId);    
-    }
-
-    /**
-     * Step 5
-     * @param {*} senderId 
-     */
-    askForBottomPrice(senderId) {
-        this.sendTextMessage(senderId, "Nhập giá thấp nhất");
-        this.step = 6;
-    }
-
-    /**
-     * Step 6
-     * @param {*} input 
-     * @param {*} senderId 
-     */
-    receiveBottomPrice(input, senderId) {
-        this.session.searchProductDialog.bottomPrice = input;
-        this.step = 7;
-        this.continue(input, senderId);
-    }
-
-    /**
-     * Step 7
-     * @param {*} senderId 
-     */
-    askForTopPrice(senderId) {
-        this.sendTextMessage(senderId, "Nhập giá tối đa");
-        this.step = 8;
-    }
-
-    /**
-     * Step 8
-     * @param {*} input 
-     * @param {*} senderId 
-     */
-    receiveTopPrice(input, senderId) {
-        this.session.searchProductDialog.topPrice = input;
-        this.step = 9;
-        this.continue(input, senderId);
-    }
-
-    /**
-     * Step 9
-     * @param {*} input 
-     * @param {*} senderId 
-     */
-    search(input, senderId) {
-
-        var params = { 
-            'keyword': this.session.searchProductDialog.productName, 
-            'from': this.session.searchProductDialog.bottomPrice, 
-            'to' : this.session.searchProductDialog.topPrice
-        }
-        var that = this;
-        new Request().sendGetRequest('/LBFC/Product/GetBrandHasProduct', params, "")
-        .then(function (data) {
-            if (data.length == 0) {
-                output = "Hệ thống không có món đó";
-            } else {
-                var listProduct = JSON.parse(data);
-                var top4Product = [];
-                for (var i = 0; i < 4; i++) {
-                    var element = {
-                        title: listProduct[i].Name,
-                        image_url: listProduct[i].Product.PicURL,
-                        subtitle: listProduct[i].Product.ProductName,
-                        default_action: {
-                            "type": "web_url",
-                            "url": "https://foody.vn",
-                            "messenger_extensions": true,
-                            "webview_height_ratio": "tall"
-                        },
-                        buttons: [
-                            {
-                                type: "postback",
-                                title: "Đặt sản phẩm",
-                                payload: "Đặt $" + listProduct[i].Product.ProductID + " $" + listProduct[i].Product.ProductName + " $" + listProduct[i].Product.Price + " $" + listProduct[i].Product.PicURL + " $" + listProduct[i].Id,
-                            }
-                        ]
-                    }
-                    top4Product.push(element);
-                }
-                that.sendGenericMessage(senderId, top4Product)
+        for (let i = 0, condition = keywords.length; i < condition; i++) {
+            if (this.levenshteinDistance(input, keywords[i]) <= 2) {
+                listProductMatching.push(keywords[i])
             }
-            that.step = 10;
-            that.continue(input, senderId);
-        });
+        }
+        if (listProductMatching.length == 1) {
+            this.step = 3
+            reply = listProductMatching[0]
+            this.sendTextMessage(senderId, "Ý của bạn muốn tìm " + reply + ' phải không?')
+            this.session.findingProduct = listProductMatching[0]
+        } else if (listProductMatching.length > 1) {
+            for (var i = 0, condition = listProductMatching.length; i < condition; i++) {
+                reply += "- " + listProductMatching[i] + "/n";
+            }
+            this.sendTextMessage(senderId, "Ý của bạn là sản phẩm nào:" + reply)
+        }
+    }
+    confirmEditKeyword(input, senderId) {
+        this.step = 4;
+        this.continue(input, senderId);
+    }
+    showProductByName(input, senderId) {
+        var that = this;
+        if (input.match(/(đúng|ok|phải|nó đó|chuẩn|chính xác)/g)) {
+            that.step = 5
+            let listProduct = null;
+            let output = '';
+            if (input != null) {
+                this.sendTyping(senderId);
+                var data = await(new Request().sendGetRequest('/LBFC/Product/GetBrandHasProduct', { 'keyword': this.session.findingProduct }, ""))
+                listProduct = JSON.parse(data);
+                if (listProduct.length == 0) {
+                    output = "Hệ thống không có món đó";
+                } else {
+                    listProduct = JSON.parse(data);
+                    var top4Product = [];
+                    for (var i = 0; i < 4; i++) {
+                        var element = {
+                            title: listProduct[i].Name,
+                            image_url: listProduct[i].Product.PicURL,
+                            subtitle: listProduct[i].Product.ProductName + "/n" + listProduct[i].Product.Price + "VND",
+                            default_action: {
+                                "type": "web_url",
+                                "url": "https://foody.vn",
+                                "messenger_extensions": true,
+                                "webview_height_ratio": "tall"
+                            },
+                            buttons: [
+                                {
+                                    type: "postback",
+                                    title: "Đặt sản phẩm",
+                                    payload: "Đặt $" + listProduct[i].Product.ProductID + " $" + listProduct[i].Product.ProductName + " $" + listProduct[i].Product.Price + " $" + listProduct[i].Product.PicURL + " $" + listProduct[i].Id,
+                                }
+                            ]
+                        }
+                        top4Product.push(element);
+                    }
+                    that.sendGenericMessage(senderId, top4Product)
+                }
+            }
+        } else {
+            that.sendTextMessage(senderId, "Nếu không phải " + that.session.findingProduct + " thì là gì nhỉ?")
+            that.step = 1;
+        }
+
     }
 
+    levenshteinDistance(a, b) {
+        console.log(a)
+        console.log(b)
+        var string1 = a.toLowerCase()
+        var string2 = b.toLowerCase()
+        var length1 = string1.length;
+        var length2 = string2.length;
+        if (length1 == 0) return length2;
+        if (length2 == 0) return length1;
+        var d = []
+        var i, j;
+        //i là cột
+        for (i = 0; i <= length2; i++) {
+            d[i] = [i];
+        }
+        //j là dòng
+        for (j = 0; j <= length1; j++) {
+            d[0][j] = j
+        }
+        for (i = 1; i <= length2; i++) {
+            for (j = 1; j <= length1; j++) {
+                if (string2.charAt(i - 1) == string1.charAt(j - 1)) {
+                    d[i][j] = d[i - 1][j - 1]
+                } else {
+                    d[i][j] = Math.min(d[i - 1][j - 1] + 1, // substitution
+                        Math.min(d[i][j - 1] + 1, // insertion
+                            d[i - 1][j] + 1));
+                }
+            }
+        }
+        console.log(d[length2][length1])
+        return d[length2][length1];
+    }
 
     end() {
         this.session.searchProductDialog = null;

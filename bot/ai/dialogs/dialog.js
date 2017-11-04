@@ -26,8 +26,6 @@ class Dialog {
 
         this.intents.some(function(intent) {
             result = intent.match(input);
-            console.log("MATCH RESULTSMATCH RESULTS")
-            console.log(result)
             if (result != null) {
                 that.step = result.step;
                 that.exception = result.exception;
@@ -74,6 +72,12 @@ class Dialog {
                     quick_replies: [
                         {
                             content_type: "location"
+                        },
+                        {
+                            content_type: "text",
+                            title: "Bỏ qua",
+                            payload: "Bỏ qua",
+                            image_url: "https://cdn4.iconfinder.com/data/icons/defaulticon/icons/png/256x256/no.png"
                         }
                     ]                    
                 }
@@ -112,7 +116,6 @@ class Dialog {
     }
 
     sendQuickReply(senderId, text, quickReplyElement) {
-        console.log("đã vô quick reply")
         var messageData = {
             "text": text,
             "quick_replies": quickReplyElement
