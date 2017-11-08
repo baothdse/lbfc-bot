@@ -1,5 +1,6 @@
 let Dialog = require('./dialog');
 let SearchProductByNameIntent = require('../intents/products/search-product-by-name-intent');
+let SearchProductByNameSimpleIntent = require('../intents/products/search-product-by-name-simple-intent');
 let Request = require('../utils/request');
 
 class SearchProductNameDialog extends Dialog {
@@ -10,6 +11,7 @@ class SearchProductNameDialog extends Dialog {
     }
 
     push() {
+        this.addIntent(new SearchProductByNameIntent(1, 0));
         this.addIntent(new SearchProductByNameIntent(1, 0));
     }
 
@@ -129,49 +131,67 @@ class SearchProductNameDialog extends Dialog {
 
         var params = { 
             'keyword': this.session.searchProductDialog.productName, 
-            'from': this.session.searchProductDialog.bottomPrice, 
-            'to' : this.session.searchProductDialog.topPrice
+            'from': this.session.searchProductDialog.bottomPrice == undefined ? 0 : this.session.searchProductDialog.bottomPrice, 
+            'to' : this.session.searchProductDialog.topPrice == undefined ? 0 : this.session.searchProductDialog.topPrice
         }
         var that = this;
-        new Request().sendGetRequest('/LBFC/Product/GetBrandHasProduct', params, "")
-        .then(function (data) {
-            if (data.length == 0) {
-                output = "Hệ thống không có món đó";
+        new Request().sendGetRequest('/LBFC/Product/SearchProductInRange', params, "")
+        .then(function (dataStr) {
+            let data = JSON.parse(dataStr);
+            if (data.length == 1) {
+                that.showProducts(data);
             } else {
-                var listProduct = JSON.parse(data);
-                var top4Product = [];
-                for (var i = 0; i < 4; i++) {
-                    var element = {
-                        title: listProduct[i].Name,
-                        image_url: listProduct[i].Product.PicURL,
-                        subtitle: listProduct[i].Product.ProductName,
-                        default_action: {
-                            "type": "web_url",
-                            "url": "https://foody.vn",
-                            "messenger_extensions": true,
-                            "webview_height_ratio": "tall"
-                        },
-                        buttons: [
-                            {
-                                type: "postback",
-                                title: "Đặt sản phẩm",
-                                payload: "Đặt $" + listProduct[i].Product.ProductID + " $" + listProduct[i].Product.ProductName + " $" + listProduct[i].Product.Price + " $" + listProduct[i].Product.PicURL + " $" + listProduct[i].Id,
-                            }
-                        ]
-                    }
-                    top4Product.push(element);
-                }
-                that.sendGenericMessage(senderId, top4Product)
+                that.sendTextMessage('Không thấy món bạn vừa kiếm, có phải ý bạn là...')
+                .then((response) => {
+                    that.showProducts(data);
+                })
             }
-            that.step = 10;
-            that.continue(input, senderId);
         });
+        that.step = 10;
+        that.continue(input, senderId);
     }
 
+    /*---------------Private method------------------*/
+
+    /**
+     * 
+     * @param {[]} products 
+     * @param {*} senderId 
+     */
+    showProducts(products, senderId) {
+        var elements = [];
+        for (var i = 0; i < products.length; i++) {
+            var element = {
+                title: products[i].ProductName,
+                image_url: products[i].PicURL,
+                subtitle: products[i].ProductName,
+                default_action: {
+                    "type": "web_url",
+                    "url": "https://foody.vn",
+                    "messenger_extensions": true,
+                    "webview_height_ratio": "tall"
+                },
+                buttons: [
+                    {
+                        type: "postback",
+                        title: "Đặt sản phẩm",
+                        payload: "Đặt $" + products[i].ProductID + " $" + products[i].ProductName + " $" + products[i].Price + " $" + products[i].PicURL + " $" + products[i].ProductCode + " $" + this.session.brandId,
+                    }
+                ]
+            }
+            elements.push(element);
+        }
+        return this.sendGenericMessage(senderId, elements);
+    }
 
     end() {
         this.session.searchProductDialog = null;
         super.end();
+    }
+
+    reset() {
+        super.reset();
+        this.session.searchProductDialog = {};
     }
 
     getName() {

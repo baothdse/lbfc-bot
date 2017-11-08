@@ -12,7 +12,6 @@ let HelloDialog = require('./dialogs/hello-dialog');
 let ShowOrderHistoryDialog = require('./dialogs/show-order-history-dialog');
 let ShowOrderDetailDialog = require('./dialogs/show-order-detail-dialog');
 let SearchProductNameDialog = require('./dialogs/search-product-name-dialog');
-let SearchProductPriceDialog = require('./dialogs/search-product-price-dialog');
 
 var Response = require('./dialogs/entities/response');
 let Dialog = require('./dialogs/dialog');
@@ -30,10 +29,9 @@ class Brain {
         this.vietnameseConverter = new VietnameseConverter();
 
         /**
-         * @type {[{'senderId' : number, 'freeDialogs' : [], 'usingDialogs' : []}]}
+         * @type {[{'senderId' : number, 'freeDialogs' : [], 'usingDialogs' : [], 'session': any}]}
          */
         this.senders = [];
-        this.session = {};
 
     }
 
@@ -41,7 +39,7 @@ class Brain {
         if (req.body.object === 'page') {
             req.body.entry.forEach(entry => {
                 entry.messaging.forEach(event => {
-                    if (event.message && event.message.text) {
+                    if (event.message && event.message.text && !event.message.quick_reply) {
                         this.response(event, 'message');
                     }
                     else if (event.message && event.message.quick_reply) {
@@ -87,29 +85,28 @@ class Brain {
         var beginNewDialog = false;
         freeDialogs.some(function (dialog) {
             var match = dialog.isMatch(message, senderId);
-            ConsoleLog.log('dialog ' + dialog.getName() + ' match = ' + match, 'brain.js', 66);
             if (match == true) {
                 if (!that.isInStack(usingDialogs, dialog)) {
                     usingDialogs.push(dialog);
                     that.removeFromFreeList(freeDialogs, dialog);
                     if (currentDialog != null) currentDialog.pause();
+                    beginNewDialog = true;
                 }
                 if (dialog.status == "end") {
                     var d = that.removeFromUsingList(usingDialogs, dialog);
                     freeDialogs.push(dialog);
                     if (d != null) {
-                        d.continue(null, senderId);
+                        currentDialog = d;
                     }
                     dialog.reset();
+                    beginNewDialog = false;
                 }
-                beginNewDialog = true;
                 return true;
             }
         });
 
 
         if (!beginNewDialog && currentDialog != null) {
-            ConsoleLog.log('continue dialog', 'brain.js', 87);
             var isMatch = currentDialog.isMatch(message, senderId);
             if (!isMatch) {
                 currentDialog.continue(message, senderId);
@@ -124,7 +121,6 @@ class Brain {
             }
 
         }
-
 
     }
 
@@ -205,18 +201,19 @@ class Brain {
         });
 
         if (!result) {
+            var session = {brandId: 1};
             this.senders.push({
+                session: session,
                 senderId: senderId,
                 freeDialogs: [
-                    new OrderDialog(this.session),
-                    new ShowMenuDialog(this.session),
-                    new ShowPromotionDialog(this.session),
-                    new SearchDialog(this.session),
-                    new HelloDialog(this.session),
-                    new SearchProductNameDialog(this.session),
-                    new SearchProductPriceDialog(this.session),
-                    new ShowOrderHistoryDialog(this.session),
-                    new ShowOrderDetailDialog(this.session)
+                    new OrderDialog(session),
+                    new ShowMenuDialog(session),
+                    new ShowPromotionDialog(session),
+                    new SearchDialog(session),
+                    new HelloDialog(session),
+                    new SearchProductNameDialog(session),
+                    new ShowOrderHistoryDialog(session),
+                    new ShowOrderDetailDialog(session)
                 ],
                 usingDialogs: [],
             });

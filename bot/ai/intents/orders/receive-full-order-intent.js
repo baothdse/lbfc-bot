@@ -5,9 +5,11 @@ class ReceiveFullOrderIntent extends Intent {
     constructor(step, exception) {
         super(step, exception);
         this.addPatterns(['DongTuYChi', 'DaiTu', 'Number', 'DonVi', '.*?', 'TinhThaiTu'], 1);
-        this.addPatterns(['YeuCau', 'DaiTu', 'Number', 'DonVi'], 2);
-        this.addPatterns(['YeuCau', 'DaiTu', 'Number'], 3);
+        this.addPatterns(['DongTuYChi', 'DaiTu', 'Number', 'DonVi'], 2);
+        this.addPatterns(['DongTuYChi', 'DaiTu', 'Number'], 3);
+        this.addPatterns(['DongTuYChi', 'Number', 'DonVi'], 4);
         this.addPatterns(["Number", "DonVi"], 4);
+        this.addPatterns(["Number", "\\w+"], 4);
     }
 
 
@@ -26,7 +28,7 @@ class ReceiveFullOrderIntent extends Intent {
         console.log(pattern);
         switch (which) {
             case 1: result = this.matchPattern1(input, match, pattern); break;
-            case 2: case 4: result = this.matchPattern24(input, match); break;
+            case 2: case 3: case 4: result = this.matchPattern24(input, match); break;
             default: break;
         }
         return result;

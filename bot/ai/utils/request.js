@@ -15,34 +15,25 @@ function Request() {
 Request.prototype.sendPostRequest = function (url, data) {
     var result = null;
 
+    var result = null;
     var options = {
-        host: 'localhost',
-        port: 42013,
-        path: url,
+        url: 'http://localhost:42013' + url,
         method: 'POST',
+        form: data,
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
         }
     };
-    var httpRequest = http.request(options, function (response) {
-        response.setEncoding('utf8');
-        response.on('data', function (chunk) {
-            console.log("body: " + chunk);
-            result = chunk;
-            //callback(chunk);
-        });
-        response.on('error', function (chunk) {
-            console.log("error: " + chunk);
-            reject(chunk);
-        });
-        response.on('end', function (response) {
-            //response.send('ok');
-        })
+
+    var httpRequest =  RequestPromise(options, function (error, response, body) {
+        if (error) {
+            console.log("Error");
+        } else {
+            result = body;
+        }
     });
 
-    httpRequest.write(data);
-    httpRequest.end();
-    return result;
+    return Promise.resolve(httpRequest);
+    
 }
 
 /**
