@@ -9,7 +9,7 @@ let ShowOrderHistoryDialog = require('./dialogs/show-order-history-dialog');
 let ShowOrderDetailDialog = require('./dialogs/show-order-detail-dialog');
 let SearchProductNameDialog = require('./dialogs/search-product-name-dialog');
 let SearchProductPriceDialog = require('./dialogs/search-product-price-dialog');
-
+let ShowStoreDialog = require('./dialogs/show-store-dialog')
 let Dialog = require('./dialogs/dialog');
 let ConsoleLog = require('./utils/console-log');
 
@@ -78,14 +78,14 @@ class Brain {
             var usingDialogs = this.getUsingDialogs(senderId);
             var freeDialogs = this.getFreeDialogs(senderId);
 
-            ConsoleLog.log('text = ' + message, 'brain.js', 59);
+            // ConsoleLog.log('text = ' + message, 'brain.js', 59);
             var that = this;
             var currentDialog = usingDialogs[usingDialogs.length - 1];
 
             var beginNewDialog = false;
             freeDialogs.some(function (dialog) {
                 var match = dialog.isMatch(message, senderId);
-                ConsoleLog.log('dialog ' + dialog.getName() + ' match = ' + match, 'brain.js', 66);
+                // ConsoleLog.log('dialog ' + dialog.getName() + ' match = ' + match, 'brain.js', 66);
                 if (match == true) {
                     if (!that.isInStack(usingDialogs, dialog)) {
                         usingDialogs.push(dialog);
@@ -107,7 +107,7 @@ class Brain {
 
 
             if (!beginNewDialog && currentDialog != null) {
-                ConsoleLog.log('continue dialog', 'brain.js', 87);
+                // ConsoleLog.log('continue dialog', 'brain.js', 87);
                 var isMatch = currentDialog.isMatch(message, senderId);
                 if (!isMatch) {
                     currentDialog.continue(message, senderId);
@@ -213,7 +213,8 @@ class Brain {
                     new SearchProductNameDialog(this.session),
                     new SearchProductPriceDialog(this.session),
                     new ShowOrderHistoryDialog(this.session),
-                    new ShowOrderDetailDialog(this.session)
+                    new ShowOrderDetailDialog(this.session),
+                    new ShowStoreDialog(this.session)
                 ],
                 usingDialogs: [],
             });

@@ -59,7 +59,6 @@ class SearchDialog extends Dialog {
                 payload: "Giá tiền",
                 image_url: "https://image.flaticon.com/icons/png/128/189/189093.png"
             }])
-        this.continue(input, senderId);
     }
 
     askProductName(input, senderId) {

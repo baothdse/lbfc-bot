@@ -21,6 +21,7 @@ class SearchProductNameDialog extends Dialog {
             case 2: this.receiveProductName(input, senderId); break;
             case 3: this.confirmEditKeyword(input, senderId); break;
             case 4: this.showProductByName(input, senderId); break;
+            case 4.1: this.receiveConfirmFindMore(input, senderId); break;
             case 5: this.end(); break;
             default: break;
         }
@@ -39,8 +40,8 @@ class SearchProductNameDialog extends Dialog {
     askForProductName(input, senderId) {
         this.step = 2;
         let that = this
-        if (!this.session.findingProduct) {
-            that.sendTextMessage(senderId, "Bạn muốn tìm món gì?"); 
+        if (!that.session.findingProduct) {
+            that.sendTextMessage(senderId, "Bạn muốn tìm món gì?");
         } else {
             that.continue(input, senderId)
         }
@@ -54,29 +55,65 @@ class SearchProductNameDialog extends Dialog {
     receiveProductName(input, senderId) {
         var keywords = ['cafe', 'coffee', 'matcha', 'tea', 'iced', 'olong', 'blended', 'hot', 'soda', 'pineaple', 'strawberry', 'nho', 'dâu', 'muffin', 'chocolate', 'chicken', 'mocha', 'expresso', 'mojito', 'trà sữa', 'kem', 'milk', 'sữa', 'cookie', 'cream', 'socola', 'sô cô la']
         let reply = ""
-        let listProductMatching = [];
-
+        let listKeywordMatching = [];
+        let that = this;
+        let keyword;
         for (let i = 0, condition = keywords.length; i < condition; i++) {
-            if (this.levenshteinDistance(input, keywords[i]) <= 2) {
-                listProductMatching.push(keywords[i])
+            keyword = {
+                keyword: keywords[i],
+                ed: this.levenshteinDistance(input, keywords[i])
+            }
+            if (keyword.ed <= 2) {
+                listKeywordMatching.push(keyword)
             }
         }
-        if (listProductMatching.length == 1) {
-            this.step = 3
-            reply = listProductMatching[0]
-            this.sendTextMessage(senderId, "Ý của bạn muốn tìm " + reply + ' phải không?')
-            this.session.findingProduct = listProductMatching[0]
-        } else if (listProductMatching.length > 1) {
-            for (var i = 0, condition = listProductMatching.length; i < condition; i++) {
-                reply += "- " + listProductMatching[i] + "/n";
+        this.bubbleSort(listKeywordMatching)
+        console.log(listKeywordMatching)
+        if (listKeywordMatching[0].ed == 0) {
+            that.step = 4;
+            that.session.findingProduct = listKeywordMatching[0].keyword
+            that.continue('ok', senderId);
+        } else {
+            if (listKeywordMatching.length == 1) {
+                that.step = 3
+                reply = listKeywordMatching[0].keyword
+                that.sendTextMessage(senderId, "Ý của bạn muốn tìm " + reply + ' phải không?')
+                that.session.findingProduct = listKeywordMatching[0].keyword
+            } else if (listKeywordMatching.length > 1) {
+                for (var i = 0, condition = listKeywordMatching.length; i < condition; i++) {
+                    reply += "- " + listKeywordMatching[i].keyword + " \n";
+                }
+                console.log(reply)
+                that.step = 2;
+                that.sendTextMessage(senderId, "Ý của bạn là: \n" + reply)
             }
-            this.sendTextMessage(senderId, "Ý của bạn là sản phẩm nào:" + reply)
         }
+        // if (listProductMatching.length == 1) {
+        //     this.step = 3
+        //     reply = listProductMatching[0]
+        //     this.sendTextMessage(senderId, "Ý của bạn muốn tìm " + reply + ' phải không?')
+        //     this.session.findingProduct = listProductMatching[0]
+        // } else if (listProductMatching.length > 1) {
+        //     for (var i = 0, condition = listProductMatching.length; i < condition; i++) {
+        //         reply += "- " + listProductMatching[i] + " \n";
+        //     }
+        //     this.sendTextMessage(senderId, "Ý của bạn là sản phẩm nào:" + reply)
+        // }
     }
     confirmEditKeyword(input, senderId) {
         this.step = 4;
         this.continue(input, senderId);
     }
+
+    // receiveEditKeywords(input, senderId) {
+    //     this.step = 5;
+
+    // }
+    /**
+     * Step 4: 
+     * @param {*} input 
+     * @param {*} senderId 
+     */
     showProductByName(input, senderId) {
         var that = this;
         if (input.match(/(đúng|ok|phải|nó đó|chuẩn|chính xác)/g)) {
@@ -87,16 +124,44 @@ class SearchProductNameDialog extends Dialog {
                 this.sendTyping(senderId);
                 var data = await(new Request().sendGetRequest('/LBFC/Product/GetBrandHasProduct', { 'keyword': this.session.findingProduct }, ""))
                 listProduct = JSON.parse(data);
+                console.log(listProduct)
                 if (listProduct.length == 0) {
-                    output = "Hệ thống không có món đó";
-                } else {
-                    listProduct = JSON.parse(data);
-                    var top4Product = [];
-                    for (var i = 0; i < 4; i++) {
-                        var element = {
+                    that.step = 4.1;
+                    that.sendTextMessage(senderId, "Cửa hàng chúng tôi không có món nào với từ khóa " + this.session.findingProduct + " cả") 
+                    that.sendTextMessage(senderId, "Bạn có muốn tìm tiếp không?")
+                } else if (listProduct.length < 4) {
+                    let top4Product = [];
+                    for (let i = 0, condition = listProduct.length; i < condition; i++) {
+                        let subtitle = listProduct[i].Product.ProductName + " \n " + listProduct[i].Product.Price + "VND"
+                        let element = {
                             title: listProduct[i].Name,
                             image_url: listProduct[i].Product.PicURL,
-                            subtitle: listProduct[i].Product.ProductName + "/n" + listProduct[i].Product.Price + "VND",
+                            subtitle: subtitle,
+                            default_action: {
+                                "type": "web_url",
+                                "url": "https://foody.vn",
+                                "messenger_extensions": true,
+                                "webview_height_ratio": "tall"
+                            },
+                            buttons: [
+                                {
+                                    type: "postback",
+                                    title: "Đặt sản phẩm",
+                                    payload: "Đặt $" + listProduct[i].Product.ProductID + " $" + listProduct[i].Product.ProductName + " $" + listProduct[i].Product.Price + " $" + listProduct[i].Product.PicURL + " $" + listProduct[i].Id,
+                                }
+                            ]
+                        }
+                        top4Product.push(element);
+                    }
+                    that.sendGenericMessage(senderId, top4Product)
+                } else if (listProduct.length > 4) {
+                    let top4Product = [];
+                    for (let i = 0; i < 4; i++) {
+                        let subtitle = listProduct[i].Product.ProductName + " \n " + listProduct[i].Product.Price + "VND"
+                        let element = {
+                            title: listProduct[i].Name,
+                            image_url: listProduct[i].Product.PicURL,
+                            subtitle: subtitle,
                             default_action: {
                                 "type": "web_url",
                                 "url": "https://foody.vn",
@@ -123,9 +188,34 @@ class SearchProductNameDialog extends Dialog {
 
     }
 
+    receiveConfirmFindMore(input, senderId) {
+        let that = this;
+        if(input.match(/(có|yes|tiếp|tìm)/i)) {
+            that.step = 1
+            delete that.session.findingProduct;
+            that.continue(input, senderId);
+        } else if(input.match(/(ko|không|thôi|khỏi)/i)) {
+            that.step = 5;
+            delete that.session.findingProduct;
+            that.continue(input, senderId)
+        }
+    }
+
+    bubbleSort(array) {
+        for (var i = 0; i < array.length; i++) {
+            for (var j = 0; j < array.length; j++) {
+                if (array[i].ed < array[j].ed) {
+                    let temp = array[i]
+                    array[i] = array[j];
+                    array[j] = temp;
+                }
+            }
+
+        }
+    }
     levenshteinDistance(a, b) {
-        console.log(a)
-        console.log(b)
+        // console.log(a)
+        // console.log(b)
         var string1 = a.toLowerCase()
         var string2 = b.toLowerCase()
         var length1 = string1.length;
@@ -153,7 +243,7 @@ class SearchProductNameDialog extends Dialog {
                 }
             }
         }
-        console.log(d[length2][length1])
+        // console.log(d[length2][length1])
         return d[length2][length1];
     }
 

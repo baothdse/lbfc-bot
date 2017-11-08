@@ -46,12 +46,10 @@ class ReceiveStoreNameIntent extends Intent {
         let storeName = null;
         for (let i = 0, condition = listStoreByBrand.length; i < condition ; i++) {
             if (this.levenshteinDistance(input, listStoreByBrand[i].Name) <= Math.floor(listStoreByBrand[i].Name.split(" ", 10).length * 1.5)) {
-                console.log("ở match patttern 2 nhe")
-                console.log(Math.floor(listStoreByBrand[i].Name.split(" ", 10).length * 1.5))
-                console.log(listStoreByBrand[i].Name)
                 store = {
                     storeId: listStoreByBrand[i].Id,
-                    storeName: listStoreByBrand[i].Name
+                    storeName: listStoreByBrand[i].Name,
+                    ed: this.levenshteinDistance(input, listStoreByBrand[i])
                 }
                 listStoreMatching.push(store)
             } else if (this.levenshteinDistance(input, listStoreByBrand[i].Name) == 0) {

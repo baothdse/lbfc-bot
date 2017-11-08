@@ -40,7 +40,8 @@ class SearchProductNameDialog extends Dialog {
         this.step = 3;
         let that = this;
         let top4Product = [];
-        if (info.listProduct != null) {
+        if (info.listProduct.length != 0) {
+            console.log("THỎA MÃN ĐIỀU KIỆN")
             let condition = info.listProduct.length;
             if (info.listProduct.length > 4) {
                 condition = 4
@@ -71,7 +72,7 @@ class SearchProductNameDialog extends Dialog {
             that.sendGenericMessage(senderId, top4Product)
 
         } else {
-            that.sendTextMessage('Rất tiếc chúng tôi không có sản phẩm nào ở trong tầm giá này!')
+            that.sendTextMessage(senderId, 'Rất tiếc chúng tôi không có sản phẩm nào ở trong tầm giá này!')
         }
     }
 

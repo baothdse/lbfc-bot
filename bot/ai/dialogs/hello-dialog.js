@@ -18,9 +18,9 @@ class HelloDialog extends Dialog {
 
     continue(input, senderId, info = null) {
         switch (this.step) {
-            case 1: this.askLocation(senderId); break;
-            case 2: this.showOption(input, senderId); break;
-            case 3: this.end(); break;
+            // case 1: this.askLocation(senderId); break;
+            case 1: this.showOption(input, senderId); break;
+            case 2: this.end(); break;
             default: this.end(); break;
         }
     }
@@ -29,10 +29,10 @@ class HelloDialog extends Dialog {
      * Step 1
      * @param {*} senderId 
      */
-    askLocation(senderId) {
-        this.step = 2;
-        this.sendLocation(senderId);
-    }
+    // askLocation(senderId) {
+    //     this.step = 2;
+    //     this.sendLocation(senderId);
+    // }
 
     /**
      * Step 2
@@ -42,13 +42,12 @@ class HelloDialog extends Dialog {
     showOption(input, senderId) {
         console.log(input)
 
-        if (input.constructor === Array) {
-            var coordinates = input[0].payload.coordinates
-            this.session.coordinates = coordinates;
+        // if (input.constructor === Array) {
+        //     var coordinates = input[0].payload.coordinates
+        //     this.session.coordinates = coordinates;
             
-        }
+        // }
         var that = this;
-
         this.getSenderName(senderId).then(function (sender) {
             var result = that.reply(senderId, { "text": "Chào " + sender.first_name + ", bạn cần mình giúp gì không?" });
             that.sendTyping(senderId);
@@ -76,7 +75,7 @@ class HelloDialog extends Dialog {
                 ]
             }]);
         });
-        that.step = 3;
+        that.step = 2;
         that.continue(input, senderId);
     }
 
