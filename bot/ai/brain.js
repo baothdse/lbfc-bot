@@ -64,6 +64,7 @@ class Brain {
      * @param {boolean} type Event này là message hay postback hay quick_reply
      */
     response(event, type) {
+        let understood = false;
         const senderId = event.sender.id;
         var message = '';
         switch (type) {
@@ -87,6 +88,7 @@ class Brain {
                 freeDialogs.some(function (dialog) {
                     var match = dialog.isMatch(message, senderId);
                     if (match == true) {
+                        understood = true;
                         if (!that.isInStack(usingDialogs, dialog)) {
                             usingDialogs.push(dialog);
                             that.removeFromFreeList(freeDialogs, dialog);
@@ -109,6 +111,7 @@ class Brain {
 
                 if (!beginNewDialog && currentDialog != null) {
                     var isMatch = currentDialog.isMatch(message, senderId);
+                    understood = isMatch;
                     if (!isMatch) {
                         currentDialog.continue(message, senderId);
                     }
@@ -123,6 +126,20 @@ class Brain {
 
                 }
             })
+
+    //         if (!understood) {
+    //             var userSession = this.getUserSession(senderId);
+    //             switch(userSession.notUnderstood) {
+    //                 case 0: new Dialog().sendTextMessage(senderId, "Nói cái quần gì vậy?"); break;
+    //                 case 1: new Dialog().sendTextMessage(senderId, "Tôi chỉ cho đặt hàng đồ thôi nhé. Mấy vấn đề khác tôi không quan tâm nhé."); break;
+    //                 case 2: new Dialog().sendTextMessage(senderId, "Thử nhấn \"tôi muốn đặt hàng\" xem :)"); break;
+    //                 default: new Dialog().sendTextMessage(senderId, "Thôi bye bye, chúng ta không thuộc về nhau :)"); break;
+    //             }
+    //             ++userSession.notUnderstood;
+    //         } else {
+    //             var userSession = this.getUserSession(senderId);
+    //             userSession.notUnderstood = 0;                
+    //         }
     }
 
 
@@ -219,7 +236,7 @@ class Brain {
         });
 
         if (!result) {
-            var session = { brandId: 1 };
+            var session = { brandId: 1, notUnderstood: 0 };
             this.senders.push({
                 session: session,
                 senderId: senderId,
@@ -271,6 +288,16 @@ class Brain {
         return result;
     }
 
+    getUserSession(senderId) {
+        var result = null;
+        this.senders.some((sender) => {
+            if (sender.senderId == senderId) {
+                result = sender.session;
+                return true;
+            }
+        })
+        return result;
+    }
 
 }
 

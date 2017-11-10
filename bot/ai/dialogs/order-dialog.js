@@ -14,6 +14,7 @@ const PostbackApplyPromotion = require('../intents/promotions/postback-apply-pro
 const PostbackChangePromotionIntent = require('../intents/promotions/postback-change-promotion-intent');
 const CancelApplyPromotionIntent = require('../intents/promotions/cancel-apply-promotion-intent');
 let AddExtraIntent = require('../intents/orders/add-extra-intent')
+const RequestFinishOrderIntent = require('../intents/orders/request-finish-order-intent');
 
 /*----------------------------------------------------*/
 
@@ -49,6 +50,7 @@ class OrderDialog extends Dialog {
         this.addIntent(new PostbackChangePromotionIntent(0, 3));
         this.addIntent(new CancelApplyPromotionIntent(0, 4));
         this.addIntent(new AddExtraIntent(7, 0));
+        this.addIntent(new RequestFinishOrderIntent(11, 0));
     }
 
     continue(input, senderId, info = null) {

@@ -1,10 +1,9 @@
 let Intent = require('../intent');
 let await = require('asyncawait/await')
 let Request = require('../../utils/request')
-class ShowStoreIntent extends Intent {
-    constructor(step, exception, session) {
-        super(step, exception);
-        this.session = session;
+class ShowStoreIntent extends Intent{
+    constructor(step, exception) {
+        super(step, exception)
         this.addPatterns(['hệ thống cửa hàng'], 1, true, false);
         this.addPatterns(['danh sách cửa hàng'], 1, true, false);
     }
@@ -21,8 +20,8 @@ class ShowStoreIntent extends Intent {
     matchPattern1(input, match, pattern) {
         
         return {
-            step: this.step,
-            exception: this.exception
+            step : this.step,
+            exception : this.exception
         }
     }
 }

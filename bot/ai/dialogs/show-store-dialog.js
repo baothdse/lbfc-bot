@@ -1,6 +1,7 @@
 let Dialog = require('./dialog');
 let await = require('asyncawait/await')
 let ShowStoreIntent = require('../intents/store/show-store-intent')
+const Request = require('../utils/request');
 
 class ShowStoreDialog extends Dialog {
     constructor(session) {
@@ -27,18 +28,31 @@ class ShowStoreDialog extends Dialog {
         let reply = "";
         this.sendTextMessage(senderId, 'Hiện tại hệ thống chúng tôi có các cửa hàng sau')
             .then((response) => {
-                if (info.listStore) {
-                    let condition = info.listStore.length;
-                    for (var i = 0; i < condition; i++) {
-                        // console.log(info.listStore[i])
-                        reply += '-' + info.listStore[i].Name + '\n'
-                        if (i % 10 == 0 || i == condition - 1) {
-                            this.sendTextMessage(senderId, reply);
-                            reply = "";
+                this.getStore()
+                .then((info) => {
+                    if (info.listStore) {
+                        let condition = info.listStore.length;
+                        for (var i = 0; i < condition; i++) {
+                            // console.log(info.listStore[i])
+                            reply += '-' + info.listStore[i].Name + '\n'
+                            if (i % 10 == 0 || i == condition - 1) {
+                                this.sendTextMessage(senderId, reply);
+                                reply = "";
+                            }
                         }
                     }
-                }
+                })
             })
+    }
+
+    getStore() {
+        return new Promise((resolve, reject) => {
+            new Request().sendGetRequest('/LBFC/Store/GetAllStoresByBrand', { 'brandId': 1 }, '')
+            .then((data) => {
+                let listStore = JSON.parse(data);
+                return listStore;
+            })
+        })
     }
 
     getName() {
