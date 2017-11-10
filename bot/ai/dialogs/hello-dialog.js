@@ -49,7 +49,7 @@ class HelloDialog extends Dialog {
         // }
         var that = this;
         this.getSenderName(senderId).then(function (sender) {
-            var result = that.reply(senderId, { "text": "Chào " + sender.first_name + ", bạn cần mình giúp gì không?" });
+            var result = that.reply(senderId, { "text": "Chào " + that.session.pronoun + ' ' + sender.first_name + ", " + that.session.pronoun + " " + "cần em giúp gì không?" });
             that.sendTyping(senderId);
             that.sendGenericMessage(senderId, [{
                 title: "Chào mừng " + sender.first_name + " đến với LBFC",

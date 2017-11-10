@@ -38,7 +38,6 @@ class PostbackOrderIntent extends Intent{
             productName : productName,
             price : price,
             productUrl: productUrl,
-            brandId : brandId,
             step : this.step,
             exception : this.exception,
         }

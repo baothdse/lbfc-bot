@@ -10,8 +10,11 @@ let ShowOrderDetailDialog = require('./dialogs/show-order-detail-dialog');
 let SearchProductNameDialog = require('./dialogs/search-product-name-dialog');
 let SearchProductPriceDialog = require('./dialogs/search-product-price-dialog');
 let ShowStoreDialog = require('./dialogs/show-store-dialog')
+let AskDeliveryDialog = require('./dialogs/ask-delivery-dialog')
 let Dialog = require('./dialogs/dialog');
 let ConsoleLog = require('./utils/console-log');
+let request = require('request-promise');
+//const FACEBOOK_ACCESS_TOKEN = 'EAAFHmBXhaYoBAFdbrN3n2nazaGfq3UOdzqvr2ZA750TZBaEi2rKorkMlZCXIo6Yl7pn9tZBBBwt6iAmV9VyKKqyX5pmB05zBLZC3iBwqgFth4ClGhWE7EPqvDsHjULGBGj4oG7qIcecqwzxoQ4w4NmCO5EAZALIvj1cgerF5nTCwZDZD';
 
 let async = require('asyncawait/async')
 let await = require('asyncawait/await')
@@ -20,6 +23,7 @@ let await = require('asyncawait/await')
 class Brain {
 
     constructor() {
+        this._storedUsers = {};
         // this.usingDialog = [];
         // this.freeDialogs = [new OrderDialog(), new ShowMenuDialog(), new ShowPromotionDialog(), new SearchDialog()
         //     , new HelloDialog(), new ShowOrderHistoryDialog(), new ShowOrderDetailDialog()];
@@ -63,6 +67,16 @@ class Brain {
      */
     response(event, type) {
         async(() => {
+            //console.log(event)
+            const senderId = event.sender.id;
+            if (!this.session.pronoun) {
+                let sender = await(new Dialog().getSenderName(senderId));
+                if (sender.gender == 'male') {
+                    this.session.pronoun = 'Anh'
+                } else if (sender.gender == 'female') {
+                    this.session.pronoun = 'Chị'
+                }
+            }
             var message = '';
             switch (type) {
                 // case 'message': message = this.vietnameseConverter.convert(event.message.text); break;
@@ -71,8 +85,8 @@ class Brain {
                 case 'attachments': message = event.message.attachments; break;
                 default: message = event.message.quick_reply.payload; break;
             }
+            console.log('MESSAGE : ' + message)
 
-            const senderId = event.sender.id;
             this.insertSender(senderId);
 
             var usingDialogs = this.getUsingDialogs(senderId);
@@ -214,7 +228,8 @@ class Brain {
                     new SearchProductPriceDialog(this.session),
                     new ShowOrderHistoryDialog(this.session),
                     new ShowOrderDetailDialog(this.session),
-                    new ShowStoreDialog(this.session)
+                    new ShowStoreDialog(this.session),
+                    new AskDeliveryDialog(this.session)
                 ],
                 usingDialogs: [],
             });
@@ -251,7 +266,29 @@ class Brain {
         return result;
     }
 
+    getSenderName(senderId) {
+        var that = this;
+        return new Promise((resolve, reject) => {
+            if (that._storedUsers[senderId]) {
+                resolve(that._storedUsers[senderId]);
+            }
+            else {
+                request({
+                    url: `https://graph.facebook.com/v2.6/${senderId}`,
+                    qs: {
+                        access_token: FACEBOOK_ACCESS_TOKEN
+                    },
+                    method: 'GET',
 
+                }, function (error, response, body) {
+                    console.log(body);
+                    var person = JSON.parse(body);
+                    that._storedUsers[senderId] = person;
+                    resolve(person);
+                });
+            }
+        });
+    }
 }
 
 

@@ -8,6 +8,7 @@ let await = require("asyncawait/await");
 let SearchProductIntent = require('../intents/products/search-product-intent');
 let SearchProductFilterIntent = require('../intents/products/search-product-filter-intent');
 let ProductPriceFilterIntent = require('../intents/products/product-price-filter-intent');
+let AddExtraIntent = require('../intents/orders/add-extra-intent')
 /*-----------------End intent------------------*/
 
 class SearchDialog extends Dialog {
@@ -47,7 +48,7 @@ class SearchDialog extends Dialog {
      */
     askSearchOption(input, senderId) {
         this.step = 2;
-        this.sendQuickReply(senderId, "Bạn muốn tìm theo tên sản phẩm hay giá tiền?",
+        this.sendQuickReply(senderId, this.session.pronoun + " muốn tìm theo tên sản phẩm hay giá tiền?",
             [{
                 content_type: "text",
                 title: "Tên sản phẩm",
@@ -82,7 +83,7 @@ class SearchDialog extends Dialog {
             new Request().sendGetRequest('/LBFC/Product/GetBrandHasProduct', { 'keyword': input }, "")
                 .then(function (data) {
                     if (data.length == 0) {
-                        output = "Hệ thống không có món đó";
+                        output = "Bên bọn em ko có bán món đó :(";
                     } else {
                         listProduct = JSON.parse(data);
                         var top4Product = [];

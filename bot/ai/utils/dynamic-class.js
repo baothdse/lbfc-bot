@@ -22,7 +22,8 @@ let DongTuTimKiem = require('../entities/dong-tu-tim-kiem');
 let DanhTuDonHang = require('../entities/danh-tu-don-hang');
 let Dozen = require('../entities/don-vi-tien/dozen');
 let Hundred = require('../entities/don-vi-tien/hundred');
-let MoneyTeenCode = require('../entities/money-teen-code')
+let MoneyTeenCode = require('../entities/money-teen-code');
+let DongTuGiaoHang = require('../entities/dong-tu-giao-hang');
 
 
 class DynamicClass {
@@ -51,6 +52,7 @@ class DynamicClass {
             case 'Dozen': return new Dozen(); break;
             case 'Hundred': return new Hundred(); break;
             case 'MoneyTeenCode': return new MoneyTeenCode(); break;
+            case 'DongTuGiaoHang': return new DongTuGiaoHang(); break;
             default: 
                 return new class C {
                     constructor(){

@@ -3,7 +3,7 @@ let ClassParser = require('../utils/class-parser');
 let Intent = require('../intents/intent');
 let request = require('request-promise');
 let key = process.env.googleAPIkey || 'AIzaSyC2atcNmGkRy3pzTskzsPbV6pW68qe_drY';
-const FACEBOOK_ACCESS_TOKEN = 'EAAFHmBXhaYoBAFdbrN3n2nazaGfq3UOdzqvr2ZA750TZBaEi2rKorkMlZCXIo6Yl7pn9tZBBBwt6iAmV9VyKKqyX5pmB05zBLZC3iBwqgFth4ClGhWE7EPqvDsHjULGBGj4oG7qIcecqwzxoQ4w4NmCO5EAZALIvj1cgerF5nTCwZDZD';
+const FACEBOOK_ACCESS_TOKEN = 'EAAFHmBXhaYoBAJR68ofNMorzRjAXNmCyZCZBXOnRXMLDuiZA66KgvHxcijb2SidQc3zRm2AsAijnaGliTCZCf4iiDmApFMfEoRFVmatHIMrKKY7tdtDSzMqgOQXlOjqFHZCFRmquVAK0DERbnA8Gp57kGJlSwV9ZBqoXC5dxHAyAZDZD';
 
 class Dialog {
     constructor(session) {

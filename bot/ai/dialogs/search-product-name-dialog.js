@@ -15,6 +15,8 @@ class SearchProductNameDialog extends Dialog {
     }
 
     continue(input, senderId, info = null) {
+        console.log('=========STANDING AT SEARCH NAME DIALOG======')
+        console.log('step : ' + this.step);
         switch (this.step) {
             case 0: this.continueException(input, step, info); break;
             case 1: this.askForProductName(input, senderId); break;
@@ -41,7 +43,7 @@ class SearchProductNameDialog extends Dialog {
         this.step = 2;
         let that = this
         if (!that.session.findingProduct) {
-            that.sendTextMessage(senderId, "Bạn muốn tìm món gì?");
+            that.sendTextMessage(senderId, that.session.pronoun + " muốn tìm món gì?");
         } else {
             that.continue(input, senderId)
         }
@@ -69,36 +71,31 @@ class SearchProductNameDialog extends Dialog {
         }
         this.bubbleSort(listKeywordMatching)
         console.log(listKeywordMatching)
-        if (listKeywordMatching[0].ed == 0) {
-            that.step = 4;
-            that.session.findingProduct = listKeywordMatching[0].keyword
-            that.continue('ok', senderId);
+        if (listKeywordMatching.length == 0) {
+            this.step = 4.1;
+            this.sendTextMessage(senderId, "Cửa hàng em không có bán món đó :(. " + this.session.pronoun + " có muốn tìm tiếp không?")
         } else {
-            if (listKeywordMatching.length == 1) {
-                that.step = 3
-                reply = listKeywordMatching[0].keyword
-                that.sendTextMessage(senderId, "Ý của bạn muốn tìm " + reply + ' phải không?')
+            if (listKeywordMatching[0].ed == 0) {
+                that.step = 4;
                 that.session.findingProduct = listKeywordMatching[0].keyword
-            } else if (listKeywordMatching.length > 1) {
-                for (var i = 0, condition = listKeywordMatching.length; i < condition; i++) {
-                    reply += "- " + listKeywordMatching[i].keyword + " \n";
+                that.continue('ok', senderId);
+            } else {
+                if (listKeywordMatching.length == 1) {
+                    that.step = 3
+                    reply = listKeywordMatching[0].keyword
+                    that.sendTextMessage(senderId, "Ý của " + that.session.pronoun + " muốn tìm " + reply + ' phải không?')
+                    that.session.findingProduct = listKeywordMatching[0].keyword
+                } else if (listKeywordMatching.length > 1) {
+                    for (var i = 0, condition = listKeywordMatching.length; i < condition; i++) {
+                        reply += "- " + listKeywordMatching[i].keyword + " \n";
+                    }
+                    console.log(reply)
+                    that.step = 2;
+                    that.sendTextMessage(senderId, "Ý của " + that.session.pronoun + " là: \n" + reply)
                 }
-                console.log(reply)
-                that.step = 2;
-                that.sendTextMessage(senderId, "Ý của bạn là: \n" + reply)
             }
         }
-        // if (listProductMatching.length == 1) {
-        //     this.step = 3
-        //     reply = listProductMatching[0]
-        //     this.sendTextMessage(senderId, "Ý của bạn muốn tìm " + reply + ' phải không?')
-        //     this.session.findingProduct = listProductMatching[0]
-        // } else if (listProductMatching.length > 1) {
-        //     for (var i = 0, condition = listProductMatching.length; i < condition; i++) {
-        //         reply += "- " + listProductMatching[i] + " \n";
-        //     }
-        //     this.sendTextMessage(senderId, "Ý của bạn là sản phẩm nào:" + reply)
-        // }
+
     }
     confirmEditKeyword(input, senderId) {
         this.step = 4;
@@ -119,23 +116,22 @@ class SearchProductNameDialog extends Dialog {
         if (input.match(/(đúng|ok|phải|nó đó|chuẩn|chính xác)/g)) {
             that.step = 5
             let listProduct = null;
-            let output = '';
             if (input != null) {
                 this.sendTyping(senderId);
-                var data = await(new Request().sendGetRequest('/LBFC/Product/GetBrandHasProduct', { 'keyword': this.session.findingProduct }, ""))
+                var data = await(new Request().sendGetRequest('/LBFC/Product/SearchProductInBrand', { 'keyword': that.session.findingProduct, 'brandId': 1 }, ""))
                 listProduct = JSON.parse(data);
                 console.log(listProduct)
                 if (listProduct.length == 0) {
                     that.step = 4.1;
-                    that.sendTextMessage(senderId, "Cửa hàng chúng tôi không có món nào với từ khóa " + this.session.findingProduct + " cả") 
-                    that.sendTextMessage(senderId, "Bạn có muốn tìm tiếp không?")
+                    that.sendTextMessage(senderId, "Cửa hàng em không có món nào với từ khóa " + that.session.findingProduct + " cả :(")
+                    that.sendTextMessage(senderId, that.session.pronoun + " có muốn tìm tiếp không?")
                 } else if (listProduct.length < 4) {
                     let top4Product = [];
                     for (let i = 0, condition = listProduct.length; i < condition; i++) {
-                        let subtitle = listProduct[i].Product.ProductName + " \n " + listProduct[i].Product.Price + "VND"
+                        let subtitle = listProduct[i].ProductName + " \n " + listProduct[i].Price + "VND"
                         let element = {
-                            title: listProduct[i].Name,
-                            image_url: listProduct[i].Product.PicURL,
+                            title: listProduct[i].ProductName,
+                            image_url: listProduct[i].PicURL,
                             subtitle: subtitle,
                             default_action: {
                                 "type": "web_url",
@@ -147,7 +143,7 @@ class SearchProductNameDialog extends Dialog {
                                 {
                                     type: "postback",
                                     title: "Đặt sản phẩm",
-                                    payload: "Đặt $" + listProduct[i].Product.ProductID + " $" + listProduct[i].Product.ProductName + " $" + listProduct[i].Product.Price + " $" + listProduct[i].Product.PicURL + " $" + listProduct[i].Id,
+                                    payload: "Đặt $" + listProduct[i].ProductID + " $" + listProduct[i].ProductName + " $" + listProduct[i].Price + " $" + listProduct[i].PicURL + " $" + listProduct[i].Id
                                 }
                             ]
                         }
@@ -157,10 +153,10 @@ class SearchProductNameDialog extends Dialog {
                 } else if (listProduct.length > 4) {
                     let top4Product = [];
                     for (let i = 0; i < 4; i++) {
-                        let subtitle = listProduct[i].Product.ProductName + " \n " + listProduct[i].Product.Price + "VND"
+                        let subtitle = listProduct[i].ProductName + " \n " + listProduct[i].Price + "VND"
                         let element = {
-                            title: listProduct[i].Name,
-                            image_url: listProduct[i].Product.PicURL,
+                            title: listProduct[i].ProductName,
+                            image_url: listProduct[i].PicURL,
                             subtitle: subtitle,
                             default_action: {
                                 "type": "web_url",
@@ -172,7 +168,7 @@ class SearchProductNameDialog extends Dialog {
                                 {
                                     type: "postback",
                                     title: "Đặt sản phẩm",
-                                    payload: "Đặt $" + listProduct[i].Product.ProductID + " $" + listProduct[i].Product.ProductName + " $" + listProduct[i].Product.Price + " $" + listProduct[i].Product.PicURL + " $" + listProduct[i].Id,
+                                    payload: "Đặt $" + listProduct[i].ProductID + " $" + listProduct[i].ProductName + " $" + listProduct[i].Price + " $" + listProduct[i].PicURL + " $" + listProduct[i].Id
                                 }
                             ]
                         }
@@ -190,11 +186,11 @@ class SearchProductNameDialog extends Dialog {
 
     receiveConfirmFindMore(input, senderId) {
         let that = this;
-        if(input.match(/(có|yes|tiếp|tìm)/i)) {
+        if (input.match(/(có|yes|tiếp|tìm)/i)) {
             that.step = 1
             delete that.session.findingProduct;
             that.continue(input, senderId);
-        } else if(input.match(/(ko|không|thôi|khỏi)/i)) {
+        } else if (input.match(/(ko|không|thôi|khỏi)/i)) {
             that.step = 5;
             delete that.session.findingProduct;
             that.continue(input, senderId)
