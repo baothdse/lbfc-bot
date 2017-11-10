@@ -1,6 +1,8 @@
 let Dialog = require('./dialog');
 let SearchProductByNameIntent = require('../intents/products/search-product-by-name-intent');
 let SearchProductByNameSimpleIntent = require('../intents/products/search-product-by-name-simple-intent');
+const SelectPriceRangeIntent = require('../intents/products/select-price-range-intent');
+const SearchProductIntent = require('../intents/products/search-product-intent');
 let Request = require('../utils/request');
 
 class SearchProductNameDialog extends Dialog {
@@ -12,7 +14,9 @@ class SearchProductNameDialog extends Dialog {
 
     push() {
         this.addIntent(new SearchProductByNameIntent(1, 0));
-        this.addIntent(new SearchProductByNameIntent(1, 0));
+        this.addIntent(new SearchProductByNameSimpleIntent(1, 0));
+        this.addIntent(new SelectPriceRangeIntent(0, 1));
+        this.addIntent(new SearchProductIntent(1, 0));
     }
 
     continue(input, senderId, info = null) {
@@ -34,7 +38,7 @@ class SearchProductNameDialog extends Dialog {
 
     continueException(input, senderId, info = null) {
         switch(this.exception) {
-
+            case 1: this.receiveFullPriceRange(info, senderId, info); break;
         }
     }
 
@@ -132,7 +136,8 @@ class SearchProductNameDialog extends Dialog {
         var params = { 
             'keyword': this.session.searchProductDialog.productName, 
             'from': this.session.searchProductDialog.bottomPrice == undefined ? 0 : this.session.searchProductDialog.bottomPrice, 
-            'to' : this.session.searchProductDialog.topPrice == undefined ? 0 : this.session.searchProductDialog.topPrice
+            'to' : this.session.searchProductDialog.topPrice == undefined ? 0 : this.session.searchProductDialog.topPrice,
+            'brandId': this.session.brandId,
         }
         var that = this;
         new Request().sendGetRequest('/LBFC/Product/SearchProductInRange', params, "")
@@ -149,6 +154,20 @@ class SearchProductNameDialog extends Dialog {
         });
         that.step = 10;
         that.continue(input, senderId);
+    }
+
+    /*--------------------Exception--------------------*/
+    
+    /**
+     * 
+     * @param {*} input 
+     * @param {*} senderId 
+     * @param {{fromPrice, toPrice}} info 
+     */
+    receiveFullPriceRange(input, senderId, info) {
+        this.session.searchProductDialog.bottomPrice = info.fromPrice;
+        this.session.searchProductDialog.topPrice = info.toPrice;
+        this.search(input, senderId);
     }
 
     /*---------------Private method------------------*/

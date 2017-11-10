@@ -7,11 +7,11 @@ var OrderDialog = require('./dialogs/order-dialog');
 var HelpDiaglog = require('./dialogs/help-dialog');
 let ShowMenuDialog = require('./dialogs/show-menu-dialog');
 let ShowPromotionDialog = require('./dialogs/show-promotion-dialog');
-let SearchDialog = require('./dialogs/search-dialog');
 let HelloDialog = require('./dialogs/hello-dialog');
 let ShowOrderHistoryDialog = require('./dialogs/show-order-history-dialog');
 let ShowOrderDetailDialog = require('./dialogs/show-order-detail-dialog');
 let SearchProductNameDialog = require('./dialogs/search-product-name-dialog');
+let ShowStoreDialog = require('./dialogs/show-store-dialog');
 
 var Response = require('./dialogs/entities/response');
 let Dialog = require('./dialogs/dialog');
@@ -209,11 +209,11 @@ class Brain {
                     new OrderDialog(session),
                     new ShowMenuDialog(session),
                     new ShowPromotionDialog(session),
-                    new SearchDialog(session),
                     new HelloDialog(session),
                     new SearchProductNameDialog(session),
                     new ShowOrderHistoryDialog(session),
-                    new ShowOrderDetailDialog(session)
+                    new ShowOrderDetailDialog(session),
+                    new ShowStoreDialog(session)
                 ],
                 usingDialogs: [],
             });

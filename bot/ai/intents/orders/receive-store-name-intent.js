@@ -37,38 +37,7 @@ class ReceiveStoreNameIntent extends Intent {
     }
 
     matchPattern2(input, match, pattern) {
-        var currentProduct = this.session.products[this.session.totalProductInList - 1]
-        var data = await(new Request().sendGetRequest('/LBFC/Store/GetAllStoresByBrand', { 'brandId': currentProduct.brandId }, ""))
-        var listStoreByBrand = JSON.parse(data)
-        var listStoreMatching = []
-        var store = {};
-        var storeId = null;
-        var storeName = null;
-        for (var i = 0; i < listStoreByBrand.length; i++) {
-            if (this.levenshteinDistance(input, listStoreByBrand[i].Name) <= Math.floor(listStoreByBrand[i].Name.split(" ", 10).length * 1.5)) {
-                console.log("ở match patttern 2 nhe")
-                console.log(Math.floor(listStoreByBrand[i].Name.split(" ", 10).length * 1.5))
-                console.log(listStoreByBrand[i].Name)
-                store = {
-                    storeId: listStoreByBrand[i].Id,
-                    storeName: listStoreByBrand[i].Name
-                }
-                listStoreMatching.push(store)
-            } else if (this.levenshteinDistance(input, listStoreByBrand[i].Name) == 0) {
-                store.name = listStoreByBrand[i].Name;
-                store.Id = listStoreByBrand[i].ID;
-                return {
-                    storeId: storeId,
-                    storeName: storeName,
-                    step: this.step,
-                    exception: this.exception
-                }
-            }
-        }
-        console.log("Ở Intent RECEIVE STORE NAME")
-        console.log(listStoreMatching)
         return {
-            listStoreMatching: listStoreMatching,
             step: this.step,
             exception: this.exception
         }

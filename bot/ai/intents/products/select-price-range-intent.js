@@ -5,15 +5,15 @@ var Request = require('../../utils/request')
 class SelectPriceRangeIntent extends Intent {
     constructor(step, exception) {
         super(step, exception);
-        this.addPatterns(['GioiTu', 'Number', 'Dozen', 'GioiTu', 'Number', 'Dozen'], 1)
-        this.addPatterns(['GioiTu', 'Number', 'Hundred', 'GioiTu', 'Number', 'Hundred'], 1)
+        this.addPatterns(['GioiTu', 'Number', 'Dozen', 'GioiTu', 'Number', 'Dozen'], 1, true, true)
+        this.addPatterns(['GioiTu', 'Number', 'Hundred', 'GioiTu', 'Number', 'Hundred'], 2, true, false)
         this.addPatterns(['GioiTu', 'Number', 'Dozen'], 3)
         this.addPatterns(['GioiTu', 'Number', 'Hundred'], 4)
-        this.addPatterns(['Number', 'Dozen'], 5)
-        this.addPatterns(['Number', 'Dozen'], 6)
+        this.addPatterns(['Number', 'Dozen'], 5, true, false)
+        this.addPatterns(['Number', 'Hundred'], 6)
         // this.addPatterns(['MoneyTeenCode'], 7, true, true)
         this.addPatterns(['MoneyTeenCode', '-', 'MoneyTeenCode'], 7, true, true)
-        this.addPatterns(['Number', 'Dozen', '-', 'Number', 'Dozen'], 9)
+        this.addPatterns([/\d+k-\d+k/i], 8)
 
     }
 
@@ -43,105 +43,148 @@ class SelectPriceRangeIntent extends Intent {
         let inputArray = input.split(" ", 10);
         let fromPrice = inputArray[1] * 10000;
         let toPrice = inputArray[4] * 10000;
-        let data = await(new Request().sendGetRequest('/LBFC/Product/GetBrandHasProductInRange', { 'from': fromPrice, 'to': toPrice }, ''))
-        let listProduct = JSON.parse(data)
         return {
-            listProduct: listProduct,
+            fromPrice,
+            toPrice,
             step: 2,
             exception: that.exception
         }
     }
 
-    matchPattern1(input, match, pattern) {
-        console.log("-----MATCH PATTERN 2 CỦA SELECT PRICE RANGE INTENT-----")
+    /**
+     * 
+     * @param {*} input : từ n trăm/xị đến n trăm/xị
+     * @param {*} match 
+     * @param {*} pattern 
+     */
+    matchPattern2(input, match, pattern) {
+        console.log("-----MATCH PATTERN 2 INPUT TỪ N TRĂM ĐẾN N TRĂM-----")
         var that = this;
         let inputArray = input.split(" ", 10);
         let fromPrice = inputArray[1] * 100000;
         let toPrice = inputArray[4] * 100000;
-        let data = await(new Request().sendGetRequest('/LBFC/Product/GetBrandHasProductInRange', { 'from': fromPrice, 'to': toPrice }, ''))
-        let listProduct = JSON.parse(data)
         return {
-            listProduct: listProduct,
+            fromPrice,
+            toPrice,
             step: 2,
             exception: that.exception
         }
     }
+
+    /**
+     * 
+     * @param {*} input : trên/dưới n chục
+     * @param {*} match 
+     * @param {*} pattern 
+     */
     matchPattern3(input, match, pattern) {
-        console.log("------MATCH PATTERN 3 CỦA SELECT PRICE RANGE INTENT------")
+        console.log("------MATCH PATTERN 3 INPUT TRÊN/DƯỚI N CHỤC------")
         var that = this;
         let inputArray = input.split(" ", 10);
         let fromPrice = 0;
         let toPrice = 0;
-        if (inputArray[0].match(/(trên| từ)/i)) {
+        if (inputArray[0].match(/(trên|từ)/i)) {
             fromPrice = inputArray[1] * 10000;
-            toPrice = 10000000;
-        } else if (inputArray[0].match(/(dưới| tầm | khoảng)/i)) {
+            toPrice = inputArray[1] * 10000 + 10000;
+        } else if (inputArray[0].match(/(dưới|tầm|khoảng)/i)) {
             toPrice = inputArray[1] * 10000
         }
-        let data = await(new Request().sendGetRequest('/LBFC/Product/GetBrandHasProductInRange', { 'from': fromPrice, 'to': toPrice }))
-        let listProduct = JSON.parse(data)
         return {
-            listProduct: listProduct,
+            fromPrice,
+            toPrice,
             step: that.step,
             exception: that.exception
         }
     }
 
+    /**
+     * 
+     * @param {*} input : trên/ dưới n trăm
+     * @param {*} match 
+     * @param {*} pattern 
+     */
     matchPattern4(input, match, pattern) {
-        console.log("------MATCH PATTERN 4 CỦA SELECT PRICE RANGE INTENT------")
+        console.log("------MATCH PATTERN 4 INPUT TRÊN/DƯỚI N TRĂM------")
         var that = this;
         let inputArray = input.split(" ", 10);
         let fromPrice = 0;
         let toPrice = 0;
-        if (inputArray[0].match(/(trên| từ)/i)) {
+        if (inputArray[0].match(/(trên|từ)/i)) {
             fromPrice = inputArray[1] * 100000;
             toPrice = 10000000;
-        } else if (inputArray[0].match(/(dưới| tầm | khoảng)/i)) {
+        } else if (inputArray[0].match(/(dưới|tầm|khoảng)/i)) {
             toPrice = inputArray[1] * 100000;
         }
-        let data = await(new Request().sendGetRequest('/LBFC/Product/GetBrandHasProductInRange', { 'from': fromPrice, 'to': toPrice }))
-        let listProduct = JSON.parse(data)
         return {
-            listProduct: listProduct,
+            fromPrice,
+            toPrice,
             step: that.step,
             exception: that.exception
         }
     }
-    matchPattern5(input, match, pattern) {
-        console.log("------MATCH PATTERN 5 CỦA SELECT PRICE RANGE------")
-        var fromPrice = 0;
-        var toPrice = 0;
-        if (input.length = 5) {
-            fromPrice = (input * 10) - 10000;
-        }
-    }
-    matchPattern6(input, match, pattern) {
-        console.log("------MATCH PATTERN 6 CỦA SELECT PRICE RANGE------")
-    }
+
     /**
-     *  ['MoneyTeenCode']
-     * @param {*} input 
+     *
+     * @param {*} input  : n chục
      * @param {*} match 
      * @param {*} pattern 
      */
-    // matchPattern7(input, match, pattern) {
-    //     console.log("------MATCH PATTERN 7 CỦA SELECT PRICE RANGE------")
-    //     var that = this;
-    //     let fromPrice = 0;
-    //     let toPrice = input.replace("k", "") * 1000;
-    //     let data = await(new Request().sendGetRequest('/LBFC/Product/GetBrandHasProductInRange', { 'from': fromPrice, 'to': toPrice }))
-    //     let listProduct = JSON.parse(data)
-    //     return {
-    //         listProduct: listProduct,
-    //         step: that.step,
-    //         exception: that.exception
-    //     }
-    // }
+    matchPattern5(input, match, pattern) {
+        console.log("------MATCH PATTERN 5 INPUT N-Chục ------")
+        let fromPrice = 0;
+        let toPrice = 0;
+        let inputPrice = input.match(/\d+/i);
+        console.log(inputPrice)
+        let that = this
+        if (inputPrice[0] == 1) {
+            toPrice = inputPrice[0] * 10000;
+        } else if (inputPrice[0] > 1) {
+            fromPrice = inputPrice[0] * 10000 - 10000;
+            toPrice = inputPrice[0] * 10000 + 10000;
+        }
+        return {
+            fromPrice,
+            toPrice,
+            step: that.step,
+            exception: that.exception
+        }
+    }
+
     /**
-     * ['MoneyTeenCode', '-', 'MoneyTeenCode']
+     * 
+     * @param {*} input : n trăm
+     * @param {*} match 
+     * @param {*} pattern 
+     */
+    matchPattern6(input, match, pattern) {
+        console.log("------MATCH PATTERN 6 INPUT N-Trăm ------")
+        let fromPrice = 0;
+        let toPrice = 0;
+        let inputPrice = input.match(/\d+/i);
+        let that = this;
+        if (inputPrice[0] == 1) {
+            fromPrice = inputPrice[0] * 100000 - 30000
+            toPrice = inputPrice[0] * 100000 + 30000;
+        } else if (inputPrice[0] > 1) {
+            fromPrice = inputPrice[0] * 100000 - 30000;
+            toPrice = inputPrice[0] * 100000 + 30000;
+        }
+
+        return {
+            fromPrice,
+            toPrice,
+            step: that.step,
+            exception: that.exception
+        }
+    }
+    /**
+     *  ['MoneyTeenCode']
+     * @param {*} input: nk - nk
+     * @param {*} match 
+     * @param {*} pattern 
      */
     matchPattern7(input, match, pattern) {
-        console.log("------MATCH PATTERN 7 CỦA SELECT PRICE RANGE------")
+        console.log("------MATCH PATTERN 7 INPUT n-k - n-k ------")
         let that = this;
         // let newInput = input.replace(/k/g, "").split("-", 10);
         // console.log(newInput)
@@ -160,10 +203,40 @@ class SelectPriceRangeIntent extends Intent {
         console.log("From price " + fromPrice)
         console.log("to price " + toPrice)
 
-        let data = await(new Request().sendGetRequest('/LBFC/Product/GetBrandHasProductInRange', { 'from': fromPrice, 'to': toPrice }))
-        let listProduct = JSON.parse(data)
         return {
-            listProduct: listProduct,
+            fromPrice,
+            toPrice,
+            step: that.step,
+            exception: that.exception
+        }
+    }
+
+    /**
+     * 
+     * @param {*} input : nk-nk (30k-40k)
+     * @param {*} match 
+     * @param {*} pattern 
+     */
+    matchPattern8(input, match, pattern) {
+        console.log("------MATCH PATTERN 8 INPUT nk-nk ------")
+        let that = this;
+        //let range = input.replace(/k/g, "").split("-", 10);
+        // console.log(newInput)
+        var priceRange = input.match(/\d+/g);
+        let fromPrice = 0;
+        let toPrice = 0;
+        console.log(priceRange)
+        console.log(priceRange.length)
+        if (priceRange.length < 2) {
+            fromPrice = 0;
+            toPrice = priceRange[0] * 1000;
+        } else {
+            fromPrice = priceRange[0] * 1000;
+            toPrice = priceRange[1] * 1000;
+        }
+        return {
+            fromPrice,
+            toPrice,
             step: that.step,
             exception: that.exception
         }

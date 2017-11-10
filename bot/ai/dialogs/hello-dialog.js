@@ -1,6 +1,4 @@
 "use strict";
-
-
 let Dialog = require('./dialog');
 let async = require("asyncawait/async");
 let await = require("asyncawait/await");
@@ -20,9 +18,9 @@ class HelloDialog extends Dialog {
 
     continue(input, senderId, info = null) {
         switch (this.step) {
-            case 1: this.askLocation(senderId); break;
-            case 2: this.showOption(input, senderId); break;
-            case 3: this.end(); break;
+            // case 1: this.askLocation(senderId); break;
+            case 1: this.showOption(input, senderId); break;
+            case 2: this.end(); break;
             default: this.end(); break;
         }
     }
@@ -31,10 +29,10 @@ class HelloDialog extends Dialog {
      * Step 1
      * @param {*} senderId 
      */
-    askLocation(senderId) {
-        this.step = 2;
-        this.sendLocation(senderId);
-    }
+    // askLocation(senderId) {
+    //     this.step = 2;
+    //     this.sendLocation(senderId);
+    // }
 
     /**
      * Step 2
@@ -42,18 +40,14 @@ class HelloDialog extends Dialog {
      * @param {*} senderId 
      */
     showOption(input, senderId) {
-        // console.log(input[0].payload.coordinates)
-        // var latlng = coordinates.lat + ',' + coordinates.long
-        // var address = await(new Request().sendHttpsGetRequest(' ', {'latlng': latlng, 'key' : process.env.googleAPIkey}, ''))
-        // var currentAddress = JSON.parse(address);
-        // console.log(currentAddress.results[0])
-        // var coordinates = input[0].payload.coordinates
-        console.log(input);
-        var coordinates = input[0].payload.coordinates
-        this.session.coordinates = coordinates;
-        console.log(this.session)
+        console.log(input)
+
+        // if (input.constructor === Array) {
+        //     var coordinates = input[0].payload.coordinates
+        //     this.session.coordinates = coordinates;
+            
+        // }
         var that = this;
-        
         this.getSenderName(senderId).then(function (sender) {
             var result = that.reply(senderId, { "text": "Chào " + sender.first_name + ", bạn cần mình giúp gì không?" });
             that.sendTyping(senderId);
@@ -80,14 +74,13 @@ class HelloDialog extends Dialog {
                     },
                     {
                         type: "postback",
-                        title: "Nhãn hiệu",
-                        payload: "Nhãn hiệu"
+                        title: "Đặt hàng",
+                        payload: "order begin"
                     }
                 ]
             }]);
-            
         });
-        that.step = 3;
+        that.step = 2;
         that.continue(input, senderId);
     }
 

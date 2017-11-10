@@ -50,7 +50,6 @@ Request.prototype.sendGetRequest =  function (url, query, data) {
             'Content-Type': 'application/x-www-form-urlencoded'
         }
     };
-    console.log("query = === " + options.qs);
 
     var httpRequest =  RequestPromise(options, function (error, response, body) {
         if (error) {

@@ -9,7 +9,7 @@ class ReceiveFullOrderIntent extends Intent {
         this.addPatterns(['DongTuYChi', 'DaiTu', 'Number'], 3);
         this.addPatterns(['DongTuYChi', 'Number', 'DonVi'], 4);
         this.addPatterns(["Number", "DonVi"], 4);
-        this.addPatterns(["Number", "\\w+"], 4);
+        //this.addPatterns(["Number", "\\w+"], 4);
     }
 
 

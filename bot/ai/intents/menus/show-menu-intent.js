@@ -4,6 +4,8 @@ class ShowMenuIntent extends Intent {
     constructor(step, exception) {
         super(step, exception);
         this.addPatterns(['menu show'], 1, true);
+        this.addPatterns(['DaiTu','DongTuYChi', 'DongTu', 'menu'], 1, true, false);
+        
     }
 
     /**
