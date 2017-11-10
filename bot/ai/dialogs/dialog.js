@@ -4,27 +4,38 @@ let Intent = require('../intents/intent');
 let request = require('request-promise');
 let key = process.env.googleAPIkey || 'AIzaSyC2atcNmGkRy3pzTskzsPbV6pW68qe_drY';
 const FACEBOOK_ACCESS_TOKEN = 'EAAFHmBXhaYoBAJR68ofNMorzRjAXNmCyZCZBXOnRXMLDuiZA66KgvHxcijb2SidQc3zRm2AsAijnaGliTCZCf4iiDmApFMfEoRFVmatHIMrKKY7tdtDSzMqgOQXlOjqFHZCFRmquVAK0DERbnA8Gp57kGJlSwV9ZBqoXC5dxHAyAZDZD';
+let ConsoleLog = require('../utils/console-log');
+const ProductModel = require('./entities/products/product');
 
 class Dialog {
+
     constructor(session) {
         this.step = 1;
         this.patterns = [];
         this.status = "new"; //new hoặc end
         this.posToAnalyze = 0;
         this._storedUsers = {};
+
+        /**
+         * @type {[Intent]}
+         */
         this.intents = [];
+        /**
+         * @type {{brandId: number, pronoun: string, coordinates: [], searchProductDialog: {productName, topPrice, bottomPrice}, orderDialog: {orderDetails: [{productID, productName, price, picURL, discountPrice, productCode, extras: [{productId, productName, price}], note: {extra: string, time: string}], originalPrice: number, finalPrice: number, currentProduct: ProductModel, currentPromotion: {PromotionDetailID, PromotionCode, BuyProductCode, DiscountRate, DiscountAmount}, address: string}}}
+         */
         this.session = session;
+        this.exception = 0;
     }
 
     pause() {
-        this.step--;
+        --this.step;
     }
 
     isMatch(input, senderId) {
         var result = null;
         var that = this;
 
-        this.intents.some(function(intent) {
+        this.intents.some(function (intent) {
             result = intent.match(input);
             if (result != null) {
                 that.step = result.step;
@@ -76,10 +87,10 @@ class Dialog {
                         {
                             content_type: "text",
                             title: "Bỏ qua",
-                            payload: "Bỏ qua",
+                            payload: "location skip",
                             image_url: "https://cdn4.iconfinder.com/data/icons/defaulticon/icons/png/256x256/no.png"
                         }
-                    ]                    
+                    ]
                 }
             }
         })
@@ -101,7 +112,7 @@ class Dialog {
                             recipient_name: recipientName,
                             order_number: orderNumber,
                             currency: "VND",
-                            payment_method : "Tiền mặt", 
+                            payment_method: "Tiền mặt",
                             order_url: orderUrl,
                             timestamp: "1428444852",
                             address: address,
@@ -111,7 +122,7 @@ class Dialog {
                         }
                     }
                 }
-            } 
+            }
         })
     }
 
@@ -120,7 +131,7 @@ class Dialog {
             "text": text,
             "quick_replies": quickReplyElement
         }
-        request({
+        return request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: { access_token: FACEBOOK_ACCESS_TOKEN },
             method: 'POST',
@@ -146,18 +157,19 @@ class Dialog {
                     },
                     method: 'GET',
 
-                }, function (error, response, body) {
-                    console.log(body);
-                    var person = JSON.parse(body);
-                    that._storedUsers[senderId] = person;
-                    resolve(person);
-                });
+                })
+                    .then((body) => {
+                        console.log(body);
+                        var person = JSON.parse(body);
+                        that._storedUsers[senderId] = person;
+                        resolve(person);
+                    })
             }
         });
     }
 
     reply(senderId, message) {
-        
+
         return request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: { access_token: FACEBOOK_ACCESS_TOKEN },
@@ -190,7 +202,7 @@ class Dialog {
         var messageData = {
             text: text
         };
-        request({
+        return request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: {
                 access_token: FACEBOOK_ACCESS_TOKEN
@@ -202,14 +214,7 @@ class Dialog {
                 },
                 message: messageData,
             }
-        }, function (error, response, body) {
-            if (error) {
-                console.log('Error sending message: ', error);
-            }
-            else if (response.body.error) {
-                console.log('Error: ', response.body.error);
-            }
-        });
+        })
     }
 
     sendButtonMessage(senderId, text, buttons) {
@@ -281,7 +286,7 @@ class Dialog {
                 }
             }
         };
-        request({
+        return request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: {
                 access_token: FACEBOOK_ACCESS_TOKEN
@@ -292,53 +297,40 @@ class Dialog {
                     id: senderId
                 },
                 message: messageData,
-            }
-        }, function (error, response, body) {
-            if (error) {
-                console.log('Error sending message: ', error);
-            }
-            else if (response.body.error) {
-                console.log('Error: ', response.body.error);
             }
         });
     }
 
     sendGenericMessage(senderId, payloadElements) {
-        
+
         var messageData = {
             "attachment": {
                 "type": "template",
                 "payload": {
                     "template_type": "generic",
-                    "elements": []
+                    "elements": payloadElements
                 }
             }
         };
 
-        messageData.attachment.payload.elements = payloadElements;
-        request({
+        return request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: {
                 access_token: FACEBOOK_ACCESS_TOKEN
             },
-            body: 
-            { whitelisted_domains: 
-               [ 
-                 'https://www.foody.vn/',
-             ] },
+            body:
+            {
+                whitelisted_domains:
+                [
+                    'https://www.foody.vn/',
+                ]
+            },
             method: 'POST',
             json: {
                 recipient: {
                     id: senderId
                 },
                 message: messageData,
-            }
-        }, function (error, response, body) {
-            if (error) {
-                console.log('Error sending message: ', error);
-            }
-            else if (response.body.error) {
-                console.log('Error: ', response.body.error);
             }
         });
     }

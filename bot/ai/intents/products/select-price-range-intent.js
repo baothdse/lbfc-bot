@@ -37,22 +37,15 @@ class SelectPriceRangeIntent extends Intent {
         return result;
     }
 
-    /**
-     * 
-     * @param {*} input: Từ n chục đến n chục 
-     * @param {*} match 
-     * @param {*} pattern 
-     */
     matchPattern1(input, match, pattern) {
         console.log("------ĐANG  MATCH PATTERN 1 CỦA SELECT PRICE RANGE INTENT------")
         var that = this;
         let inputArray = input.split(" ", 10);
         let fromPrice = inputArray[1] * 10000;
         let toPrice = inputArray[4] * 10000;
-        let data = await(new Request().sendGetRequest('/LBFC/Product/GetBrandHasProductInRange', { 'from': fromPrice, 'to': toPrice }, ''))
-        let listProduct = JSON.parse(data)
         return {
-            listProduct: listProduct,
+            fromPrice,
+            toPrice,
             step: 2,
             exception: that.exception
         }
@@ -70,10 +63,9 @@ class SelectPriceRangeIntent extends Intent {
         let inputArray = input.split(" ", 10);
         let fromPrice = inputArray[1] * 100000;
         let toPrice = inputArray[4] * 100000;
-        let data = await(new Request().sendGetRequest('/LBFC/Product/GetBrandHasProductInRange', { 'from': fromPrice, 'to': toPrice }, ''))
-        let listProduct = JSON.parse(data)
         return {
-            listProduct: listProduct,
+            fromPrice,
+            toPrice,
             step: 2,
             exception: that.exception
         }
@@ -97,10 +89,9 @@ class SelectPriceRangeIntent extends Intent {
         } else if (inputArray[0].match(/(dưới|tầm|khoảng)/i)) {
             toPrice = inputArray[1] * 10000
         }
-        let data = await(new Request().sendGetRequest('/LBFC/Product/GetBrandHasProductInRange', { 'from': fromPrice, 'to': toPrice }))
-        let listProduct = JSON.parse(data)
         return {
-            listProduct: listProduct,
+            fromPrice,
+            toPrice,
             step: that.step,
             exception: that.exception
         }
@@ -124,10 +115,9 @@ class SelectPriceRangeIntent extends Intent {
         } else if (inputArray[0].match(/(dưới|tầm|khoảng)/i)) {
             toPrice = inputArray[1] * 100000;
         }
-        let data = await(new Request().sendGetRequest('/LBFC/Product/GetBrandHasProductInRange', { 'from': fromPrice, 'to': toPrice }))
-        let listProduct = JSON.parse(data)
         return {
-            listProduct: listProduct,
+            fromPrice,
+            toPrice,
             step: that.step,
             exception: that.exception
         }
@@ -146,16 +136,15 @@ class SelectPriceRangeIntent extends Intent {
         let inputPrice = input.match(/\d+/i);
         console.log(inputPrice)
         let that = this
-        if(inputPrice[0] == 1) {
+        if (inputPrice[0] == 1) {
             toPrice = inputPrice[0] * 10000;
         } else if (inputPrice[0] > 1) {
             fromPrice = inputPrice[0] * 10000 - 10000;
             toPrice = inputPrice[0] * 10000 + 10000;
         }
-        let data = await(new Request().sendGetRequest('/LBFC/Product/GetBrandHasProductInRange', { 'from': fromPrice, 'to': toPrice }))
-        let listProduct = JSON.parse(data)
         return {
-            listProduct: listProduct,
+            fromPrice,
+            toPrice,
             step: that.step,
             exception: that.exception
         }
@@ -173,7 +162,7 @@ class SelectPriceRangeIntent extends Intent {
         let toPrice = 0;
         let inputPrice = input.match(/\d+/i);
         let that = this;
-        if(inputPrice[0] == 1) {
+        if (inputPrice[0] == 1) {
             fromPrice = inputPrice[0] * 100000 - 30000
             toPrice = inputPrice[0] * 100000 + 30000;
         } else if (inputPrice[0] > 1) {
@@ -181,10 +170,9 @@ class SelectPriceRangeIntent extends Intent {
             toPrice = inputPrice[0] * 100000 + 30000;
         }
 
-        let data = await(new Request().sendGetRequest('/LBFC/Product/GetBrandHasProductInRange', { 'from': fromPrice, 'to': toPrice }))
-        let listProduct = JSON.parse(data)
         return {
-            listProduct: listProduct,
+            fromPrice,
+            toPrice,
             step: that.step,
             exception: that.exception
         }
@@ -215,10 +203,9 @@ class SelectPriceRangeIntent extends Intent {
         console.log("From price " + fromPrice)
         console.log("to price " + toPrice)
 
-        let data = await(new Request().sendGetRequest('/LBFC/Product/GetBrandHasProductInRange', { 'from': fromPrice, 'to': toPrice }))
-        let listProduct = JSON.parse(data)
         return {
-            listProduct: listProduct,
+            fromPrice,
+            toPrice,
             step: that.step,
             exception: that.exception
         }
@@ -247,13 +234,9 @@ class SelectPriceRangeIntent extends Intent {
             fromPrice = priceRange[0] * 1000;
             toPrice = priceRange[1] * 1000;
         }
-        console.log("From price " + fromPrice)
-        console.log("to price " + toPrice)
-
-        let data = await(new Request().sendGetRequest('/LBFC/Product/GetBrandHasProductInRange', { 'from': fromPrice, 'to': toPrice }))
-        let listProduct = JSON.parse(data)
         return {
-            listProduct: listProduct,
+            fromPrice,
+            toPrice,
             step: that.step,
             exception: that.exception
         }

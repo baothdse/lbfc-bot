@@ -1,7 +1,9 @@
 let Dialog = require('./dialog');
 let SearchProductByNameIntent = require('../intents/products/search-product-by-name-intent');
+let SearchProductByNameSimpleIntent = require('../intents/products/search-product-by-name-simple-intent');
+const SelectPriceRangeIntent = require('../intents/products/select-price-range-intent');
+const SearchProductIntent = require('../intents/products/search-product-intent');
 let Request = require('../utils/request');
-var await = require('asyncawait/await')
 
 class SearchProductNameDialog extends Dialog {
     constructor(session) {
@@ -12,26 +14,31 @@ class SearchProductNameDialog extends Dialog {
 
     push() {
         this.addIntent(new SearchProductByNameIntent(1, 0));
+        this.addIntent(new SearchProductByNameSimpleIntent(1, 0));
+        this.addIntent(new SelectPriceRangeIntent(0, 1));
+        this.addIntent(new SearchProductIntent(1, 0));
     }
 
     continue(input, senderId, info = null) {
-        console.log('=========STANDING AT SEARCH NAME DIALOG======')
-        console.log('step : ' + this.step);
-        switch (this.step) {
+        switch(this.step) {
             case 0: this.continueException(input, step, info); break;
-            case 1: this.askForProductName(input, senderId); break;
+            case 1: this.askForProductName(senderId); break;
             case 2: this.receiveProductName(input, senderId); break;
-            case 3: this.confirmEditKeyword(input, senderId); break;
-            case 4: this.showProductByName(input, senderId); break;
-            case 4.1: this.receiveConfirmFindMore(input, senderId); break;
-            case 5: this.end(); break;
+            case 3: this.askForPriceFilter(senderId); break;
+            case 4: this.receivePriceFilterConfirmation(input, senderId); break;
+            case 5: this.askForBottomPrice(senderId); break;
+            case 6: this.receiveBottomPrice(input, senderId); break;
+            case 7: this.askForTopPrice(senderId); break;
+            case 8: this.receiveTopPrice(input, senderId); break;
+            case 9: this.search(input, senderId); break;
+            case 10: this.end(); break;
             default: break;
         }
     }
 
     continueException(input, senderId, info = null) {
-        switch (this.exception) {
-
+        switch(this.exception) {
+            case 1: this.receiveFullPriceRange(info, senderId, info); break;
         }
     }
 
@@ -39,14 +46,9 @@ class SearchProductNameDialog extends Dialog {
      * Step 1
      * @param {} senderId 
      */
-    askForProductName(input, senderId) {
+    askForProductName(senderId) {
+        this.sendTextMessage(senderId, "Bạn muốn tìm món gì?");
         this.step = 2;
-        let that = this
-        if (!that.session.findingProduct) {
-            that.sendTextMessage(senderId, that.session.pronoun + " muốn tìm món gì?");
-        } else {
-            that.continue(input, senderId)
-        }
     }
 
     /**
@@ -55,197 +57,160 @@ class SearchProductNameDialog extends Dialog {
      * @param {*} senderId 
      */
     receiveProductName(input, senderId) {
-        var keywords = ['cafe', 'coffee', 'matcha', 'tea', 'iced', 'olong', 'blended', 'hot', 'soda', 'pineaple', 'strawberry', 'nho', 'dâu', 'muffin', 'chocolate', 'chicken', 'mocha', 'expresso', 'mojito', 'trà sữa', 'kem', 'milk', 'sữa', 'cookie', 'cream', 'socola', 'sô cô la']
-        let reply = ""
-        let listKeywordMatching = [];
-        let that = this;
-        let keyword;
-        for (let i = 0, condition = keywords.length; i < condition; i++) {
-            keyword = {
-                keyword: keywords[i],
-                ed: this.levenshteinDistance(input, keywords[i])
-            }
-            if (keyword.ed <= 2) {
-                listKeywordMatching.push(keyword)
-            }
-        }
-        this.bubbleSort(listKeywordMatching)
-        console.log(listKeywordMatching)
-        if (listKeywordMatching.length == 0) {
-            this.step = 4.1;
-            this.sendTextMessage(senderId, "Cửa hàng em không có bán món đó :(. " + this.session.pronoun + " có muốn tìm tiếp không?")
-        } else {
-            if (listKeywordMatching[0].ed == 0) {
-                that.step = 4;
-                that.session.findingProduct = listKeywordMatching[0].keyword
-                that.continue('ok', senderId);
-            } else {
-                if (listKeywordMatching.length == 1) {
-                    that.step = 3
-                    reply = listKeywordMatching[0].keyword
-                    that.sendTextMessage(senderId, "Ý của " + that.session.pronoun + " muốn tìm " + reply + ' phải không?')
-                    that.session.findingProduct = listKeywordMatching[0].keyword
-                } else if (listKeywordMatching.length > 1) {
-                    for (var i = 0, condition = listKeywordMatching.length; i < condition; i++) {
-                        reply += "- " + listKeywordMatching[i].keyword + " \n";
-                    }
-                    console.log(reply)
-                    that.step = 2;
-                    that.sendTextMessage(senderId, "Ý của " + that.session.pronoun + " là: \n" + reply)
-                }
-            }
-        }
-
-    }
-    confirmEditKeyword(input, senderId) {
-        this.step = 4;
+        this.session.searchProductDialog.productName = input;
+        this.step = 3;
         this.continue(input, senderId);
     }
-
-    // receiveEditKeywords(input, senderId) {
-    //     this.step = 5;
-
-    // }
+    
     /**
-     * Step 4: 
+     * Step 3
+     * @param {*} senderId 
+     */
+    askForPriceFilter(senderId) {
+        this.sendTextMessage(senderId, "Bạn có muốn lọc theo giá không?");
+        this.step = 4;
+    }
+
+
+    /**
+     * Step 4
+     * @param {*} input 
+     * @param {*} sender 
+     */
+    receivePriceFilterConfirmation(input, senderId) {
+        if (input.match(/(không|ko|hông|nô|no)/i)) {
+            this.step = 10;
+        } else {
+            this.step = 5;
+        }
+        this.continue(input, senderId);    
+    }
+
+    /**
+     * Step 5
+     * @param {*} senderId 
+     */
+    askForBottomPrice(senderId) {
+        this.sendTextMessage(senderId, "Nhập giá thấp nhất");
+        this.step = 6;
+    }
+
+    /**
+     * Step 6
      * @param {*} input 
      * @param {*} senderId 
      */
-    showProductByName(input, senderId) {
+    receiveBottomPrice(input, senderId) {
+        this.session.searchProductDialog.bottomPrice = input;
+        this.step = 7;
+        this.continue(input, senderId);
+    }
+
+    /**
+     * Step 7
+     * @param {*} senderId 
+     */
+    askForTopPrice(senderId) {
+        this.sendTextMessage(senderId, "Nhập giá tối đa");
+        this.step = 8;
+    }
+
+    /**
+     * Step 8
+     * @param {*} input 
+     * @param {*} senderId 
+     */
+    receiveTopPrice(input, senderId) {
+        this.session.searchProductDialog.topPrice = input;
+        this.step = 9;
+        this.continue(input, senderId);
+    }
+
+    /**
+     * Step 9
+     * @param {*} input 
+     * @param {*} senderId 
+     */
+    search(input, senderId) {
+
+        var params = { 
+            'keyword': this.session.searchProductDialog.productName, 
+            'from': this.session.searchProductDialog.bottomPrice == undefined ? 0 : this.session.searchProductDialog.bottomPrice, 
+            'to' : this.session.searchProductDialog.topPrice == undefined ? 0 : this.session.searchProductDialog.topPrice,
+            'brandId': this.session.brandId,
+        }
         var that = this;
-        if (input.match(/(đúng|ok|phải|nó đó|chuẩn|chính xác)/g)) {
-            that.step = 5
-            let listProduct = null;
-            if (input != null) {
-                this.sendTyping(senderId);
-                var data = await(new Request().sendGetRequest('/LBFC/Product/SearchProductInBrand', { 'keyword': that.session.findingProduct, 'brandId': 1 }, ""))
-                listProduct = JSON.parse(data);
-                console.log(listProduct)
-                if (listProduct.length == 0) {
-                    that.step = 4.1;
-                    that.sendTextMessage(senderId, "Cửa hàng em không có món nào với từ khóa " + that.session.findingProduct + " cả :(")
-                    that.sendTextMessage(senderId, that.session.pronoun + " có muốn tìm tiếp không?")
-                } else if (listProduct.length < 4) {
-                    let top4Product = [];
-                    for (let i = 0, condition = listProduct.length; i < condition; i++) {
-                        let subtitle = listProduct[i].ProductName + " \n " + listProduct[i].Price + "VND"
-                        let element = {
-                            title: listProduct[i].ProductName,
-                            image_url: listProduct[i].PicURL,
-                            subtitle: subtitle,
-                            default_action: {
-                                "type": "web_url",
-                                "url": "https://foody.vn",
-                                "messenger_extensions": true,
-                                "webview_height_ratio": "tall"
-                            },
-                            buttons: [
-                                {
-                                    type: "postback",
-                                    title: "Đặt sản phẩm",
-                                    payload: "Đặt $" + listProduct[i].ProductID + " $" + listProduct[i].ProductName + " $" + listProduct[i].Price + " $" + listProduct[i].PicURL + " $" + listProduct[i].Id
-                                }
-                            ]
-                        }
-                        top4Product.push(element);
+        new Request().sendGetRequest('/LBFC/Product/SearchProductInRange', params, "")
+        .then(function (dataStr) {
+            let data = JSON.parse(dataStr);
+            if (data.length == 1) {
+                that.showProducts(data);
+            } else {
+                that.sendTextMessage('Không thấy món bạn vừa kiếm, có phải ý bạn là...')
+                .then((response) => {
+                    that.showProducts(data);
+                })
+            }
+        });
+        that.step = 10;
+        that.continue(input, senderId);
+    }
+
+    /*--------------------Exception--------------------*/
+    
+    /**
+     * 
+     * @param {*} input 
+     * @param {*} senderId 
+     * @param {{fromPrice, toPrice}} info 
+     */
+    receiveFullPriceRange(input, senderId, info) {
+        this.session.searchProductDialog.bottomPrice = info.fromPrice;
+        this.session.searchProductDialog.topPrice = info.toPrice;
+        this.search(input, senderId);
+    }
+
+    /*---------------Private method------------------*/
+
+    /**
+     * 
+     * @param {[]} products 
+     * @param {*} senderId 
+     */
+    showProducts(products, senderId) {
+        var elements = [];
+        for (var i = 0; i < products.length; i++) {
+            var element = {
+                title: products[i].ProductName,
+                image_url: products[i].PicURL,
+                subtitle: products[i].ProductName,
+                default_action: {
+                    "type": "web_url",
+                    "url": "https://foody.vn",
+                    "messenger_extensions": true,
+                    "webview_height_ratio": "tall"
+                },
+                buttons: [
+                    {
+                        type: "postback",
+                        title: "Đặt sản phẩm",
+                        payload: "Đặt $" + products[i].ProductID + " $" + products[i].ProductName + " $" + products[i].Price + " $" + products[i].PicURL + " $" + products[i].ProductCode + " $" + this.session.brandId,
                     }
-                    that.sendGenericMessage(senderId, top4Product)
-                } else if (listProduct.length > 4) {
-                    let top4Product = [];
-                    for (let i = 0; i < 4; i++) {
-                        let subtitle = listProduct[i].ProductName + " \n " + listProduct[i].Price + "VND"
-                        let element = {
-                            title: listProduct[i].ProductName,
-                            image_url: listProduct[i].PicURL,
-                            subtitle: subtitle,
-                            default_action: {
-                                "type": "web_url",
-                                "url": "https://foody.vn",
-                                "messenger_extensions": true,
-                                "webview_height_ratio": "tall"
-                            },
-                            buttons: [
-                                {
-                                    type: "postback",
-                                    title: "Đặt sản phẩm",
-                                    payload: "Đặt $" + listProduct[i].ProductID + " $" + listProduct[i].ProductName + " $" + listProduct[i].Price + " $" + listProduct[i].PicURL + " $" + listProduct[i].Id
-                                }
-                            ]
-                        }
-                        top4Product.push(element);
-                    }
-                    that.sendGenericMessage(senderId, top4Product)
-                }
+                ]
             }
-        } else {
-            that.sendTextMessage(senderId, "Nếu không phải " + that.session.findingProduct + " thì là gì nhỉ?")
-            that.step = 1;
+            elements.push(element);
         }
-
-    }
-
-    receiveConfirmFindMore(input, senderId) {
-        let that = this;
-        if (input.match(/(có|yes|tiếp|tìm)/i)) {
-            that.step = 1
-            delete that.session.findingProduct;
-            that.continue(input, senderId);
-        } else if (input.match(/(ko|không|thôi|khỏi)/i)) {
-            that.step = 5;
-            delete that.session.findingProduct;
-            that.continue(input, senderId)
-        }
-    }
-
-    bubbleSort(array) {
-        for (var i = 0; i < array.length; i++) {
-            for (var j = 0; j < array.length; j++) {
-                if (array[i].ed < array[j].ed) {
-                    let temp = array[i]
-                    array[i] = array[j];
-                    array[j] = temp;
-                }
-            }
-
-        }
-    }
-    levenshteinDistance(a, b) {
-        // console.log(a)
-        // console.log(b)
-        var string1 = a.toLowerCase()
-        var string2 = b.toLowerCase()
-        var length1 = string1.length;
-        var length2 = string2.length;
-        if (length1 == 0) return length2;
-        if (length2 == 0) return length1;
-        var d = []
-        var i, j;
-        //i là cột
-        for (i = 0; i <= length2; i++) {
-            d[i] = [i];
-        }
-        //j là dòng
-        for (j = 0; j <= length1; j++) {
-            d[0][j] = j
-        }
-        for (i = 1; i <= length2; i++) {
-            for (j = 1; j <= length1; j++) {
-                if (string2.charAt(i - 1) == string1.charAt(j - 1)) {
-                    d[i][j] = d[i - 1][j - 1]
-                } else {
-                    d[i][j] = Math.min(d[i - 1][j - 1] + 1, // substitution
-                        Math.min(d[i][j - 1] + 1, // insertion
-                            d[i - 1][j] + 1));
-                }
-            }
-        }
-        // console.log(d[length2][length1])
-        return d[length2][length1];
+        return this.sendGenericMessage(senderId, elements);
     }
 
     end() {
         this.session.searchProductDialog = null;
         super.end();
+    }
+
+    reset() {
+        super.reset();
+        this.session.searchProductDialog = {};
     }
 
     getName() {

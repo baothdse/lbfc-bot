@@ -1,8 +1,8 @@
 class GioiTu {
     constructor() {
-        this.words = ['ở', 'của', 'từ', 'đến', 'khoảng', 'tầm', 'trên', 'dưới'];
+        this.words = ['ở', 'của'];
     }
 
 }
 
-module.exports = GioiTu;
+module.exports = GioiTu

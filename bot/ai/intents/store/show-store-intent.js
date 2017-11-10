@@ -18,10 +18,8 @@ class ShowStoreIntent extends Intent{
     }
 
     matchPattern1(input, match, pattern) {
-        let data = await(new Request().sendGetRequest('/LBFC/Store/GetAllStoresByBrand', {'brandId': 1}, ''))
-        let listStore = JSON.parse(data);
+        
         return {
-            listStore: listStore,
             step : this.step,
             exception : this.exception
         }

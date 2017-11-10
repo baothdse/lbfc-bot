@@ -1,11 +1,9 @@
 let Intent = require('../intent');
 
-class SearchProductByPriceIntent extends Intent {
+class SearchProductByNameSimpleIntent extends Intent {
     constructor(step, exception) {
         super(step, exception);
-        this.addPatterns(["Giá tiền"], 1, true, true);
-        this.addPatterns(["Giá"], 1, true, true);
-        this.addPatterns(["DongTuTimKiem", "theo giá"], 1);
+        this.addPatterns(["search product simple"], 1, true, true)
     }
 
     getResult(input, match, which, pattern) {
@@ -24,4 +22,4 @@ class SearchProductByPriceIntent extends Intent {
     }
 }
 
-module.exports = SearchProductByPriceIntent
+module.exports = SearchProductByNameSimpleIntent

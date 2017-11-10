@@ -37,36 +37,7 @@ class ReceiveStoreNameIntent extends Intent {
     }
 
     matchPattern2(input, match, pattern) {
-        let currentProduct = this.session.products[this.session.totalProductInList - 1]
-        let data = await(new Request().sendGetRequest('/LBFC/Store/GetAllStoresByBrand', { 'brandId': currentProduct.brandId }, ""))
-        let listStoreByBrand = JSON.parse(data)
-        let listStoreMatching = []
-        let store = {};
-        let storeId = null;
-        let storeName = null;
-        for (let i = 0, condition = listStoreByBrand.length; i < condition ; i++) {
-            if (this.levenshteinDistance(input, listStoreByBrand[i].Name) <= Math.floor(listStoreByBrand[i].Name.split(" ", 10).length * 1.5)) {
-                store = {
-                    storeId: listStoreByBrand[i].Id,
-                    storeName: listStoreByBrand[i].Name,
-                    ed: this.levenshteinDistance(input, listStoreByBrand[i])
-                }
-                listStoreMatching.push(store)
-            } else if (this.levenshteinDistance(input, listStoreByBrand[i].Name) == 0) {
-                store.name = listStoreByBrand[i].Name;
-                store.Id = listStoreByBrand[i].ID;
-                return {
-                    storeId: storeId,
-                    storeName: storeName,
-                    step: this.step,
-                    exception: this.exception
-                }
-            }
-        }
-        console.log("Ở Intent RECEIVE STORE NAME")
-        console.log(listStoreMatching)
         return {
-            listStoreMatching: listStoreMatching,
             step: this.step,
             exception: this.exception
         }

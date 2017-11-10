@@ -1,29 +1,28 @@
+
+
 var VietnameseConverter = require('../vietnamese/vietnamese-converter');
+
+
 var OrderDialog = require('./dialogs/order-dialog');
 var HelpDiaglog = require('./dialogs/help-dialog');
 let ShowMenuDialog = require('./dialogs/show-menu-dialog');
 let ShowPromotionDialog = require('./dialogs/show-promotion-dialog');
-let SearchDialog = require('./dialogs/search-dialog');
 let HelloDialog = require('./dialogs/hello-dialog');
 let ShowOrderHistoryDialog = require('./dialogs/show-order-history-dialog');
 let ShowOrderDetailDialog = require('./dialogs/show-order-detail-dialog');
 let SearchProductNameDialog = require('./dialogs/search-product-name-dialog');
-let SearchProductPriceDialog = require('./dialogs/search-product-price-dialog');
-let ShowStoreDialog = require('./dialogs/show-store-dialog')
+let ShowStoreDialog = require('./dialogs/show-store-dialog');
 let AskDeliveryDialog = require('./dialogs/ask-delivery-dialog')
-let Dialog = require('./dialogs/dialog');
-let ConsoleLog = require('./utils/console-log');
-let request = require('request-promise');
-//const FACEBOOK_ACCESS_TOKEN = 'EAAFHmBXhaYoBAFdbrN3n2nazaGfq3UOdzqvr2ZA750TZBaEi2rKorkMlZCXIo6Yl7pn9tZBBBwt6iAmV9VyKKqyX5pmB05zBLZC3iBwqgFth4ClGhWE7EPqvDsHjULGBGj4oG7qIcecqwzxoQ4w4NmCO5EAZALIvj1cgerF5nTCwZDZD';
 
-let async = require('asyncawait/async')
-let await = require('asyncawait/await')
+var Response = require('./dialogs/entities/response');
+let Dialog = require('./dialogs/dialog');
+
+let ConsoleLog = require('./utils/console-log');
 
 
 class Brain {
 
     constructor() {
-        this._storedUsers = {};
         // this.usingDialog = [];
         // this.freeDialogs = [new OrderDialog(), new ShowMenuDialog(), new ShowPromotionDialog(), new SearchDialog()
         //     , new HelloDialog(), new ShowOrderHistoryDialog(), new ShowOrderDetailDialog()];
@@ -31,10 +30,9 @@ class Brain {
         this.vietnameseConverter = new VietnameseConverter();
 
         /**
-         * @type {[{'senderId' : number, 'freeDialogs' : [], 'usingDialogs' : []}]}
+         * @type {[{'senderId' : number, 'freeDialogs' : [], 'usingDialogs' : [], 'session': any}]}
          */
         this.senders = [];
-        this.session = {};
 
     }
 
@@ -42,7 +40,7 @@ class Brain {
         if (req.body.object === 'page') {
             req.body.entry.forEach(entry => {
                 entry.messaging.forEach(event => {
-                    if (event.message && event.message.text) {
+                    if (event.message && event.message.text && !event.message.quick_reply) {
                         this.response(event, 'message');
                     }
                     else if (event.message && event.message.quick_reply) {
@@ -66,79 +64,101 @@ class Brain {
      * @param {boolean} type Event này là message hay postback hay quick_reply
      */
     response(event, type) {
-        async(() => {
-            //console.log(event)
-            const senderId = event.sender.id;
-            if (!this.session.pronoun) {
-                let sender = await(new Dialog().getSenderName(senderId));
-                if (sender.gender == 'male') {
-                    this.session.pronoun = 'Anh'
-                } else if (sender.gender == 'female') {
-                    this.session.pronoun = 'Chị'
-                }
-            }
-            var message = '';
-            switch (type) {
-                // case 'message': message = this.vietnameseConverter.convert(event.message.text); break;
-                case 'message': message = event.message.text; break;
-                case 'postback': message = event.postback.payload; break;
-                case 'attachments': message = event.message.attachments; break;
-                default: message = event.message.quick_reply.payload; break;
-            }
-            console.log('MESSAGE : ' + message)
+        let understood = false;
+        const senderId = event.sender.id;
+        var message = '';
+        switch (type) {
+            // case 'message': message = this.vietnameseConverter.convert(event.message.text); break;
+            case 'message': message = event.message.text; break;
+            case 'postback': message = event.postback.payload; break;
+            case 'attachments': message = event.message.attachments; break;
+            default: message = event.message.quick_reply.payload; break;
+        }
 
-            this.insertSender(senderId);
+        this.insertSender(senderId)
+            .then((res) => {
+                var usingDialogs = this.getUsingDialogs(senderId);
+                var freeDialogs = this.getFreeDialogs(senderId);
 
-            var usingDialogs = this.getUsingDialogs(senderId);
-            var freeDialogs = this.getFreeDialogs(senderId);
+                ConsoleLog.log('text = ' + message, 'brain.js', 59);
+                var that = this;
+                var currentDialog = usingDialogs[usingDialogs.length - 1];
 
-            // ConsoleLog.log('text = ' + message, 'brain.js', 59);
-            var that = this;
-            var currentDialog = usingDialogs[usingDialogs.length - 1];
-
-            var beginNewDialog = false;
-            freeDialogs.some(function (dialog) {
-                var match = dialog.isMatch(message, senderId);
-                // ConsoleLog.log('dialog ' + dialog.getName() + ' match = ' + match, 'brain.js', 66);
-                if (match == true) {
-                    if (!that.isInStack(usingDialogs, dialog)) {
-                        usingDialogs.push(dialog);
-                        that.removeFromFreeList(freeDialogs, dialog);
-                        if (currentDialog != null) currentDialog.pause();
+                var beginNewDialog = false;
+                freeDialogs.some(function (dialog) {
+                    var match = dialog.isMatch(message, senderId);
+                    if (match == true) {
+                        understood = true;
+                        if (!that.isInStack(usingDialogs, dialog)) {
+                            usingDialogs.push(dialog);
+                            that.removeFromFreeList(freeDialogs, dialog);
+                            if (currentDialog != null) currentDialog.pause();
+                            beginNewDialog = true;
+                        }
+                        if (dialog.status == "end") {
+                            var d = that.removeFromUsingList(usingDialogs, dialog);
+                            freeDialogs.push(dialog);
+                            if (d != null) {
+                                currentDialog = d;
+                            }
+                            dialog.reset();
+                            beginNewDialog = false;
+                        }
+                        return true;
                     }
-                    if (dialog.status == "end") {
-                        var d = that.removeFromUsingList(usingDialogs, dialog);
-                        freeDialogs.push(dialog);
+                });
+
+
+                if (!beginNewDialog && currentDialog != null) {
+                    var isMatch = currentDialog.isMatch(message, senderId);
+                    understood = isMatch;
+                    if (!isMatch) {
+                        currentDialog.continue(message, senderId);
+                    }
+                    if (currentDialog.status == "end") {
+                        var d = that.removeFromUsingList(usingDialogs, currentDialog);
+                        freeDialogs.push(currentDialog);
                         if (d != null) {
                             d.continue(null, senderId);
                         }
-                        dialog.reset();
+                        currentDialog.reset();
                     }
-                    beginNewDialog = true;
-                    return true;
+
+                }
+            })
+
+    //         if (!understood) {
+    //             var userSession = this.getUserSession(senderId);
+    //             switch(userSession.notUnderstood) {
+    //                 case 0: new Dialog().sendTextMessage(senderId, "Nói cái quần gì vậy?"); break;
+    //                 case 1: new Dialog().sendTextMessage(senderId, "Tôi chỉ cho đặt hàng đồ thôi nhé. Mấy vấn đề khác tôi không quan tâm nhé."); break;
+    //                 case 2: new Dialog().sendTextMessage(senderId, "Thử nhấn \"tôi muốn đặt hàng\" xem :)"); break;
+    //                 default: new Dialog().sendTextMessage(senderId, "Thôi bye bye, chúng ta không thuộc về nhau :)"); break;
+    //             }
+    //             ++userSession.notUnderstood;
+    //         } else {
+    //             var userSession = this.getUserSession(senderId);
+    //             userSession.notUnderstood = 0;                
+    //         }
+    }
+
+
+    getGender(senderId, session) {
+        return new Dialog().getSenderName(senderId)
+            .then((sender) => {
+                if (!session.pronoun) {
+
+                    ConsoleLog.log("do ton performance", "brain.js", 136);
+                    if (sender.gender == 'male') {
+                        session.pronoun = 'Anh'
+                    } else if (sender.gender == 'female') {
+                        session.pronoun = 'Chị'
+                    }
+
                 }
             });
 
-
-            if (!beginNewDialog && currentDialog != null) {
-                // ConsoleLog.log('continue dialog', 'brain.js', 87);
-                var isMatch = currentDialog.isMatch(message, senderId);
-                if (!isMatch) {
-                    currentDialog.continue(message, senderId);
-                }
-                if (currentDialog.status == "end") {
-                    var d = that.removeFromUsingList(usingDialogs, currentDialog);
-                    freeDialogs.push(currentDialog);
-                    if (d != null) {
-                        d.continue(null, senderId);
-                    }
-                    currentDialog.reset();
-                }
-
-            }
-        })()
     }
-
 
     /**
      * Xóa dialog khỏi stack các dialog đang sử dụng
@@ -216,23 +236,25 @@ class Brain {
         });
 
         if (!result) {
+            var session = { brandId: 1, notUnderstood: 0 };
             this.senders.push({
+                session: session,
                 senderId: senderId,
                 freeDialogs: [
-                    new OrderDialog(this.session),
-                    new ShowMenuDialog(this.session),
-                    new ShowPromotionDialog(this.session),
-                    new SearchDialog(this.session),
-                    new HelloDialog(this.session),
-                    new SearchProductNameDialog(this.session),
-                    new SearchProductPriceDialog(this.session),
-                    new ShowOrderHistoryDialog(this.session),
-                    new ShowOrderDetailDialog(this.session),
-                    new ShowStoreDialog(this.session),
-                    new AskDeliveryDialog(this.session)
+                    new OrderDialog(session),
+                    new ShowMenuDialog(session),
+                    new ShowPromotionDialog(session),
+                    new HelloDialog(session),
+                    new SearchProductNameDialog(session),
+                    new ShowOrderHistoryDialog(session),
+                    new ShowOrderDetailDialog(session),
+                    new ShowStoreDialog(session)
                 ],
                 usingDialogs: [],
             });
+            return this.getGender(senderId, this.senders[this.senders.length - 1].session);
+        } else {
+            return new Promise((resolve, reject) => {resolve("")});
         }
     }
 
@@ -266,29 +288,17 @@ class Brain {
         return result;
     }
 
-    getSenderName(senderId) {
-        var that = this;
-        return new Promise((resolve, reject) => {
-            if (that._storedUsers[senderId]) {
-                resolve(that._storedUsers[senderId]);
+    getUserSession(senderId) {
+        var result = null;
+        this.senders.some((sender) => {
+            if (sender.senderId == senderId) {
+                result = sender.session;
+                return true;
             }
-            else {
-                request({
-                    url: `https://graph.facebook.com/v2.6/${senderId}`,
-                    qs: {
-                        access_token: FACEBOOK_ACCESS_TOKEN
-                    },
-                    method: 'GET',
-
-                }, function (error, response, body) {
-                    console.log(body);
-                    var person = JSON.parse(body);
-                    that._storedUsers[senderId] = person;
-                    resolve(person);
-                });
-            }
-        });
+        })
+        return result;
     }
+
 }
 
 

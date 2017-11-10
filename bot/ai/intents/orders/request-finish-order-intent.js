@@ -1,22 +1,15 @@
 let Intent = require('../intent');
 
-class HelloIntent extends Intent {
+class RequestFinishOrderIntent extends Intent{
     constructor(step, exception) {
         super(step, exception);
-        this.addPatterns(["hello"], 1);
-        this.addPatterns(["xin chào"], 1);
-        this.addPatterns(["chao xìn"], 1);
-        this.addPatterns(["halo"], 1);
-        this.addPatterns(["hé lô"], 1);
-        this.addPatterns(["hé nhô"], 1);
-        this.addPatterns(["hi", 1], true, true);
-        this.addPatterns(["alo"], 1);
-        this.addPatterns(["ê"], 1, true, true);
-        this.addPatterns(["ê mày"], 1);
-        this.addPatterns(["chào"], 1);
-        this.addPatterns(["hey"], 1);
-        this.addPatterns(["a ey"], 1);
+        this.addPatterns(['thanh toán'], 1);
+        this.addPatterns(['tính tiền'], 1);
+        this.addPatterns(['tổng cộng bao nhiêu'], 1, true, true);
     }
+
+
+
 
     /**
      * Như trên
@@ -40,6 +33,7 @@ class HelloIntent extends Intent {
             exception: this.exception,
         }
     }
+    
 }
 
-module.exports = HelloIntent
+module.exports = RequestFinishOrderIntent

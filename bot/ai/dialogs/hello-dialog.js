@@ -71,6 +71,11 @@ class HelloDialog extends Dialog {
                         type: "postback",
                         title: "Khuyến mãi",
                         payload: "Khuyến mãi"
+                    },
+                    {
+                        type: "postback",
+                        title: "Đặt hàng",
+                        payload: "order begin"
                     }
                 ]
             }]);
