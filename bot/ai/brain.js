@@ -12,6 +12,7 @@ let ShowOrderHistoryDialog = require('./dialogs/show-order-history-dialog');
 let ShowOrderDetailDialog = require('./dialogs/show-order-detail-dialog');
 let SearchProductNameDialog = require('./dialogs/search-product-name-dialog');
 let ShowStoreDialog = require('./dialogs/show-store-dialog');
+let AskDeliveryDialog = require('./dialogs/ask-delivery-dialog')
 
 var Response = require('./dialogs/entities/response');
 let Dialog = require('./dialogs/dialog');
@@ -63,6 +64,7 @@ class Brain {
      * @param {boolean} type Event này là message hay postback hay quick_reply
      */
     response(event, type) {
+        const senderId = event.sender.id;
         var message = '';
         switch (type) {
             // case 'message': message = this.vietnameseConverter.convert(event.message.text); break;
@@ -72,58 +74,74 @@ class Brain {
             default: message = event.message.quick_reply.payload; break;
         }
 
-        const senderId = event.sender.id;
-        this.insertSender(senderId);
+        this.insertSender(senderId)
+            .then((res) => {
+                var usingDialogs = this.getUsingDialogs(senderId);
+                var freeDialogs = this.getFreeDialogs(senderId);
 
-        var usingDialogs = this.getUsingDialogs(senderId);
-        var freeDialogs = this.getFreeDialogs(senderId);
+                ConsoleLog.log('text = ' + message, 'brain.js', 59);
+                var that = this;
+                var currentDialog = usingDialogs[usingDialogs.length - 1];
 
-        ConsoleLog.log('text = ' + message, 'brain.js', 59);
-        var that = this;
-        var currentDialog = usingDialogs[usingDialogs.length - 1];
-
-        var beginNewDialog = false;
-        freeDialogs.some(function (dialog) {
-            var match = dialog.isMatch(message, senderId);
-            if (match == true) {
-                if (!that.isInStack(usingDialogs, dialog)) {
-                    usingDialogs.push(dialog);
-                    that.removeFromFreeList(freeDialogs, dialog);
-                    if (currentDialog != null) currentDialog.pause();
-                    beginNewDialog = true;
-                }
-                if (dialog.status == "end") {
-                    var d = that.removeFromUsingList(usingDialogs, dialog);
-                    freeDialogs.push(dialog);
-                    if (d != null) {
-                        currentDialog = d;
+                var beginNewDialog = false;
+                freeDialogs.some(function (dialog) {
+                    var match = dialog.isMatch(message, senderId);
+                    if (match == true) {
+                        if (!that.isInStack(usingDialogs, dialog)) {
+                            usingDialogs.push(dialog);
+                            that.removeFromFreeList(freeDialogs, dialog);
+                            if (currentDialog != null) currentDialog.pause();
+                            beginNewDialog = true;
+                        }
+                        if (dialog.status == "end") {
+                            var d = that.removeFromUsingList(usingDialogs, dialog);
+                            freeDialogs.push(dialog);
+                            if (d != null) {
+                                currentDialog = d;
+                            }
+                            dialog.reset();
+                            beginNewDialog = false;
+                        }
+                        return true;
                     }
-                    dialog.reset();
-                    beginNewDialog = false;
+                });
+
+
+                if (!beginNewDialog && currentDialog != null) {
+                    var isMatch = currentDialog.isMatch(message, senderId);
+                    if (!isMatch) {
+                        currentDialog.continue(message, senderId);
+                    }
+                    if (currentDialog.status == "end") {
+                        var d = that.removeFromUsingList(usingDialogs, currentDialog);
+                        freeDialogs.push(currentDialog);
+                        if (d != null) {
+                            d.continue(null, senderId);
+                        }
+                        currentDialog.reset();
+                    }
+
                 }
-                return true;
-            }
-        });
-
-
-        if (!beginNewDialog && currentDialog != null) {
-            var isMatch = currentDialog.isMatch(message, senderId);
-            if (!isMatch) {
-                currentDialog.continue(message, senderId);
-            }
-            if (currentDialog.status == "end") {
-                var d = that.removeFromUsingList(usingDialogs, currentDialog);
-                freeDialogs.push(currentDialog);
-                if (d != null) {
-                    d.continue(null, senderId);
-                }
-                currentDialog.reset();
-            }
-
-        }
-
+            })
     }
 
+
+    getGender(senderId, session) {
+        return new Dialog().getSenderName(senderId)
+            .then((sender) => {
+                if (!session.pronoun) {
+
+                    ConsoleLog.log("do ton performance", "brain.js", 136);
+                    if (sender.gender == 'male') {
+                        session.pronoun = 'Anh'
+                    } else if (sender.gender == 'female') {
+                        session.pronoun = 'Chị'
+                    }
+
+                }
+            });
+
+    }
 
     /**
      * Xóa dialog khỏi stack các dialog đang sử dụng
@@ -201,7 +219,7 @@ class Brain {
         });
 
         if (!result) {
-            var session = {brandId: 1};
+            var session = { brandId: 1 };
             this.senders.push({
                 session: session,
                 senderId: senderId,
@@ -217,6 +235,9 @@ class Brain {
                 ],
                 usingDialogs: [],
             });
+            return this.getGender(senderId, this.senders[this.senders.length - 1].session);
+        } else {
+            return new Promise((resolve, reject) => {resolve("")});
         }
     }
 

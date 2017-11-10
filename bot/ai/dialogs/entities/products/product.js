@@ -13,7 +13,10 @@ class Product {
         this.picURL = data.PicURL;
         this.discountPrice = data.DiscountPrice;
         this.productCode = data.ProductCode;
-
+        /**
+         * @type {[Product]}
+         */
+        this.extras = [];
         this.quantity = 0;
     }
 
@@ -40,6 +43,7 @@ class Product {
             discountPrice: this.discountPrice,
             quantity: this.quantity,
             productCode: this.productCode,
+            extras: this.extras,
         };
     }
 }
