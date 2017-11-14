@@ -15,6 +15,10 @@ const PostbackChangePromotionIntent = require('../intents/promotions/postback-ch
 const CancelApplyPromotionIntent = require('../intents/promotions/cancel-apply-promotion-intent');
 let AddExtraIntent = require('../intents/orders/add-extra-intent')
 const RequestFinishOrderIntent = require('../intents/orders/request-finish-order-intent');
+const PostbackMembershipCardUseIntent = require('../intents/membership/postback-membership-card-use');
+const PostbackMembershipCardRefuseIntent = require('../intents/membership/postback-membership-card-refuse');
+const PostbackMembershipCardAvailableIntent = require('../intents/membership/postback-membership-card-available');
+const PostbackMembershipCardUnavailableIntent = require('../intents/membership/postback-membership-card-unavailable');
 
 /*----------------------------------------------------*/
 
@@ -51,10 +55,13 @@ class OrderDialog extends Dialog {
         this.addIntent(new CancelApplyPromotionIntent(0, 4));
         this.addIntent(new AddExtraIntent(7, 0));
         this.addIntent(new RequestFinishOrderIntent(11, 0));
+        this.addIntent(new PostbackMembershipCardAvailableIntent(20, 0));
+        this.addIntent(new PostbackMembershipCardRefuseIntent(23, 0));
+        this.addIntent(new PostbackMembershipCardUnavailableIntent(23, 0));
+        this.addIntent(new PostbackMembershipCardUseIntent(21, 0));
     }
 
     continue(input, senderId, info = null) {
-        ConsoleLog.log(`info = ${info}`, this.getName(), 52);
         switch (this.step) {
             case 0: this.continueException(input, senderId, info); break;
             case 1: this.receiveRequire(input, senderId); break;
@@ -79,9 +86,14 @@ class OrderDialog extends Dialog {
             case 18.2: this.receiveEditStoreName(input, senderId); break;
             case 18.3: this.receiveLocation(input, senderId); break;
             case 18.4: this.receiveDeliveryAdrress(input, senderId); break;
-            case 19: this.askForConfirmation(input, senderId); break;
-            case 20: this.receiveConfirmation(input, senderId); break;
-            case 21: this.end(); break;
+            case 19: this.checkForMembership(senderId); break;
+            case 20: this.askForMembershipCard(input, senderId); break;
+            case 21: this.receiveMembershipCardCode(input, senderId, info); break;
+            case 22: this.checkForPaymentAbility(input, senderId, info); break;
+            case 23: this.receiveUsingCardConfirmation(input, senderId, info); break;
+            case 24: this.askForConfirmation(input, senderId); break;
+            case 25: this.receiveConfirmation(input, senderId); break;
+            case 26: this.end(); break;
             default: break;
         }
     }
@@ -132,7 +144,7 @@ class OrderDialog extends Dialog {
                 'payload': 'menu show',
             }
         ];
-        this.sendTextMessage(senderId, this.session.pronoun + ' muốn gọi thêm món gì? ^.^');
+        this.sendTextMessage(senderId, this.session.pronoun + ' muốn gọi món gì? ^.^');
 
 
     }
@@ -170,11 +182,11 @@ class OrderDialog extends Dialog {
                                 type: "postback",
                                 title: "Đặt sản phẩm",
                                 payload: "Đặt $" + data[i].ProductID +
-                                " $" + data[i].ProductName +
-                                " $" + data[i].Price +
-                                " $" + data[i].PicURL +
-                                " $" + data[i].ProductCode +
-                                " $" + that.session.brandId,
+                                    " $" + data[i].ProductName +
+                                    " $" + data[i].Price +
+                                    " $" + data[i].PicURL +
+                                    " $" + data[i].ProductCode +
+                                    " $" + that.session.brandId,
                             }
                         ]
                     }
@@ -224,7 +236,6 @@ class OrderDialog extends Dialog {
                     this.reply(senderId,
                         new SimpleTextTemplate('Ok ' + input + ' phần ' + currentProduct.productName).template)
                         .then(function (data) {
-                            that.session.orderDialog.currentProduct = {};
                             that.continue(input, senderId);
                         });
                 })
@@ -745,23 +756,174 @@ class OrderDialog extends Dialog {
 
     /**step 18.4 */
     receiveDeliveryAdrress(input, senderId) {
-        this.sendTextMessage(senderId, "Bạn kiểm tra lại đơn hàng giúp mình nhé")
         this.session.orderDialog.address = input;
-        this.step = 19;
-        this.continue(input, senderId);
+        this.sendTextMessage(senderId, "Bạn kiểm tra lại đơn hàng giúp mình nhé")
+            .then((response) => {
+                this.step = 19;
+                this.continue(input, senderId);
+            })
     }
 
 
+
+
     /**
-     * Step 19: confirm lại order
+     * Step 19
+     * @param {*} senderId 
+     */
+    checkForMembership(senderId) {
+        let params = {
+            facebookPSID: senderId,
+        }
+        new Request().sendGetRequest('/LBFC/Membership/SearchMembershipCardByFacebookPSID', params, '')
+            .then((response) => {
+                if (response != '\"Membership card not found\"') {
+
+                    /**
+                     * @type {{Money, MembershipCardCode, Id, CustomerId}}
+                     */
+                    let card = JSON.parse(response);
+                    if (card.Money >= this.session.orderDialog.finalPrice) {
+                        let elements = [
+                            {
+                                content_type: "text",
+                                title: "Xài",
+                                payload: `membership card use ${card.MembershipCardCode}`,
+                                image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
+                            },
+                            {
+                                content_type: "text",
+                                title: "Hông xài đâu",
+                                payload: "membership card refuse",
+                                image_url: "https://cdn4.iconfinder.com/data/icons/wirecons-free-vector-icons/32/menu-alt-512.png"
+                            }
+                        ]
+                        this.sendQuickReply(senderId,
+                            `Em thấy ${this.session.pronoun} có tạo thẻ thành viên này,  ${this.session.pronoun} có muốn xài không?`,
+                            elements);
+                    } else {
+                        this.step = 24;
+                        this.continue('', senderId);
+                    }
+                } else {
+                    ConsoleLog.log("Card founddddddddd", this.getName(), 811);
+                    
+                    let elements = [
+                        {
+                            content_type: "text",
+                            title: "Có rùi",
+                            payload: `membership card available`,
+                            image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
+                        },
+                        {
+                            content_type: "text",
+                            title: "Không có",
+                            payload: `membership card unavailable`,
+                            image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
+                        }
+                    ];
+                    this.sendQuickReply(senderId, `${this.session.pronoun} có thẻ thành viên chưa?`, elements);
+                }
+            })
+    }
+
+    /**
+     * Step 20
+     * @param {*} input 
+     * @param {*} senderId 
+     */
+    askForMembershipCard(input, senderId) {
+        this.sendTextMessage(senderId, `${this.session.pronoun} nhập mã thẻ với`);
+        this.step = 21;
+    }
+
+    /**
+     * Step 21
+     * @param {*} input 
+     * @param {*} senderId 
+     * @param {{cardCode}} info 
+     */
+    receiveMembershipCardCode(input, senderId, info) {
+        let params = {
+            membershipCardCode: info == undefined ? input : info.cardCode,
+        }
+        ConsoleLog.log(params, this.getName(), 851);
+        new Request().sendGetRequest('/LBFC/Membership/SearchMembershipCard', params, '')
+            .then((response) => {
+                if (response == null) {
+                    this.sendTextMessage(senderId, 'Em không kiếm thấy mã thẻ vừa nhập :\'<');
+                } else {
+                    this.insertMembershipCard(params.membershipCardCode, senderId)
+                        .then((response) => {
+                            if (response !== '502') {
+                                this.sendTextMessage(senderId, 'Em đã liên kết mã thẻ với facebook.');
+                                let info = JSON.parse(response);
+                                this.step = 22;
+                                this.continue(input, senderId, info);
+                            } else {
+                                this.sendTextMessage(senderId, `Hì hì hệ thống đang trục trặc xíu, ${this.session.pronoun} đợi xíu lát nhập lại nha.`);
+                            }
+                        })
+                }
+            })
+    }
+
+    /**
+     * Step 22
+     * @param {*} input 
+     * @param {*} senderId 
+     * @param {{Money, MembershipCardCode, Id, CustomerId}} info 
+     */
+    checkForPaymentAbility(input, senderId, info) {
+        if (info.Money < this.session.orderDialog.finalPrice) {
+            this.sendTextMessage(senderId, `${this.session.pronoun} ơi, thẻ của ${this.session.pronoun} không đủ tiền rồi :\'< Mình tính bằng tiền mặt đỡ nha.`)
+                .then((res) => {
+                    let response = {
+                        isUsed: false,
+                        cardCode: info.MembershipCardCode
+                    }
+                    this.step = 23;
+                    this.continue(input, senderId, response);
+                })
+        } else {
+            let response = {
+                isUsed: true,
+                cardCode: info.MembershipCardCode
+            }
+            this.step = 23;
+            this.continue(input, senderId, response);
+        }
+    }
+
+    /**
+     * Step 23
+     * @param {*} input 
+     * @param {*} senderId 
+     * @param {{isUsed:boolean, cardCode: string}} info 
+     */
+    receiveUsingCardConfirmation(input, senderId, info) {
+        if (info.isUsed) {
+            this.session.orderDialog.membershipCardCode = info.cardCode;
+            this.sendTextMessage(senderId, 'Vậy là mình xài thẻ ha');
+        } else {
+            this.session.orderDialog.membershipCardCode = null;
+            this.sendTextMessage(senderId, 'Vậy là mình không xài thẻ ha');
+        }
+        this.step = 24;
+        this.continue(input, senderId);
+    }
+
+    /**
+     * Step 24: confirm lại order
      * @param {number} senderId 
      */
     askForConfirmation(input, senderId) {
-        this.step = 20;
+        this.step = 25;
         var that = this;
         this.session.orderDialog.orderDetails.forEach(function (element) {
-            ConsoleLog.log(element, that.getName(), 459);
+            ConsoleLog.log(element, that.getName(), 923);
         }, this);
+        ConsoleLog.log(this.session.orderDialog, this.getName(), 925);
         this.getSenderName(senderId)
             .then((sender) => {
                 var recipientName = sender.first_name + " " + sender.last_name;
@@ -806,15 +968,17 @@ class OrderDialog extends Dialog {
                 ConsoleLog.log(summary, this.getName(), 656);
                 that.sendReceipt(senderId, recipientName, orderNumber, orderUrl, address, summary, adjustments, elements)
                     .then(function (data) {
-                        that.sendTextMessage(senderId, 'Đồng ý đặt hàng?');
+                        that.step = 25;
+                        that.continue(input, senderId);
                     });
 
             });
 
     }
 
+
     /**
-     * Step 20: Nhận coi user có đồng ý đặt hàng không
+     * Step 25: Nhận coi user có đồng ý đặt hàng không
      * @param {string} input 
      * @param {number} senderId 
      */
@@ -823,13 +987,17 @@ class OrderDialog extends Dialog {
             this.order(senderId)
                 .then((data) => {
                     this.sendTextMessage(senderId, 'Đơn hàng của bạn đã thành công.')
-                    this.sendTextMessage(senderId, 'Vui lòng đợi trong ít phút nhân viên cửa hàng sẽ gọi điện cho bạn')
-                    this.sendTextMessage(senderId, 'Chúc bạn một ngày vui vẻ')
+                        .then((response) => {
+                            this.sendTextMessage(senderId, 'Vui lòng đợi trong ít phút nhân viên cửa hàng sẽ gọi điện cho bạn')
+                        })
+                        .then((response) => {
+                            this.sendTextMessage(senderId, 'Chúc bạn một ngày vui vẻ')
+                        })
                 })
                 .catch((err) => {
                     console.log(err);
                 })
-            this.step = 21;
+            this.step = 26;
             this.continue(input, senderId);
         } else if (input.match(/(ko|không|hủy|thôi)/i)) {
             this.sendTextMessage('Đơn hàng của bạn đã bị hủy')
@@ -1231,20 +1399,30 @@ class OrderDialog extends Dialog {
             })
     }
 
+    insertMembershipCard(cardCode, senderId) {
+        let params = {
+            cardCode,
+            facebookPSID: senderId,
+        }
+        ConsoleLog.log(params, this.getName(), 1408);
+        return new Request().sendPostRequest('/LBFC/Membership/InsertFacebookPSID', params);
+    }
+
     getName() {
         return "order dialog";
     }
 
     reset() {
-        super.reset();
         this.session.orderDialog = {};
+        this.session.orderDialog.currentPromotion = null;
         this.session.orderDialog.orderDetails = [];
         this.session.orderDialog.finalPrice = this.session.orderDialog.originalPrice = 0;
-
+        
         /**
          * @type {{ProductModel}}
          */
         this.session.orderDialog.currentProduct = {};
+        super.reset();
     }
 
 

@@ -81,8 +81,6 @@ class ReceiveFullOrderIntent extends Intent {
             'step': this.step,
             'exception': this.exception
         };
-        console.log('receive-full-order-intent:78 ------------------------------------');
-        console.log(result);
         return result;
     }
 
