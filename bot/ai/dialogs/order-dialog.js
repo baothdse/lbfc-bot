@@ -19,7 +19,7 @@ const PostbackMembershipCardUseIntent = require('../intents/membership/postback-
 const PostbackMembershipCardRefuseIntent = require('../intents/membership/postback-membership-card-refuse');
 const PostbackMembershipCardAvailableIntent = require('../intents/membership/postback-membership-card-available');
 const PostbackMembershipCardUnavailableIntent = require('../intents/membership/postback-membership-card-unavailable');
-
+const PostbackConfirmAddressIntent = require('../intents/delivery/postback-confirm-address');
 /*----------------------------------------------------*/
 
 /*-------------------Template-------------------------*/
@@ -59,6 +59,7 @@ class OrderDialog extends Dialog {
         this.addIntent(new PostbackMembershipCardRefuseIntent(23, 0));
         this.addIntent(new PostbackMembershipCardUnavailableIntent(23, 0));
         this.addIntent(new PostbackMembershipCardUseIntent(21, 0));
+        this.addIntent(new PostbackConfirmAddressIntent(18.5, 0));
     }
 
     continue(input, senderId, info = null) {
@@ -86,6 +87,7 @@ class OrderDialog extends Dialog {
             case 18.2: this.receiveEditStoreName(input, senderId); break;
             case 18.3: this.receiveLocation(input, senderId); break;
             case 18.4: this.receiveDeliveryAdrress(input, senderId); break;
+            case 18.5: this.receiveAdrressConfirmation(input, senderId, info); break;
             case 19: this.checkForMembership(senderId); break;
             case 20: this.askForMembershipCard(input, senderId); break;
             case 21: this.receiveMembershipCardCode(input, senderId, info); break;
@@ -756,12 +758,56 @@ class OrderDialog extends Dialog {
 
     /**step 18.4 */
     receiveDeliveryAdrress(input, senderId) {
-        this.session.orderDialog.address = input;
-        this.sendTextMessage(senderId, "Bạn kiểm tra lại đơn hàng giúp mình nhé")
+        ConsoleLog.log(input, this.getName(), 761);
+        const GOOGLE_API_KEY = 'AIzaSyD6D1KPx1dD32u0BHDHK2Pp0bDMnfkXLLM';
+        const URL = 'https://maps.googleapis.com/maps/api/place/autocomplete/json';
+        const params = {
+            input,
+            types: 'geocode',
+            key: GOOGLE_API_KEY
+        }
+        new Request().sendUniversalGetRequest(URL, params, '')
+        .then((response) => {
+            let places = JSON.parse(response);
+            let topPlace = places.predictions[0].description;
+            let elements = [
+                {
+                    content_type: "text",
+                    title: "Đúng rồi",
+                    payload: `address use ${topPlace}`,
+                    image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
+                },
+                {
+                    content_type: "text",
+                    title: "Hông phải",
+                    payload: `address refuse`,
+                    image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
+                }
+            ];
+            this.sendQuickReply(senderId, `Có phải ý ${this.session.pronoun} là ${topPlace}?`, elements);
+        })
+        .catch((err) => {
+            ConsoleLog.log(err, this.getName(), 789);
+        })
+    }
+
+    /**
+     * Step 18.5
+     * @param {*} input 
+     * @param {*} senderId 
+     * @param {{address}} info 
+     */
+    receiveAdrressConfirmation(input, senderId, info) {
+        if (info.address == null) {
+            this.sendTextMessage(senderId, `${this.session.pronoun} có thể nhập lại địa chỉ mà rõ hơn xíu được hông?`)
             .then((response) => {
-                this.step = 19;
-                this.continue(input, senderId);
+                this.step = 18.4;
             })
+        } else {
+            this.session.orderDialog.address = info.address;
+            this.step = 19;
+            this.continue(input, senderId);
+        }
     }
 
 

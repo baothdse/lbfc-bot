@@ -58,21 +58,32 @@ Request.prototype.sendGetRequest =  function (url, query, data) {
             result = body;
         }
     });
-    // var httpRequest = http.request(options, function (response) {
-    //     response.setEncoding('utf8');
-    //     response.on('data', function (response) {
-    //         console.log("body: " + response);
-    //         result = response;
-    //         //callback(chunk);
-    //     });
-    //     response.on('error', function (chunk) {
-    //         console.log("error: " + chunk);
-    //         reject(chunk);
-    //     });
-    //     response.on('end', function (response) {
-    //         //response.send('ok');
-    //     })
-    // });
+    
+    return Promise.resolve(httpRequest);
+}
+
+/**
+ * 
+ */
+Request.prototype.sendUniversalGetRequest =  function (url, query, data) {
+    
+    var result = null;
+    var options = {
+        url: url,
+        qs: query,
+        method: 'Get',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+    };
+
+    var httpRequest =  RequestPromise(options, function (error, response, body) {
+        if (error) {
+            console.log("Error");
+        } else {
+            result = body;
+        }
+    });
     
     return Promise.resolve(httpRequest);
 }
