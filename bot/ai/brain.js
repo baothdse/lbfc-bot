@@ -14,6 +14,7 @@ let SearchProductNameDialog = require('./dialogs/search-product-name-dialog');
 let ShowStoreDialog = require('./dialogs/show-store-dialog');
 let AskDeliveryDialog = require('./dialogs/ask-delivery-dialog')
 let SearchPopularProducts = require('./dialogs/show-popular-products-dialog');
+const ShowMembershipEventDialog = require('./dialogs/show-membership-event-dialog');
 
 var Response = require('./dialogs/entities/response');
 let Dialog = require('./dialogs/dialog');
@@ -85,6 +86,8 @@ class Brain {
                 var that = this;
                 var currentDialog = usingDialogs[usingDialogs.length - 1];
 
+                
+
                 var beginNewDialog = false;
                 freeDialogs.some(function (dialog) {
                     var match = dialog.isMatch(message, senderId);
@@ -126,6 +129,10 @@ class Brain {
                     }
 
                 }
+
+                usingDialogs.forEach((element) => {
+                    ConsoleLog.log(element.getName(), 'brain.js', 90);
+                })
             })
 
     //         if (!understood) {
@@ -250,7 +257,8 @@ class Brain {
                     new ShowOrderHistoryDialog(session),
                     new ShowOrderDetailDialog(session),
                     new ShowStoreDialog(session),
-                    new SearchPopularProducts(session)
+                    new SearchPopularProducts(session),
+                    new ShowMembershipEventDialog(session),
                 ],
                 usingDialogs: [],
             });

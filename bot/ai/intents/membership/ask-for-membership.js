@@ -1,9 +1,16 @@
 let Intent = require('../intent');
 
-class ReceiveProductNameIntent extends Intent {
+class AskForMembershipIntent extends Intent {
     constructor(step, exception) {
         super(step, exception);
-        this.addPatterns(['DaiTu', 'DongTuYChi', '\\w+'], 1);
+        this.addPatterns(['có tạo thẻ thành viên không'], 1);
+        this.addPatterns(['có tạo thẻ không'], 1);
+        this.addPatterns(['có làm thẻ thành viên không'], 1);
+        this.addPatterns(['có làm thẻ thành viên ko'], 1);
+        this.addPatterns(['có làm thẻ không'], 1);
+        this.addPatterns(['có làm thẻ hông'], 1);
+        this.addPatterns(['có tạo thẻ thành viên ko'], 1);
+        this.addPatterns(['có tạo thẻ thành viên hông'], 1);
     }
 
     /**
@@ -23,19 +30,11 @@ class ReceiveProductNameIntent extends Intent {
     }
 
     matchPattern1(input, match, pattern) {
-        let productName = '';
-        let inputs = input.split(' ');
-        for (let index = 2; index < inputs.length; index++) {
-            productName += input.split(" ")[index] + ' ';
-        }
-        console.log(productName);
         return {
-            productName: productName.trim(),
             step: this.step,
             exception: this.exception,
         }
     }
-    
 }
 
-module.exports = ReceiveProductNameIntent;
+module.exports = AskForMembershipIntent

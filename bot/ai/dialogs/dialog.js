@@ -79,7 +79,7 @@ class Dialog {
             json: {
                 recipient: { id: senderId },
                 message: {
-                    text: "Vui lòng cho chúng tôi biết địa điểm để có thể hỗ trợ bạn tốt hơn",
+                    text: `Cho em biết địa điểm của ${this.session.pronoun} đi`,
                     quick_replies: [
                         {
                             content_type: "location"

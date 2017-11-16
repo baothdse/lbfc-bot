@@ -20,7 +20,7 @@ const PostbackMembershipCardRefuseIntent = require('../intents/membership/postba
 const PostbackMembershipCardAvailableIntent = require('../intents/membership/postback-membership-card-available');
 const PostbackMembershipCardUnavailableIntent = require('../intents/membership/postback-membership-card-unavailable');
 const PostbackConfirmAddressIntent = require('../intents/delivery/postback-confirm-address');
-const ReceiveProductNameIntent = require('../intents/products/receive-product-name-intent')
+const ReceiveProductNameIntent = require('../intents/orders/receive-product-name-intent')
 /*----------------------------------------------------*/
 
 /*-------------------Template-------------------------*/
@@ -61,7 +61,7 @@ class OrderDialog extends Dialog {
         this.addIntent(new PostbackMembershipCardUnavailableIntent(23, 0));
         this.addIntent(new PostbackMembershipCardUseIntent(21, 0));
         this.addIntent(new PostbackConfirmAddressIntent(18.5, 0));
-        //this.addIntent(new ReceiveProductNameIntent(0, 5));
+        this.addIntent(new ReceiveProductNameIntent(0, 5));
     }
 
     continue(input, senderId, info = null) {
