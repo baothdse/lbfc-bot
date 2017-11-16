@@ -13,13 +13,14 @@ const ReceiveStoreNameIntent = require('../intents/orders/receive-store-name-int
 const PostbackApplyPromotion = require('../intents/promotions/postback-apply-promotion-intent');
 const PostbackChangePromotionIntent = require('../intents/promotions/postback-change-promotion-intent');
 const CancelApplyPromotionIntent = require('../intents/promotions/cancel-apply-promotion-intent');
-let AddExtraIntent = require('../intents/orders/add-extra-intent')
+const AddExtraIntent = require('../intents/orders/add-extra-intent');
 const RequestFinishOrderIntent = require('../intents/orders/request-finish-order-intent');
 const PostbackMembershipCardUseIntent = require('../intents/membership/postback-membership-card-use');
 const PostbackMembershipCardRefuseIntent = require('../intents/membership/postback-membership-card-refuse');
 const PostbackMembershipCardAvailableIntent = require('../intents/membership/postback-membership-card-available');
 const PostbackMembershipCardUnavailableIntent = require('../intents/membership/postback-membership-card-unavailable');
 const PostbackConfirmAddressIntent = require('../intents/delivery/postback-confirm-address');
+const ReceiveProductNameIntent = require('../intents/products/receive-product-name-intent')
 /*----------------------------------------------------*/
 
 /*-------------------Template-------------------------*/
@@ -60,6 +61,7 @@ class OrderDialog extends Dialog {
         this.addIntent(new PostbackMembershipCardUnavailableIntent(23, 0));
         this.addIntent(new PostbackMembershipCardUseIntent(21, 0));
         this.addIntent(new PostbackConfirmAddressIntent(18.5, 0));
+        //this.addIntent(new ReceiveProductNameIntent(0, 5));
     }
 
     continue(input, senderId, info = null) {
@@ -118,6 +120,8 @@ class OrderDialog extends Dialog {
                 this.changePromotion(input, senderId, info); break;
             case 4:
                 this.confirmCancelPromotion(senderId); break;
+            case 5: 
+                this.receiveProductName(input, senderId, info); break;
             default:
                 break;
         }
@@ -1011,8 +1015,9 @@ class OrderDialog extends Dialog {
                     ConsoleLog.log(element, this.getName(), 655);
                     elements.push(element)
                 }
+                let paymentMethod = this.session.orderDialog.membershipCardCode == null ? "Tiền mặt" : "Thẻ thành viên";
                 ConsoleLog.log(summary, this.getName(), 656);
-                that.sendReceipt(senderId, recipientName, orderNumber, orderUrl, address, summary, adjustments, elements)
+                that.sendReceipt(senderId, recipientName, orderNumber, orderUrl, address, summary, adjustments, elements, paymentMethod)
                     .then(function (data) {
                         that.step = 25;
                         that.continue(input, senderId);
@@ -1192,6 +1197,11 @@ class OrderDialog extends Dialog {
         }, this);
         this.session.orderDialog.finalPrice = this.session.orderDialog.originalPrice;
         this.sendTextMessage(senderId, "Đã hủy khuyến mãi :'<")
+    }
+
+    receiveProductName(input, sender, info) {
+        this.step = 3;
+        this.continue(info.productName, sender, info);
     }
 
 

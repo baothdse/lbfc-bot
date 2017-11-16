@@ -21,7 +21,7 @@ class Dialog {
          */
         this.intents = [];
         /**
-         * @type {{brandId: number, pronoun: string, coordinates: [], searchProductDialog: {productName, topPrice, bottomPrice}, orderDialog: {orderDetails: [{productID, productName, price, picURL, discountPrice, productCode, extras: [{productId, productName, price}], note: {extra: string, time: string}], originalPrice: number, finalPrice: number, currentProduct: ProductModel, currentPromotion: {PromotionDetailID, PromotionCode, BuyProductCode, DiscountRate, DiscountAmount}, address: string, membershipCardCode: any}}}
+         * @type {{brandId: number, pronoun: string, coordinates: [], searchProductDialog: {productName, topPrice, bottomPrice}, orderDialog: {orderDetails: [{productID, productName, price, picURL, discountPrice, productCode, extras: [{productId, productName, price}], note: {extra: string}], originalPrice: number, finalPrice: number, currentProduct: ProductModel, currentPromotion: {PromotionDetailID, PromotionCode, BuyProductCode, DiscountRate, DiscountAmount}, address: string, membershipCardCode: any, timeNote: string}}}
          */
         this.session = session;
         this.exception = 0;
@@ -96,7 +96,7 @@ class Dialog {
         })
     }
 
-    sendReceipt(senderId, recipientName, orderNumber, orderUrl, address, summary, adjustments, elements) {
+    sendReceipt(senderId, recipientName, orderNumber, orderUrl, address, summary, adjustments, elements, paymentMethod) {
         console.log("đã chạy vào send receipt")
         return request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
@@ -112,7 +112,7 @@ class Dialog {
                             recipient_name: recipientName,
                             order_number: orderNumber,
                             currency: "VND",
-                            payment_method: "Tiền mặt",
+                            payment_method: paymentMethod,
                             order_url: orderUrl,
                             timestamp: "1428444852",
                             address: address,

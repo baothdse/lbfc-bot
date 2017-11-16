@@ -47,7 +47,7 @@ class SearchProductNameDialog extends Dialog {
      * @param {} senderId 
      */
     askForProductName(senderId) {
-        this.sendTextMessage(senderId, "Bạn muốn tìm món gì?");
+        this.sendTextMessage(senderId, `${this.session.pronoun} muốn tìm món gì?`);
         this.step = 2;
     }
 

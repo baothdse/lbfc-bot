@@ -13,6 +13,7 @@ let ShowOrderDetailDialog = require('./dialogs/show-order-detail-dialog');
 let SearchProductNameDialog = require('./dialogs/search-product-name-dialog');
 let ShowStoreDialog = require('./dialogs/show-store-dialog');
 let AskDeliveryDialog = require('./dialogs/ask-delivery-dialog')
+let SearchPopularProducts = require('./dialogs/show-popular-products-dialog');
 
 var Response = require('./dialogs/entities/response');
 let Dialog = require('./dialogs/dialog');
@@ -248,7 +249,8 @@ class Brain {
                     new SearchProductNameDialog(session),
                     new ShowOrderHistoryDialog(session),
                     new ShowOrderDetailDialog(session),
-                    new ShowStoreDialog(session)
+                    new ShowStoreDialog(session),
+                    new SearchPopularProducts(session)
                 ],
                 usingDialogs: [],
             });
