@@ -1,7 +1,7 @@
 let ClassParser = require('../utils/class-parser');
 let Brain = require('../brain');
 let Pattern = require('./patterns/pattern');
-
+const EditDistance = require('../utils/edit-distance')
 class Intent {
     constructor(step, exception) {
 
@@ -56,6 +56,25 @@ class Intent {
             }
         }
         return null;
+    }
+
+    /**
+     * Trả về pattern có độ trùng cao nhất
+     * @returns {{string: string, distance: number}}
+     */
+    getMinDistance(input) {
+        let minPattern = {
+            string: '',
+            distance: 1000,
+        }
+        this.patterns.forEach((pattern) => {
+            let string = pattern.pattern.getString();
+            let distance = EditDistance.levenshteinDistance(input, string);
+            if (distance < minPattern.distance) {
+                minPattern = {string, distance};
+            }
+        })
+        return minPattern
     }
 
     getResult(input, matchResult, which, pattern) {

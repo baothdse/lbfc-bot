@@ -48,14 +48,7 @@ class ShowPromotionDialog extends Dialog{
                         "url": "https://www.facebook.com/permalink.php?story_fbid=143435499716864&id=119378645455883",
                         "messenger_extensions": true,
                         "webview_height_ratio": "tall"
-                    },
-                    buttons: [
-                        {
-                            type: "postback",
-                            title: "Áp dụng",
-                            payload: "promotion select $" + promotion.PromotionCode,
-                        }
-                    ]
+                    }
                 }
                 elements.push(element);
             });

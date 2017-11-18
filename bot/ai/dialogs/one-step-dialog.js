@@ -1,6 +1,7 @@
 let Dialog = require('./dialog');
 let Request = require('../utils/request');
 let AskForDeliveryTimeIntent = require('../intents/orders/ask-for-delivery-time-intent');
+const ThankyouIntent = require('../intents/thank-you-intent')
 
 const ConsoleLog = require('../utils/console-log');
 
@@ -8,6 +9,7 @@ class OneStepDialog extends Dialog {
     constructor(session) {
         super(session);
         this.addIntent(new AskForDeliveryTimeIntent(1, 0));
+        this.addIntent(new ThankyouIntent(2, 0));
         this.error = 0;
     }
 
@@ -16,7 +18,7 @@ class OneStepDialog extends Dialog {
             case 1:
                 this.responseDeliveryTime(senderId);
                 break;
-            case 2: this.receiveUserIntention(input, senderId); break;
+            case 2: this.responseThankyou(senderId); break;
             default:
                 this.end();
                 break;
@@ -31,6 +33,18 @@ class OneStepDialog extends Dialog {
         this.sendTextMessage(senderId, `Bên em sẽ giao hàng từ 15-30p nha ${this.session.pronoun.toLowerCase()}`)
         .then((response) => {
             this.sendTextMessage(senderId, `Tùy địa điểm giao hàng`);
+        })
+        this.step = 999;
+        this.continue('', '');
+    }
+
+    responseThankyou(senderId) {
+        this.sendTextMessage(senderId, `Hí hí`)
+        .then((res) => {
+            return this.sendTextMessage(senderId, `Hông có chi ${this.session.pronoun.toLowerCase()}`);
+        })
+        .then((res) => {
+            this.sendTextMessage(senderId, `:3`);
         })
         this.step = 999;
         this.continue('', '');

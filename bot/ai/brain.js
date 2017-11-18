@@ -16,6 +16,7 @@ let AskDeliveryDialog = require('./dialogs/ask-delivery-dialog')
 let SearchPopularProducts = require('./dialogs/show-popular-products-dialog');
 const ShowMembershipEventDialog = require('./dialogs/show-membership-event-dialog');
 const OneStepDialog = require('./dialogs/one-step-dialog');
+const ChangeOrderDialog = require('./dialogs/change-order-dialog')
 
 var Response = require('./dialogs/entities/response');
 let Dialog = require('./dialogs/dialog');
@@ -83,11 +84,11 @@ class Brain {
                 var usingDialogs = this.getUsingDialogs(senderId);
                 var freeDialogs = this.getFreeDialogs(senderId);
 
-                ConsoleLog.log('text = ' + message, 'brain.js', 59);
+                ConsoleLog.log(message, 'brain.js', 59);
                 var that = this;
                 var currentDialog = usingDialogs[usingDialogs.length - 1];
 
-                
+
 
                 var beginNewDialog = false;
                 freeDialogs.some(function (dialog) {
@@ -131,24 +132,12 @@ class Brain {
 
                 }
 
-                usingDialogs.forEach((element) => {
-                    ConsoleLog.log(element.getName(), 'brain.js', 90);
-                })
+
+                if (!understood) {
+                    this.handleUnexpectedInput(message, senderId, usingDialogs, freeDialogs, this.getUserSession(senderId));
+                }
             })
 
-    //         if (!understood) {
-    //             var userSession = this.getUserSession(senderId);
-    //             switch(userSession.notUnderstood) {
-    //                 case 0: new Dialog().sendTextMessage(senderId, "Nói cái quần gì vậy?"); break;
-    //                 case 1: new Dialog().sendTextMessage(senderId, "Tôi chỉ cho đặt hàng đồ thôi nhé. Mấy vấn đề khác tôi không quan tâm nhé."); break;
-    //                 case 2: new Dialog().sendTextMessage(senderId, "Thử nhấn \"tôi muốn đặt hàng\" xem :)"); break;
-    //                 default: new Dialog().sendTextMessage(senderId, "Thôi bye bye, chúng ta không thuộc về nhau :)"); break;
-    //             }
-    //             ++userSession.notUnderstood;
-    //         } else {
-    //             var userSession = this.getUserSession(senderId);
-    //             userSession.notUnderstood = 0;                
-    //         }
     }
 
 
@@ -261,12 +250,13 @@ class Brain {
                     new SearchPopularProducts(session),
                     new ShowMembershipEventDialog(session),
                     new OneStepDialog(session),
+                    new ChangeOrderDialog(session)
                 ],
                 usingDialogs: [],
             });
             return this.getGender(senderId, this.senders[this.senders.length - 1].session);
         } else {
-            return new Promise((resolve, reject) => {resolve("")});
+            return new Promise((resolve, reject) => { resolve("") });
         }
     }
 
@@ -288,6 +278,7 @@ class Brain {
     /**
      * Trả về usingDialog của một senderId
      * @param {number} senderId 
+     * @returns {[Dialog]}
      */
     getUsingDialogs(senderId) {
         var result = null;
@@ -309,6 +300,50 @@ class Brain {
             }
         })
         return result;
+    }
+
+    handleUnexpectedInput(input, senderId, usingDialogs, freeDialogs, session) {
+        if (input.match(/message refined /i)) {
+            let match = input.match(/message refined /i);
+            let message = input.substring(match.index + match.length, input.length);
+            this.response({ message: { text: message } }, 'message');
+            return;
+        } else if (input.match(/message decline/i)) {
+            new Dialog().sendTextMessage(senderId, `${session.pronoun} thử đổi vài chữ xem em có hiểu không, hì hì`);
+            return;
+        }
+        let minPattern = { string: '', distance: 1000 };
+        usingDialogs.forEach((dialog) => {
+            dialog.intents.forEach((intent) => {
+                let result = intent.getMinDistance(input);
+                if (result.distance < minPattern.distance) {
+                    minPattern = { distance: result.distance, string: result.string }
+                }
+            })
+        })
+        freeDialogs.forEach((dialog) => {
+            dialog.intents.forEach((intent) => {
+                let result = intent.getMinDistance(input);
+                if (result.distance < minPattern.distance) {
+                    minPattern = { distance: result.distance, string: result.string }
+                }
+            })
+        })
+        let elements = [
+            {
+                content_type: "text",
+                title: "Đúng rồi",
+                payload: `message refined ${minPattern.string}`,
+                image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
+            },
+            {
+                content_type: "text",
+                title: "Hông phải",
+                payload: `message decline`,
+                image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
+            }
+        ]
+        new Dialog().sendQuickReply(senderId, `Có phải ý ${session.pronoun.toLowerCase()} là *${minPattern.string}*?`, elements);
     }
 
 }

@@ -65,6 +65,7 @@ class OrderDialog extends Dialog {
     }
 
     continue(input, senderId, info = null) {
+        ConsoleLog.log(`Currently in step ${this.step}`, this.getName(), 68);
         switch (this.step) {
             case 0: this.continueException(input, senderId, info); break;
             case 1: this.receiveRequire(input, senderId); break;
@@ -260,7 +261,6 @@ class OrderDialog extends Dialog {
         new Request().sendGetRequest('/LBFC/Product/GetProductExtra', { 'productId': currentProduct.productID }, "")
             .then((data) => {
                 let listExtraProduct;
-                ConsoleLog.log(data == '', this.getName(), 264);
                 if (data != "") {
                     that.step = 7;
                     that.sendTextMessage(senderId, 'Có một số món dùng kèm với món này, ' + this.session.pronoun.toLowerCase() + ' có muốn dùng không?')
@@ -1268,7 +1268,6 @@ class OrderDialog extends Dialog {
         this.reply(senderId, new SimpleTextTemplate(that.session.pronoun + ' vui lòng nhập số thôi').template).then(
             function (data) {
                 that.step = step;
-                that.continue('', senderId);
             }
         );
     }

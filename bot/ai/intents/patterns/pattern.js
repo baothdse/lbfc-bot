@@ -14,9 +14,7 @@ class Pattern {
      * @returns {string} regex dưới dạng chuỗi
      */
     getString() {
-        console.log('pattern:17----------------------')
         var str = this.string.toString();
-        console.log('str = ' + str.substring(1, str.length - 2));
         return str.substring(1, str.length - 2);
     }
 }

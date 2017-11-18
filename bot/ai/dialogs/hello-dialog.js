@@ -42,6 +42,7 @@ class HelloDialog extends Dialog {
     showOption(input, senderId) {
         console.log(input)
 
+
         // if (input.constructor === Array) {
         //     var coordinates = input[0].payload.coordinates
         //     this.session.coordinates = coordinates;
