@@ -14,7 +14,6 @@ class ShowStoreDialog extends Dialog {
     }
 
     continue(input, senderId, info = null) {
-        console.log("===STANDING AT SHOW STORE DIALOG===");
         switch (this.step) {
             case 1: this.showStore(input, senderId, info); break;
             case 2: this.end();
@@ -26,7 +25,7 @@ class ShowStoreDialog extends Dialog {
         let that = this;
         this.step = 2;
         let reply = "";
-        this.sendTextMessage(senderId, 'Hiện tại hệ thống chúng tôi có các cửa hàng sau')
+        this.sendTextMessage(senderId, 'Hiện tại hệ thống tụi em có các cửa hàng sau')
             .then((response) => {
                 this.getStore()
                 .then((info) => {
