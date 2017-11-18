@@ -2,6 +2,8 @@ let Dialog = require('./dialog');
 let Pattern = require('../intents/patterns/pattern');
 let PromotionListTemplate = require('./templates/promotion-list-template');
 let Request = require('../utils/request');
+const ShowPromotionIntent = require('../intents/promotions/show-promotion-intent');
+const ConsoleLog = require('../utils/console-log');
 
 class ShowPromotionDialog extends Dialog{
 
@@ -11,11 +13,7 @@ class ShowPromotionDialog extends Dialog{
     }
 
     push() {
-        ////this.addPatterns(['KhuyenMai'], false, false, 1, 0);
-    }
-
-    pause() {
-        --this.step;
+        this.addIntent(new ShowPromotionIntent(1, 0));
     }
 
     continue(input, senderId) {
@@ -35,19 +33,44 @@ class ShowPromotionDialog extends Dialog{
      * @param {int} senderId 
      */
     showPromotion(senderId) {
-        var that = this;
+        var request = new Request();
+        request.sendGetRequest('/LBFC/Promotion/GetBrandPromotion', {'brandId' : this.session.brandId}, '')
+        .then((response) => {
+            let promotions = JSON.parse(response);
+            let elements = [];
+            promotions.forEach(promotion => {
+                let element = {
+                    title: promotion.PromotionName,
+                    image_url: promotion.ImageURL,
+                    subtitle: promotion.Description,
+                    default_action: {
+                        "type": "web_url",
+                        "url": "https://www.facebook.com/permalink.php?story_fbid=143435499716864&id=119378645455883",
+                        "messenger_extensions": true,
+                        "webview_height_ratio": "tall"
+                    },
+                    buttons: [
+                        {
+                            type: "postback",
+                            title: "Áp dụng",
+                            payload: "promotion select $" + promotion.PromotionCode,
+                        }
+                    ]
+                }
+                elements.push(element);
+            });
+            this.sendTextMessage(senderId, `Hiện tại thì bên em có một số chương trình khuyến mãi đây ${this.session.pronoun.toLowerCase()}`)
+            .then((res) => {
+                this.sendGenericMessage(senderId, elements);
+            })
+        })
+        .catch((err) => {
+            ConsoleLog.log(err, this.getName(), 68);
+        })
         this.step = 2;
-        var request = new MyRequest();
-        request.sendGetRequest('/LBFC/Store/GetStorePromotions', {'storeId' : 36}, '')
-        .then(function (data) {
-            var promotions = JSON.parse(data);
-            console.log('show-promotion-dialog.js:42 -----> ');
-            console.log(promotions);
-            that.reply(senderId, new PromotionListTemplate(promotions).template);
-            
-        });
+        this.continue('', '');
     }
-
+    
 
     /*---------------------------------Exception----------------------------- */
     
@@ -62,6 +85,11 @@ class ShowPromotionDialog extends Dialog{
 
         
     }
+
+
+    /*--------------------Private methods-----------------------*/
+
+
 
     getName() {
         return 'show promotion dialog';

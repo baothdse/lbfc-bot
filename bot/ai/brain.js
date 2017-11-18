@@ -15,6 +15,7 @@ let ShowStoreDialog = require('./dialogs/show-store-dialog');
 let AskDeliveryDialog = require('./dialogs/ask-delivery-dialog')
 let SearchPopularProducts = require('./dialogs/show-popular-products-dialog');
 const ShowMembershipEventDialog = require('./dialogs/show-membership-event-dialog');
+const OneStepDialog = require('./dialogs/one-step-dialog');
 
 var Response = require('./dialogs/entities/response');
 let Dialog = require('./dialogs/dialog');
@@ -259,6 +260,7 @@ class Brain {
                     new ShowStoreDialog(session),
                     new SearchPopularProducts(session),
                     new ShowMembershipEventDialog(session),
+                    new OneStepDialog(session),
                 ],
                 usingDialogs: [],
             });

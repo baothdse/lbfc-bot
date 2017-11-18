@@ -1,18 +1,17 @@
 let Intent = require('../intent');
 
-class AskForMembershipIntent extends Intent {
+class AskForDeliveryTimeIntent extends Intent {
     constructor(step, exception) {
         super(step, exception);
-        this.addPatterns(['có tạo thẻ thành viên không'], 1);
-        this.addPatterns(['có tạo thẻ không'], 1);
-        this.addPatterns(['có làm thẻ thành viên không'], 1);
-        this.addPatterns(['có làm thẻ thành viên ko'], 1);
-        this.addPatterns(['có làm thẻ không'], 1);
-        this.addPatterns(['có làm thẻ hông'], 1);
-        this.addPatterns(['có tạo thẻ thành viên ko'], 1);
-        this.addPatterns(['có tạo thẻ thành viên hông'], 1);
-        this.addPatterns(['làm thẻ ở đâu'], 1);
-        this.addPatterns(['tạo thẻ ở đâu'], 1);
+        this.addPatterns(['mấy giờ giao hàng'], 1);
+        this.addPatterns(['bao lâu giao hàng'], 1);
+        this.addPatterns(['chừng nào giao hàng'], 1);
+        this.addPatterns(['giao hàng bao lâu'], 1);
+        this.addPatterns(['giao hàng mất bao lâu'], 1);
+        this.addPatterns(['giao hàng mất nhiêu lâu'], 1);
+        this.addPatterns(['giao hàng lâu không'], 1);
+        this.addPatterns(['giao hàng lâu ko'], 1);
+        this.addPatterns(['giao hàng lâu hông'], 1);
     }
 
     /**
@@ -37,6 +36,9 @@ class AskForMembershipIntent extends Intent {
             exception: this.exception,
         }
     }
+
 }
 
-module.exports = AskForMembershipIntent
+
+module.exports = AskForDeliveryTimeIntent
+

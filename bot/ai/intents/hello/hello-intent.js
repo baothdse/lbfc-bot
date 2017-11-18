@@ -9,7 +9,7 @@ class HelloIntent extends Intent {
         this.addPatterns(["halo"], 1);
         this.addPatterns(["hé lô"], 1);
         this.addPatterns(["hé nhô"], 1);
-        this.addPatterns(["hi", 1], true, true);
+        this.addPatterns(["hi"], 1, true, true);
         this.addPatterns(["alo"], 1);
         this.addPatterns(["ê"], 1, true, true);
         this.addPatterns(["ê mày"], 1);

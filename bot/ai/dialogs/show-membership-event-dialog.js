@@ -117,7 +117,14 @@ class ShowMembershipEventDialog extends Dialog {
     }
 
     receiveCoordinates(input, senderId) {
-        this.session.coordinates = input[0].payload.coordinates;
+        if (input[0].payload == undefined) {
+            this.session.coordinates = {
+                lat: 10.779853,
+                long: 106.69898560000001,
+            };
+        } else {
+            this.session.coordinates = input[0].payload.coordinates;
+        }
         this.step = 2;
         this.error = 0;
         this.continue('ok', senderId);

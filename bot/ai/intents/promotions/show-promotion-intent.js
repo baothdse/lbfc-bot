@@ -1,18 +1,11 @@
 let Intent = require('../intent');
 
-class AskForMembershipIntent extends Intent {
+class ShowMyPromotionIntent extends Intent {
     constructor(step, exception) {
         super(step, exception);
-        this.addPatterns(['có tạo thẻ thành viên không'], 1);
-        this.addPatterns(['có tạo thẻ không'], 1);
-        this.addPatterns(['có làm thẻ thành viên không'], 1);
-        this.addPatterns(['có làm thẻ thành viên ko'], 1);
-        this.addPatterns(['có làm thẻ không'], 1);
-        this.addPatterns(['có làm thẻ hông'], 1);
-        this.addPatterns(['có tạo thẻ thành viên ko'], 1);
-        this.addPatterns(['có tạo thẻ thành viên hông'], 1);
-        this.addPatterns(['làm thẻ ở đâu'], 1);
-        this.addPatterns(['tạo thẻ ở đâu'], 1);
+        this.addPatterns(["Khuyến mãi"], 1, true, true);
+        this.addPatterns(['xem khuyến mãi'], 1);
+        this.addPatterns(['có', 'DanhTuKhuyenMai', 'gì'], 1);
     }
 
     /**
@@ -39,4 +32,4 @@ class AskForMembershipIntent extends Intent {
     }
 }
 
-module.exports = AskForMembershipIntent
+module.exports = ShowMyPromotionIntent

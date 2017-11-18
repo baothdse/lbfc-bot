@@ -28,7 +28,7 @@ class AskForMembershipDialog extends Dialog {
      * @param {*} senderId 
      */
     askForMembershipCard(input, senderId) {
-        this.sendTextMessage(senderId, 'Mã thẻ của bạn là gì?');
+        this.sendTextMessage(senderId, `Mã thẻ của ${this.session.pronoun.toLowerCase()} là gì?`);
         this.step = 2;
     }
 

@@ -26,7 +26,7 @@ class BrandDialog extends Dialog {
     askBrandName(senderId) {
         console.log("brand dialog ==============24")
         this.step = 2;
-        this.reply(senderId, { 'text': 'Hiện có 50 nhãn hiệu trong hệ thống của chúng tôi gồm có: ... Vui lòng nhập tên nhãn hiệu bạn quan tâm!' });
+        this.reply(senderId, { 'text': 'Hiện có 50 nhãn hiệu trong hệ thống của chúng tôi gồm có: ... Vui lòng nhập tên nhãn hiệu ' + this.session.pronoun.toLowerCase() + ' quan tâm!' });
     }
 
     showBrandDetail(input, senderId) {
@@ -49,7 +49,7 @@ class BrandDialog extends Dialog {
                 flag = 0;
                 var sender = await(this.getSenderName(senderId));
                 this.sendGenericMessage(senderId, [{
-                    title: "Cám ơn " + sender.first_name + " đã chọn " + listBrand[index].brandName + " hôm nay! Chúng tôi có thể giúp gì cho bạn?",
+                    title: "Cám ơn " + sender.first_name + " đã chọn " + listBrand[index].brandName + " hôm nay! Chúng tôi có thể giúp gì cho " + this.session.pronoun.toLowerCase() + "?",
                     image_url: "https://marketingai.admicro.vn/wp-content/uploads/2017/07/starbucks.jpg",
                     subtitle: "highlandscoffee.com.vn",
                     default_action: {
@@ -141,7 +141,7 @@ class BrandDialog extends Dialog {
 
     getCodeByBrand(input, senderId) {
         let promotionCode = this.generateRandomString();
-        this.reply(senderId, { "text": "Mã khuyến mãi của bạn là: " + promotionCode })
+        this.reply(senderId, { "text": "Mã khuyến mãi của " + this.session.pronoun.toLowerCase() + " là: " + promotionCode })
     }
 
     getName() {

@@ -20,7 +20,6 @@ class HelpDialog extends Dialog {
 
     continue(input,senderId) {
         console.log("help dialog status = " + this.status);
-        //var result = this.reply(senderId, {"text" : "Bạn cần giúp gì"})
         switch(this.step) {
             case 1: this.getHelp(senderId); break;
             case 2: this.end(); break;
@@ -31,7 +30,7 @@ class HelpDialog extends Dialog {
 
     getHelp(senderId) {
         this.step = 2;
-        this.reply(senderId, {'text' : 'Bạn cần mình giúp gì không nè?'});
+        this.reply(senderId, {'text' : `${this.session.pronoun} cần em giúp gì không nè?`});
     }
 
     getName() {
