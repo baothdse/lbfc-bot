@@ -417,14 +417,14 @@ class OrderDialog extends Dialog {
             "order": {
                 "OrderDetails": this.session.orderDialog.orderDetails,
                 "originalPrice": this.session.orderDialog.originalPrice,
-            }
+            },
+            "brandId": this.session.brandId
         }
-        this.sendTextMessage(senderId, "Bên em có một số chương trình khuyến mãi nè.");
         new Request().sendPostRequest("/LBFC/Promotion/GetSuitablePromotions", data)
-            .then(function (dataStr) {
-                if (dataStr != undefined && dataStr.length > 0) {
-                    var data = JSON.parse(dataStr);
-                    var s = "" + that.session.pronoun + " có muốn xài mấy khuyến mãi dưới này ko?\n";
+            .then((dataStr) => {
+                var data = JSON.parse(dataStr);
+                if (data.length > 0) {
+                    this.sendTextMessage(senderId, `Bên em có một số chương trình khuyến mãi nè. ${this.session.pronoun} có muốn áp dụng ko?`);
                     var elements = [];
                     data.forEach(function (element) {
                         var e = {
@@ -449,6 +449,9 @@ class OrderDialog extends Dialog {
                     }, this);
                     that.sendGenericMessage(senderId, elements);
                     that.step = 12;
+                } else {
+                    this.step = 13;
+                    this.continue('', senderId);
                 }
             });
     }
@@ -773,6 +776,7 @@ class OrderDialog extends Dialog {
 
     /**step 18.4 */
     receiveDeliveryAdrress(input, senderId) {
+        this.step = 18.5;
         ConsoleLog.log(input, this.getName(), 761);
         const GOOGLE_API_KEY = 'AIzaSyD6D1KPx1dD32u0BHDHK2Pp0bDMnfkXLLM';
         const URL = 'https://maps.googleapis.com/maps/api/place/autocomplete/json';
@@ -784,25 +788,31 @@ class OrderDialog extends Dialog {
         new Request().sendUniversalGetRequest(URL, params, '')
             .then((response) => {
                 let places = JSON.parse(response);
-                let topPlace = places.predictions[0].description;
-                let elements = [
-                    {
-                        content_type: "text",
-                        title: "Đúng rồi",
-                        payload: `address use ${topPlace}`,
-                        image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
-                    },
-                    {
-                        content_type: "text",
-                        title: "Hông phải",
-                        payload: `address refuse`,
-                        image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
-                    }
-                ];
-                this.sendQuickReply(senderId, `Có phải ý ${this.session.pronoun} là ${topPlace}?`, elements);
+                if (places.predictions.length == 0) {
+                    this.sendTextMessage(senderId, `${this.session.pronoun} nhập lại địa chỉ được hông? Bên em không nhận ra địa chỉ này :(`);
+                    this.step = 18.4;
+                } else {
+                    let topPlace = places.predictions[0].description;
+                    let elements = [
+                        {
+                            content_type: "text",
+                            title: "Đúng rồi",
+                            payload: `address use ${topPlace}`,
+                            image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
+                        },
+                        {
+                            content_type: "text",
+                            title: "Hông phải",
+                            payload: `address refuse`,
+                            image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
+                        }
+                    ];
+                    this.sendQuickReply(senderId, `Có phải ý ${this.session.pronoun} là *${topPlace}*?`, elements);
+                }
             })
             .catch((err) => {
                 ConsoleLog.log(err, this.getName(), 789);
+                this.step = 18.4;
             })
     }
 
@@ -1002,8 +1012,8 @@ class OrderDialog extends Dialog {
                     total_tax: Math.ceil(that.session.orderDialog.finalPrice * 10 / 11 * 0.1),
                     total_cost: that.session.orderDialog.finalPrice
                 }
-                var adjustments = [{}];
-                if (this.session.orderDialog.currentPromotion.PromotionCode != undefined) {
+                var adjustments = [];
+                if (this.session.orderDialog.currentPromotion != undefined && this.session.orderDialog.currentPromotion.PromotionCode != undefined) {
                     adjustments = [
                         {
                             name: `Giảm giá ${this.session.orderDialog.currentPromotion.PromotionCode}`,
@@ -1062,21 +1072,21 @@ class OrderDialog extends Dialog {
         } else if (input.match(/(ko|không|hủy|thôi|kg|no|nô)/i)) {
             if (this.session.orderDialog.cancelLoop == 1) {
                 this.sendTextMessage(senderId, `Ủa là sao ${this.session.pronoun.toLowerCase()}?`)
-                .then((res) => {
-                    this.sendTextMessage(senderId, `Sao tự nhiên hổng đặt nữa? ${this.session.pronoun} muốn hủy hả?`);
-                })
+                    .then((res) => {
+                        this.sendTextMessage(senderId, `Sao tự nhiên hổng đặt nữa? ${this.session.pronoun} muốn hủy hả?`);
+                    })
                 this.step = 25.1;
             } else {
                 this.sendTextMessage(senderId, `Ok hủy đơn hàng`)
-                .then((res) => {
-                    return this.sendTextMessage(senderId, `Rẹt rẹt`);
-                })
-                .then((res) => {
-                    return this.sendTextMessage(senderId, `Xong, đã hủy`);
-                })
-                .then((res) => {
-                    this.sendTextMessage(senderId, `Cám ơn ${this.session.pronoun.toLowerCase()} đã ghé thăm gian hàng của em :*`);
-                })
+                    .then((res) => {
+                        return this.sendTextMessage(senderId, `Rẹt rẹt`);
+                    })
+                    .then((res) => {
+                        return this.sendTextMessage(senderId, `Xong, đã hủy`);
+                    })
+                    .then((res) => {
+                        this.sendTextMessage(senderId, `Cám ơn ${this.session.pronoun.toLowerCase()} đã ghé thăm gian hàng của em :*`);
+                    })
                 this.step = 26;
                 this.continue('', '');
             }
@@ -1096,12 +1106,12 @@ class OrderDialog extends Dialog {
             this.continue('', '');
         } else {
             this.sendTextMessage(senderId, `Là sao?`)
-            .then((res) => {
-                return this.sendTextMessage(senderId, `Vậy là có đặt hàng hông?`)
-            })
-            .then((res) => {
-                this.sendTextMessage(senderId, `Đặt hàng thì hãy say yes, hông đặt thì say no nhé >:O`)
-            })
+                .then((res) => {
+                    return this.sendTextMessage(senderId, `Vậy là có đặt hàng hông?`)
+                })
+                .then((res) => {
+                    this.sendTextMessage(senderId, `Đặt hàng thì hãy say yes, hông đặt thì say no nhé >:O`)
+                })
             this.step = 25;
             ++this.session.orderDialog.cancelLoop;
         }

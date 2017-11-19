@@ -100,32 +100,61 @@ class Dialog {
 
     sendReceipt(senderId, recipientName, orderNumber, orderUrl, address, summary, adjustments, elements, paymentMethod) {
         console.log("đã chạy vào send receipt")
-        return request({
-            url: 'https://graph.facebook.com/v2.6/me/messages',
-            qs: { access_token: this.FACEBOOK_ACCESS_TOKEN },
-            method: 'POST',
-            json: {
-                recipient: { id: senderId },
-                message: {
-                    attachment: {
-                        type: "template",
-                        payload: {
-                            template_type: "receipt",
-                            recipient_name: recipientName,
-                            order_number: orderNumber,
-                            currency: "VND",
-                            payment_method: paymentMethod,
-                            order_url: orderUrl,
-                            timestamp: "1428444852",
-                            address: address,
-                            summary: summary,
-                            adjustments: adjustments,
-                            elements: elements
+        if (adjustments.length == 0) {
+            return request({
+                url: 'https://graph.facebook.com/v2.6/me/messages',
+                qs: { access_token: this.FACEBOOK_ACCESS_TOKEN },
+                method: 'POST',
+                json: {
+                    recipient: { id: senderId },
+                    message: {
+                        attachment: {
+                            type: "template",
+                            payload: {
+                                template_type: "receipt",
+                                recipient_name: recipientName,
+                                order_number: orderNumber,
+                                currency: "VND",
+                                payment_method: paymentMethod,
+                                order_url: orderUrl,
+                                timestamp: Math.round(new Date().getTime() / 1000) + "",
+                                address: address,
+                                summary: summary,
+                                elements: elements
+                            }
                         }
                     }
                 }
-            }
-        })
+            })
+        } else {
+            return request({
+                url: 'https://graph.facebook.com/v2.6/me/messages',
+                qs: { access_token: this.FACEBOOK_ACCESS_TOKEN },
+                method: 'POST',
+                json: {
+                    recipient: { id: senderId },
+                    message: {
+                        attachment: {
+                            type: "template",
+                            payload: {
+                                template_type: "receipt",
+                                recipient_name: recipientName,
+                                order_number: orderNumber,
+                                currency: "VND",
+                                payment_method: paymentMethod,
+                                order_url: orderUrl,
+                                timestamp: Math.round(new Date().getTime() / 1000) + "",
+                                address: address,
+                                summary: summary,
+                                adjustments: adjustments,
+                                elements: elements
+                            }
+                        }
+                    }
+                }
+            })
+        }
+        
     }
 
     sendQuickReply(senderId, text, quickReplyElement) {
