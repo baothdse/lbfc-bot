@@ -79,7 +79,7 @@ class SearchProductNameDialog extends Dialog {
      */
     receivePriceFilterConfirmation(input, senderId) {
         if (input.match(/(không|ko|hông|nô|no|kg)/i)) {
-            this.step = 10;
+            this.step = 9;
         } else {
             this.step = 5;
         }
@@ -146,7 +146,7 @@ class SearchProductNameDialog extends Dialog {
             if (data.length == 1) {
                 that.showProducts(data);
             } else {
-                that.sendTextMessage(`Không thấy món ${that.session.pronoun.toLowerCase()} vừa kiếm, có phải ý ${that.session.pronoun.toLowerCase()} là...`)
+                that.sendTextMessage(senderId, `Không thấy món ${that.session.pronoun.toLowerCase()} vừa kiếm, có phải ý ${that.session.pronoun.toLowerCase()} là...`)
                 .then((response) => {
                     that.showProducts(data);
                 })

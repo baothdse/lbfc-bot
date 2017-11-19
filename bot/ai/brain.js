@@ -79,12 +79,13 @@ class Brain {
             default: message = event.message.quick_reply.payload; break;
         }
 
-        this.insertSender(senderId)
+        this.insertSender(senderId, event.recipient.id)
             .then((res) => {
                 var usingDialogs = this.getUsingDialogs(senderId);
                 var freeDialogs = this.getFreeDialogs(senderId);
 
                 ConsoleLog.log(message, 'brain.js', 59);
+                ConsoleLog.log(event, 'brain.js', 60);
                 var that = this;
                 var currentDialog = usingDialogs[usingDialogs.length - 1];
 
@@ -119,7 +120,9 @@ class Brain {
                     var isMatch = currentDialog.isMatch(message, senderId);
                     understood = isMatch;
                     if (!isMatch) {
+                        let step = currentDialog.step;
                         currentDialog.continue(message, senderId);
+                        understood = currentDialog.step > step;
                     }
                     if (currentDialog.status == "end") {
                         var d = that.removeFromUsingList(usingDialogs, currentDialog);
@@ -142,11 +145,10 @@ class Brain {
 
 
     getGender(senderId, session) {
-        return new Dialog().getSenderName(senderId)
+        return new Dialog(session).getSenderName(senderId)
             .then((sender) => {
                 if (!session.pronoun) {
 
-                    ConsoleLog.log("do ton performance", "brain.js", 136);
                     if (sender.gender == 'male') {
                         session.pronoun = 'Anh'
                     } else if (sender.gender == 'female') {
@@ -224,17 +226,22 @@ class Brain {
      * Kiểm tra senderId này có trong mảng chưa, chưa thì push vô rồi tạo mới các dialog
      * @param {number} senderId 
      */
-    insertSender(senderId) {
+    insertSender(senderId, pageId) {
         var result = false;
         this.senders.some(function (sender) {
-            if (sender.senderId == senderId) {
+            if (sender.senderId == senderId && sender.session.pageId == pageId) {
                 result = true;
                 return true;
             }
         });
 
         if (!result) {
-            var session = { brandId: 1, notUnderstood: 0 };
+            var session = { pageId: pageId, notUnderstood: 0 };
+            if (pageId == '119378645455883') {
+                session.brandId = 1;
+            } else {
+                session.brandId = 4;
+            }
             this.senders.push({
                 session: session,
                 senderId: senderId,
@@ -309,7 +316,7 @@ class Brain {
             this.response({ message: { text: message } }, 'message');
             return;
         } else if (input.match(/message decline/i)) {
-            new Dialog().sendTextMessage(senderId, `${session.pronoun} thử đổi vài chữ xem em có hiểu không, hì hì`);
+            new Dialog(session).sendTextMessage(senderId, `${session.pronoun} thử đổi vài chữ xem em có hiểu không, hì hì`);
             return;
         }
         let minPattern = { string: '', distance: 1000 };
@@ -343,7 +350,7 @@ class Brain {
                 image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
             }
         ]
-        new Dialog().sendQuickReply(senderId, `Có phải ý ${session.pronoun.toLowerCase()} là *${minPattern.string}*?`, elements);
+        new Dialog(session).sendQuickReply(senderId, `Có phải ý ${session.pronoun.toLowerCase()} là *${minPattern.string}*?`, elements);
     }
 
 }

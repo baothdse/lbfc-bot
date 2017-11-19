@@ -3,7 +3,8 @@ let ClassParser = require('../utils/class-parser');
 let Intent = require('../intents/intent');
 let request = require('request-promise');
 let key = process.env.googleAPIkey || 'AIzaSyC2atcNmGkRy3pzTskzsPbV6pW68qe_drY';
-const FACEBOOK_ACCESS_TOKEN = 'EAAGrlOZA1cX8BAPBSqjEfXdVDqnH7W0XSds555yhQBHKmYX1NpLWLb8ZBfZCtC8jRWLVefaLWV1JKEwH0BO5uTMZBTgsKFzZBJtrZBtOZAvhQVEsztGOWS0n4igEdJcY5bYMwOxScudevUwoMjFqGv4p5LJcZARSQTfd3kDWjhRmQsUTMHfVLWu2';
+const PASSIO_ACCESS_TOKEN = 'EAAGrlOZA1cX8BAPBSqjEfXdVDqnH7W0XSds555yhQBHKmYX1NpLWLb8ZBfZCtC8jRWLVefaLWV1JKEwH0BO5uTMZBTgsKFzZBJtrZBtOZAvhQVEsztGOWS0n4igEdJcY5bYMwOxScudevUwoMjFqGv4p5LJcZARSQTfd3kDWjhRmQsUTMHfVLWu2';
+const KFC_ACCESS_TOKEN = 'EAACnZBgtuUCEBAPe5ZB5dU6AceReE8GVZAinu2QglTfpsga33hMbCEIFACuhnSNHxY5SrZA38Wblo6zJ2H0BaBnmTVAU6i1f92GfyJqj7lK3AZCceCbLrmXfYkhyL5R5Rl5VoHZBvvMQFx0xWubM69J1KDGbuYqVovFfwwWxjU7wZDZD';
 let ConsoleLog = require('../utils/console-log');
 const ProductModel = require('./entities/products/product');
 
@@ -25,6 +26,7 @@ class Dialog {
          */
         this.session = session;
         this.exception = 0;
+        this.FACEBOOK_ACCESS_TOKEN = this.session.brandId == 1 ? PASSIO_ACCESS_TOKEN : KFC_ACCESS_TOKEN
     }
 
     pause() {
@@ -74,7 +76,7 @@ class Dialog {
     sendLocation(senderId) {
         return request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
-            qs: { access_token: FACEBOOK_ACCESS_TOKEN },
+            qs: { access_token: this.FACEBOOK_ACCESS_TOKEN },
             method: 'POST',
             json: {
                 recipient: { id: senderId },
@@ -100,7 +102,7 @@ class Dialog {
         console.log("đã chạy vào send receipt")
         return request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
-            qs: { access_token: FACEBOOK_ACCESS_TOKEN },
+            qs: { access_token: this.FACEBOOK_ACCESS_TOKEN },
             method: 'POST',
             json: {
                 recipient: { id: senderId },
@@ -133,7 +135,7 @@ class Dialog {
         }
         return request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
-            qs: { access_token: FACEBOOK_ACCESS_TOKEN },
+            qs: { access_token: this.FACEBOOK_ACCESS_TOKEN },
             method: 'POST',
             json: {
                 recipient: { id: senderId },
@@ -153,7 +155,7 @@ class Dialog {
                 request({
                     url: `https://graph.facebook.com/v2.6/${senderId}`,
                     qs: {
-                        access_token: FACEBOOK_ACCESS_TOKEN
+                        access_token: this.FACEBOOK_ACCESS_TOKEN
                     },
                     method: 'GET',
 
@@ -172,7 +174,7 @@ class Dialog {
 
         return request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
-            qs: { access_token: FACEBOOK_ACCESS_TOKEN },
+            qs: { access_token: this.FACEBOOK_ACCESS_TOKEN },
             method: 'POST',
             json: {
                 recipient: { id: senderId },
@@ -184,7 +186,7 @@ class Dialog {
     sendTyping(senderId) {
         request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
-            qs: { access_token: FACEBOOK_ACCESS_TOKEN },
+            qs: { access_token: this.FACEBOOK_ACCESS_TOKEN },
             method: 'POST',
             json: {
                 recipient: { id: senderId },
@@ -205,7 +207,7 @@ class Dialog {
         return request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: {
-                access_token: FACEBOOK_ACCESS_TOKEN
+                access_token: this.FACEBOOK_ACCESS_TOKEN
             },
             method: 'POST',
             json: {
@@ -232,7 +234,7 @@ class Dialog {
         request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: {
-                access_token: FACEBOOK_ACCESS_TOKEN
+                access_token: this.FACEBOOK_ACCESS_TOKEN
             },
             method: 'POST',
             json: {
@@ -258,7 +260,7 @@ class Dialog {
         request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: {
-                access_token: FACEBOOK_ACCESS_TOKEN
+                access_token: this.FACEBOOK_ACCESS_TOKEN
             },
             method: 'POST',
             json: {
@@ -289,7 +291,7 @@ class Dialog {
         return request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: {
-                access_token: FACEBOOK_ACCESS_TOKEN
+                access_token: this.FACEBOOK_ACCESS_TOKEN
             },
             method: 'POST',
             json: {
@@ -316,7 +318,7 @@ class Dialog {
         return request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: {
-                access_token: FACEBOOK_ACCESS_TOKEN
+                access_token: this.FACEBOOK_ACCESS_TOKEN
             },
             body:
             {

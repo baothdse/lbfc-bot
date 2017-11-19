@@ -164,7 +164,7 @@ class OrderDialog extends Dialog {
     receiveProduct(input, senderId) {
         var that = this;
         this.sendTyping(senderId);
-
+        this.step = 4;
         new Request().sendGetRequest('/LBFC/Product/GetProductInBrand', { 'name': input, 'brandId': that.session.brandId }, "")
             .then(function (dataStr) {
                 var data = JSON.parse(dataStr);
@@ -230,6 +230,7 @@ class OrderDialog extends Dialog {
      * @param {int} senderId id fb của user
      */
     receiveQuantity(input, senderId) {
+        this.step = 6;
         var currentProduct = this.session.orderDialog.currentProduct;
         var that = this;
         if (input.match(/^\d+$/g)) {
@@ -257,6 +258,7 @@ class OrderDialog extends Dialog {
     */
     askExtraProduct(input, senderId) {
         let that = this;
+        this.step = 7;
         let currentProduct = this.session.orderDialog.currentProduct;
         new Request().sendGetRequest('/LBFC/Product/GetProductExtra', { 'productId': currentProduct.productID }, "")
             .then((data) => {
@@ -491,6 +493,9 @@ class OrderDialog extends Dialog {
                         }
                     });
             }
+        } else if (input.match(/(bỏ qua|không|ko|kg|khong)/i)) {
+            this.step = 13;
+            this.continue(input, senderId);
         } else {
             that.step = 11;
             that.continue(input, senderId);
