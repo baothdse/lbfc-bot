@@ -84,7 +84,6 @@ class Brain {
                 var usingDialogs = this.getUsingDialogs(senderId);
                 var freeDialogs = this.getFreeDialogs(senderId);
 
-                ConsoleLog.log(message, 'brain.js', 59);
                 ConsoleLog.log(event, 'brain.js', 60);
                 var that = this;
                 var currentDialog = usingDialogs[usingDialogs.length - 1];
