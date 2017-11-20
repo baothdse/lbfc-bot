@@ -13,7 +13,9 @@ let ShowOrderDetailDialog = require('./dialogs/show-order-detail-dialog');
 let SearchProductNameDialog = require('./dialogs/search-product-name-dialog');
 let ShowStoreDialog = require('./dialogs/show-store-dialog');
 let AskDeliveryDialog = require('./dialogs/ask-delivery-dialog')
-
+let AskOpenCloseTimeDialog = require('./dialogs/ask-open-close-time-dialog');
+let AskDeliveryTimeDialog = require('./dialogs/delivery/ask-delivery-time-dialog');
+let EmojiDialog = require('./dialogs/emoji/emoji-dialog');
 var Response = require('./dialogs/entities/response');
 let Dialog = require('./dialogs/dialog');
 
@@ -248,7 +250,11 @@ class Brain {
                     new SearchProductNameDialog(session),
                     new ShowOrderHistoryDialog(session),
                     new ShowOrderDetailDialog(session),
-                    new ShowStoreDialog(session)
+                    new ShowStoreDialog(session),
+                    new AskDeliveryDialog(session),
+                    new AskOpenCloseTimeDialog(session),
+                    new AskDeliveryTimeDialog(session),
+                    new EmojiDialog(session)
                 ],
                 usingDialogs: [],
             });

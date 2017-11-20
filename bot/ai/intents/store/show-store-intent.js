@@ -18,11 +18,26 @@ class ShowStoreIntent extends Intent{
     }
 
     matchPattern1(input, match, pattern) {
-        
+        var listAllStore;
+        let promise = this.getStore()
+            .then((data) => {
+                listAllStore = JSON.parse(data)
+                return new Promise((resolve, reject) => {
+                    resolve(listAllStore)
+                })
+            })
         return {
+            listAllStore: promise,
             step : this.step,
             exception : this.exception
         }
+    }
+
+    getStore() {
+        return new Promise((resolve, reject) => {
+            let data = new Request().sendGetRequest('/LBFC/Store/GetAllStoresByBrand', { 'brandId': 1 }, '')
+            resolve(data)
+        })
     }
 }
 module.exports = ShowStoreIntent;

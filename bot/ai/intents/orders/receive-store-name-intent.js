@@ -26,55 +26,40 @@ class ReceiveStoreNameIntent extends Intent {
 
     matchPattern1(input, match, pattern) {
         var info = (input.slice(15, input.length)).split("$", 2);
-        var storeId = info[0];
-        var storeName = info[1];
         return {
-            storeId: storeId,
-            storeName: storeName,
+            storeId: info[0],
+            storeName: info[1],
             step: this.step,
             exception: this.exception
         };
     }
 
     matchPattern2(input, match, pattern) {
+        // var promise = this.getAllStore()
+        //     .then((data) => {
+        //         listAllStore = JSON.parse(data)
+        //         return new Promise((resolve, reject) => {
+        //             let condition = listAllStore.length;
+        //                 for (var i = 0; i < condition;  i++) {
+        //                     if(that.levenshteinDistance(input, listAllStore[i].Name) <= 10) { 
+        //                         store = {
+        //                             storeId: listAllStore[i].ID,
+        //                             storeName: listAllStore[i].Name,
+        //                             ed: that.levenshteinDistance(input, listAllStore[i].Name)
+        //                         }
+        //                         listStoreMatching.push(store);                                
+        //                     }
+        //                 }
+                    
+        //             that.bubbleSort(listStoreMatching);
+                    
+        //             resolve(listStoreMatching)
+        //         })
+        //     })
         return {
             step: this.step,
             exception: this.exception
         }
-    }
-
-    levenshteinDistance(a, b) {
-        console.log(a)
-        console.log(b)
-        var string1 = a.toLowerCase()
-        var string2 = b.toLowerCase()
-        var length1 = string1.length;
-        var length2 = string2.length;
-        if (length1 == 0) return length2;
-        if (length2 == 0) return length1;
-        var d = []
-        var i, j;
-        //i là cột
-        for (i = 0; i <= length2; i++) {
-            d[i] = [i];
-        }
-        //j là dòng
-        for (j = 0; j <= length1; j++) {
-            d[0][j] = j
-        }
-        for (i = 1; i <= length2; i++) {
-            for (j = 1; j <= length1; j++) {
-                if (string2.charAt(i - 1) == string1.charAt(j - 1)) {
-                    d[i][j] = d[i - 1][j - 1]
-                } else {
-                    d[i][j] = Math.min(d[i - 1][j - 1] + 1, // substitution
-                        Math.min(d[i][j - 1] + 1, // insertion
-                            d[i - 1][j] + 1));
-                }
-            }
-        }
-        console.log(d[length2][length1])
-        return d[length2][length1];
     }
 }
 

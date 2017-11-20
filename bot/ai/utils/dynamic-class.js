@@ -20,7 +20,8 @@ let TinhTu = require('../entities/tinh-tu');
 let DanhTuCuaHang = require('../entities/danh-tu-cua-hang');
 let DongTuTimKiem = require('../entities/dong-tu-tim-kiem');
 let DanhTuDonHang = require('../entities/danh-tu-don-hang');
-let DonViTien = require('../entities/don-vi-tien')
+let Dozen = require('../entities/don-vi-tien/dozen')
+let Hundred = require('../entities/don-vi-tien/hundred')
 let MoneyTeenCode = require('../entities/money-teen-code')
 let DongTuGiaoHang = require('../entities/dong-tu-giao-hang');
 
@@ -28,7 +29,7 @@ let DongTuGiaoHang = require('../entities/dong-tu-giao-hang');
 
 class DynamicClass {
     constructor(name) {
-        switch(name) {
+        switch (name) {
             case "DaiTu": return new DaiTu(); break;
             case "YeuCau": return new YeuCau(); break;
             case "DongTuDatHang": return new DongTuDatHang(); break;
@@ -37,31 +38,32 @@ class DynamicClass {
             case "End": return new End(); break;
             case 'DanhTuKhuyenMai': return new DanhTuKhuyenMai(); break;
             case 'DanhTuChiNoiChon': return new DanhTuChiNoiChon(); break;
-            case 'DongTuTinhthai' : return new DongTuTinhthai(); break;
-            case 'DongTu' : return new DongTu(); break;
-            case 'DongTuYChi' : return new DongTuYChi(); break;
+            case 'DongTuTinhthai': return new DongTuTinhthai(); break;
+            case 'DongTu': return new DongTu(); break;
+            case 'DongTuYChi': return new DongTuYChi(); break;
             case 'GioiTu': return new GioiTu(); break;
-            case 'PhoTu' : return new PhoTu(); break;
-            case 'QuanHeTu' : return new QuanHeTu(); break;
-            case 'ThanTu' : return new ThanTu(); break;
-            case 'TinhThaiTu' : return new TinhThaiTu(); break;
-            case 'TinhTu' : return new TinhTu(); break;
-            case 'DanhTuCuaHang' : return new DanhTuCuaHang(); break;
+            case 'PhoTu': return new PhoTu(); break;
+            case 'QuanHeTu': return new QuanHeTu(); break;
+            case 'ThanTu': return new ThanTu(); break;
+            case 'TinhThaiTu': return new TinhThaiTu(); break;
+            case 'TinhTu': return new TinhTu(); break;
+            case 'DanhTuCuaHang': return new DanhTuCuaHang(); break;
             case 'DongTuTimKiem': return new DongTuTimKiem(); break;
-            case 'DanhTuDonHang' : return new DanhTuDonHang(); break;
-            case 'DonViTien': return new DonViTien(); break;
+            case 'DanhTuDonHang': return new DanhTuDonHang(); break;
+            case 'Dozen': return new Dozen(); break;
+            case 'Hundred': return new Hundred(); break;
             case 'MoneyTeenCode': return new MoneyTeenCode(); break;
             case 'DongTuGiaoHang': return new DongTuGiaoHang(); break;
-            
-            default: 
+
+            default:
                 return new class C {
-                    constructor(){
+                    constructor() {
                         this.words = [name];
                     }
                 }
-            break;
+                break;
         }
     }
 }
 
-module.exports  = DynamicClass
+module.exports = DynamicClass

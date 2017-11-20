@@ -26,32 +26,46 @@ class ShowStoreDialog extends Dialog {
         let that = this;
         this.step = 2;
         let reply = "";
-        this.sendTextMessage(senderId, 'Hiện tại hệ thống chúng tôi có các cửa hàng sau')
-            .then((response) => {
-                this.getStore()
-                .then((info) => {
-                    if (info.listStore) {
-                        let condition = info.listStore.length;
-                        for (var i = 0; i < condition; i++) {
-                            // console.log(info.listStore[i])
-                            reply += '-' + info.listStore[i].Name + '\n'
-                            if (i % 10 == 0 || i == condition - 1) {
-                                this.sendTextMessage(senderId, reply);
-                                reply = "";
-                            }
-                        }
+        this.sendTextMessage(senderId, "Hiện tại bên bọn em đang có các cửa hàng: ")
+        let promise = info.listAllStore
+            .then((listAllStore) => {
+                let condition = listAllStore.length;
+                for (var i = 0; i < condition; i++) {
+                    // console.log(info.listStore[i])
+                    reply += '-' + listAllStore[i].Name + '\n'
+                    if (i % 10 == 0 || i == condition - 1) {
+                        this.sendTextMessage(senderId, reply);
+                        reply = "";
                     }
-                })
+                }
             })
+        this.continue(input, senderId);
+        // this.sendTextMessage(senderId, 'Hiện tại hệ thống chúng tôi có các cửa hàng sau')
+        //     .then((response) => {
+        //         this.getStore()
+        //         .then((info) => {
+        //             if (info.listStore) {
+        //                 let condition = info.listStore.length;
+        //                 for (var i = 0; i < condition; i++) {
+        //                     // console.log(info.listStore[i])
+        //                     reply += '-' + info.listStore[i].Name + '\n'
+        //                     if (i % 10 == 0 || i == condition - 1) {
+        //                         this.sendTextMessage(senderId, reply);
+        //                         reply = "";
+        //                     }
+        //                 }
+        //             }
+        //         })
+        //     })
     }
 
     getStore() {
         return new Promise((resolve, reject) => {
             new Request().sendGetRequest('/LBFC/Store/GetAllStoresByBrand', { 'brandId': 1 }, '')
-            .then((data) => {
-                let listStore = JSON.parse(data);
-                return listStore;
-            })
+                .then((data) => {
+                    let listStore = JSON.parse(data);
+                    return listStore;
+                })
         })
     }
 
