@@ -9,11 +9,11 @@ class SelectPriceRangeIntent extends Intent {
         this.addPatterns(['GioiTu', 'Number', 'Hundred', 'GioiTu', 'Number', 'Hundred'], 2, true, false)
         this.addPatterns(['GioiTu', 'Number', 'Dozen'], 3)
         this.addPatterns(['GioiTu', 'Number', 'Hundred'], 4)
-        this.addPatterns(['Number', 'Dozen'], 5, true, false)
+        this.addPatterns(['Number', 'Dozen'], 5)
         this.addPatterns(['Number', 'Hundred'], 6)
-        // this.addPatterns(['MoneyTeenCode'], 7, true, true)
         this.addPatterns(['MoneyTeenCode', '-', 'MoneyTeenCode'], 7, true, true)
-        this.addPatterns([/\d+k-\d+k/i], 8)
+        this.addPatterns([/\d+k-\d+k/i], 8, false, true)
+        this.addPatterns([/\d/i], 9)
 
     }
 
@@ -23,7 +23,7 @@ class SelectPriceRangeIntent extends Intent {
         console.log(input)
         console.log("match: + " + match)
         console.log("which : \n" + which)
-        let result = ""
+        let result = null;
         switch (which) {
             case 1: result = this.matchPattern1(input, match, pattern); break;
             case 2: result = this.matchPattern2(input, match, pattern); break;
@@ -33,6 +33,7 @@ class SelectPriceRangeIntent extends Intent {
             case 6: result = this.matchPattern6(input, match, pattern); break;
             case 7: result = this.matchPattern7(input, match, pattern); break;
             case 8: result = this.matchPattern8(input, match, pattern); break;
+            case 9: result = this.matchPattern9(input, match, pattern); break;
         }
         return result;
     }
@@ -44,8 +45,8 @@ class SelectPriceRangeIntent extends Intent {
         let fromPrice = inputArray[1] * 10000;
         let toPrice = inputArray[4] * 10000;
         return {
-            fromPrice,
-            toPrice,
+            fromPrice: fromPrice,
+            toPrice: toPrice,
             step: 2,
             exception: that.exception
         }
@@ -64,8 +65,8 @@ class SelectPriceRangeIntent extends Intent {
         let fromPrice = inputArray[1] * 100000;
         let toPrice = inputArray[4] * 100000;
         return {
-            fromPrice,
-            toPrice,
+            fromPrice: fromPrice,
+            toPrice: toPrice,
             step: 2,
             exception: that.exception
         }
@@ -90,8 +91,8 @@ class SelectPriceRangeIntent extends Intent {
             toPrice = inputArray[1] * 10000
         }
         return {
-            fromPrice,
-            toPrice,
+            fromPrice: fromPrice,
+            toPrice: toPrice,
             step: that.step,
             exception: that.exception
         }
@@ -116,8 +117,8 @@ class SelectPriceRangeIntent extends Intent {
             toPrice = inputArray[1] * 100000;
         }
         return {
-            fromPrice,
-            toPrice,
+            fromPrice: fromPrice,
+            toPrice: toPrice,
             step: that.step,
             exception: that.exception
         }
@@ -143,8 +144,8 @@ class SelectPriceRangeIntent extends Intent {
             toPrice = inputPrice[0] * 10000 + 10000;
         }
         return {
-            fromPrice,
-            toPrice,
+            fromPrice: fromPrice,
+            toPrice: toPrice,
             step: that.step,
             exception: that.exception
         }
@@ -171,8 +172,8 @@ class SelectPriceRangeIntent extends Intent {
         }
 
         return {
-            fromPrice,
-            toPrice,
+            fromPrice: fromPrice,
+            toPrice: toPrice,
             step: that.step,
             exception: that.exception
         }
@@ -204,8 +205,8 @@ class SelectPriceRangeIntent extends Intent {
         console.log("to price " + toPrice)
 
         return {
-            fromPrice,
-            toPrice,
+            fromPrice: fromPrice,
+            toPrice: toPrice,
             step: that.step,
             exception: that.exception
         }
@@ -226,7 +227,6 @@ class SelectPriceRangeIntent extends Intent {
         let fromPrice = 0;
         let toPrice = 0;
         console.log(priceRange)
-        console.log(priceRange.length)
         if (priceRange.length < 2) {
             fromPrice = 0;
             toPrice = priceRange[0] * 1000;
@@ -235,11 +235,39 @@ class SelectPriceRangeIntent extends Intent {
             toPrice = priceRange[1] * 1000;
         }
         return {
-            fromPrice,
-            toPrice,
+            fromPrice: fromPrice,
+            toPrice: toPrice,
             step: that.step,
             exception: that.exception
         }
+    }
+
+    /**
+     * User chỉ nhập số Vd:50
+     * @param {*} input 
+     * @param {*} match 
+     * @param {*} pattern 
+     */
+    matchPattern9(input, match, pattern) {
+        console.log("------MATCH PATTERN 8 INPUT nk-nk ------")
+        let fromPrice = 0;
+        let toPrice = 0;
+        if (parseInt(input) > 10 && parseInt(input) < 99) {
+            fromPrice = parseInt(input) * 1000 - 10000;
+            toPrice = parseInt(input) * 1000 + 10000;
+        } else if (parseInt(input) < 10) {
+            toPrice = parseInt(input) * 10000 + 20000;
+        } else if (parseInt(input) > 100) {
+            fromPrice = parseInt(input) * 1000 - 20000;
+            toPrice = parseInt(input) * 1000 + 20000;
+        }
+        return {
+            fromPrice: fromPrice,
+            toPrice: toPrice,
+            step: this.step,
+            exception: this.exception
+        }
+
     }
 }
 module.exports = SelectPriceRangeIntent

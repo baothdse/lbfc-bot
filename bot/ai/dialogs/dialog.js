@@ -16,6 +16,7 @@ class Dialog {
         this.status = "new"; //new hoặc end
         this.posToAnalyze = 0;
         this._storedUsers = {};
+        this.emojiArray = ['😬','😂','😄','🙂','😊','😉','😇','😅','😋','😌','😍','😘','😗','😎','😛','😝','😜','😚','😙','😶','👍'];
 
         /**
          * @type {[Intent]}
@@ -59,6 +60,15 @@ class Dialog {
 
     end() {
         this.status = "end";
+    }
+
+    /**
+     * send random emoji
+     * @param {*} senderId 
+     */
+    sendEmoji(senderId) {
+        let emoji = this.randomReplyMessage(this.emojiArray);
+        this.sendTextMessage(senderId, emoji);
     }
 
     /**
@@ -154,7 +164,6 @@ class Dialog {
                 }
             })
         }
-        
     }
 
     sendQuickReply(senderId, text, quickReplyElement) {
@@ -364,6 +373,16 @@ class Dialog {
                 message: messageData,
             }
         });
+    }
+
+    /**
+     * Dùng để chọn ngẫu nhiên 1 câu trả lời trong mảng gồm các câu trả lời
+     * @param {*} Array
+     * @returns {*} Câu trả lời trong mảng gồm các câu trả lời 
+     */
+    randomReplyMessage(replyMessageArr) {
+        let replyMessage = replyMessageArr[Math.floor(Math.random() * replyMessageArr.length)]
+        return replyMessage;
     }
 
 }

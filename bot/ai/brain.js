@@ -17,7 +17,9 @@ let SearchPopularProducts = require('./dialogs/show-popular-products-dialog');
 const ShowMembershipEventDialog = require('./dialogs/show-membership-event-dialog');
 const OneStepDialog = require('./dialogs/one-step-dialog');
 const ChangeOrderDialog = require('./dialogs/change-order-dialog')
-
+let AskOpenCloseTimeDialog = require('./dialogs/ask-open-close-time-dialog');
+let AskDeliveryTimeDialog = require('./dialogs/delivery/ask-delivery-time-dialog');
+let EmojiDialog = require('./dialogs/emoji/emoji-dialog');
 var Response = require('./dialogs/entities/response');
 let Dialog = require('./dialogs/dialog');
 
@@ -79,6 +81,7 @@ class Brain {
             default: message = event.message.quick_reply.payload; break;
         }
 
+
         this.insertSender(senderId, event.recipient.id)
             .then((res) => {
                 var usingDialogs = this.getUsingDialogs(senderId);
@@ -87,8 +90,6 @@ class Brain {
                 ConsoleLog.log(event, 'brain.js', 60);
                 var that = this;
                 var currentDialog = usingDialogs[usingDialogs.length - 1];
-
-
 
                 var beginNewDialog = false;
                 freeDialogs.some(function (dialog) {
@@ -140,8 +141,17 @@ class Brain {
                 }
             })
 
-    }
+                    ConsoleLog.log("do ton performance", "brain.js", 136);
+                    if (sender.gender == 'male') {
+                        session.pronoun = 'Anh'
+                    } else if (sender.gender == 'female') {
+                        session.pronoun = 'Chị'
+                    }
 
+                }
+            });
+
+    }
 
     getGender(senderId, session) {
         return new Dialog(session).getSenderName(senderId)
@@ -257,6 +267,10 @@ class Brain {
                     new ShowMembershipEventDialog(session),
                     new OneStepDialog(session),
                     new ChangeOrderDialog(session)
+                    new AskDeliveryDialog(session),
+                    new AskOpenCloseTimeDialog(session),
+                    new AskDeliveryTimeDialog(session),
+                    new EmojiDialog(session)
                 ],
                 usingDialogs: [],
             });
@@ -351,6 +365,7 @@ class Brain {
         ]
         new Dialog(session).sendQuickReply(senderId, `Có phải ý ${session.pronoun.toLowerCase()} là *${minPattern.string}*?`, elements);
     }
+
 
 }
 

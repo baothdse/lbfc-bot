@@ -14,7 +14,7 @@
   "keywords": [
     "chatbot"
   ],
-  "author": "khang",
+  "author": "",
   "license": "ISC",
   "dependencies": {
     "async": "^2.5.0",

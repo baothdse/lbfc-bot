@@ -18,7 +18,6 @@ class ShowStoreIntent extends Intent{
     }
 
     matchPattern1(input, match, pattern) {
-        
         return {
             step : this.step,
             exception : this.exception
