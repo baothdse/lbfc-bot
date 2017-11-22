@@ -144,8 +144,6 @@ class SearchProductNameDialog extends Dialog {
      * @param {*} senderId 
      */
     showProducts(products, senderId) {
-        console.log('STANDING AT SHOW PRODUCTS')
-        console.log(products)
         var elements = [];
         var condition = products.length
         if (condition <= 4) {
@@ -194,7 +192,16 @@ class SearchProductNameDialog extends Dialog {
                 elements.push(element);
             }
         }
-        return this.sendGenericMessage(senderId, elements);
+        return this.sendGenericMessage(senderId, elements)
+        .then((res) => {
+            return this.sendQuickReply(senderId, "Nếu không thấy sản phẩm muốn đặt thì bấm nút \"Tìm nữa\" nha",
+            [{
+                content_type: "text",
+                title: "Tìm nữa",
+                payload: "search product simple",
+                image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
+            }]);
+        })
     }
     end() {
         this.session.searchProductDialog = null;

@@ -51,17 +51,17 @@ class OrderDialog extends Dialog {
         this.addIntent(new ReceiveFullOrderIntent(0, 1));
         this.addIntent(new BeginOrderIntent(2, 0));
         this.addIntent(new PostbackOrderIntent(0, 2));
-        this.addIntent(new ReceiveStoreNameIntent(18, 0, this.session));
-        this.addIntent(new PostbackApplyPromotion(12, 0));
+        this.addIntent(new ReceiveStoreNameIntent(20, 0, this.session));
+        this.addIntent(new PostbackApplyPromotion(14, 0));
         this.addIntent(new PostbackChangePromotionIntent(0, 3));
         this.addIntent(new CancelApplyPromotionIntent(0, 4));
         this.addIntent(new AddExtraIntent(7, 0));
-        this.addIntent(new RequestFinishOrderIntent(11, 0));
-        this.addIntent(new PostbackMembershipCardAvailableIntent(20, 0));
-        this.addIntent(new PostbackMembershipCardRefuseIntent(23, 0));
-        this.addIntent(new PostbackMembershipCardUnavailableIntent(23, 0));
-        this.addIntent(new PostbackMembershipCardUseIntent(21, 0));
-        this.addIntent(new PostbackConfirmAddressIntent(18.5, 0));
+        this.addIntent(new RequestFinishOrderIntent(13, 0));
+        this.addIntent(new PostbackMembershipCardAvailableIntent(24, 0));
+        this.addIntent(new PostbackMembershipCardRefuseIntent(27, 0));
+        this.addIntent(new PostbackMembershipCardUnavailableIntent(27, 0));
+        this.addIntent(new PostbackMembershipCardUseIntent(25, 0));
+        this.addIntent(new PostbackConfirmAddressIntent(20.5, 0));
         this.addIntent(new ReceiveProductNameIntent(0, 5));
     }
 
@@ -161,6 +161,7 @@ class OrderDialog extends Dialog {
             }
         ];
         this.sendTextMessage(senderId, this.session.pronoun + ' muốn gọi món gì? ^.^')
+        .catch((err) => ConsoleLog.log(err, this.getName(), 164));
 
     }
 
@@ -218,7 +219,6 @@ class OrderDialog extends Dialog {
                                 image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
                             }]);
                     });
-
             })
     }
 
@@ -306,7 +306,7 @@ class OrderDialog extends Dialog {
                     that.step = 9;
                     that.continue(input, senderId);
                 }
-          })
+            })
             .catch((err) => {
                 ConsoleLog.log(err, this.getName(), 299);
             })
@@ -399,16 +399,16 @@ class OrderDialog extends Dialog {
      * @param {*} senderId 
      */
     askExtraBelongToWhichProduct(input, senderId) {
-        
+
         let currentProduct = this.session.orderDialog.currentProduct;
         console.log('CURRENT PRIDUCT = \n' + JSON.stringify(this.session))
         let currentExtra = currentProduct.extras[currentProduct.extras.length - 1];
-        if(currentProduct.quantity == 1) {
+        if (currentProduct.quantity == 1) {
             this.step = 11
-        } else if(currentProduct.quantity > 1) {
+        } else if (currentProduct.quantity > 1) {
             this.step = 10;
             this.sendTextMessage(senderId, `${currentProduct.quantity} phần ${currentProduct.productName} đều thêm ${currentExtra.quantity} phần ${currentExtra.productName} hay sao ${this.session.pronoun}?`);
-            currentProduct.note  = `(Mỗi phần ${currentProduct.quantity} đều thêm ${currentExtra.quantity} phần ${currentExtra.productName})`;
+            currentProduct.note = `(Mỗi phần ${currentProduct.quantity} đều thêm ${currentExtra.quantity} phần ${currentExtra.productName})`;
         }
     }
 
@@ -421,7 +421,7 @@ class OrderDialog extends Dialog {
     receiveExtraBelongToWhichProductAgain(input, senderId) {
         let currentProduct = this.session.orderDialog.currentProduct;
         let currentExtra = currentProduct.extras[currentProduct.extras.length - 1];
-        if (input.match(/(đúng rồi|phải|nó đó|ok|đúng|chính xác)/i)) {
+        if (input.match(/(đúng rồi|phải|nó đó|ok|đúng|chính xác|ờ|ừ|ừm|ừn|uhm|uh)/i)) {
             this.step = 11
             this.continue(input, senderId);
         } else if (input.match(/(ko|ko phải|k|không|kg|thôi|sai rồi|sai|nô|no)/i)) {
@@ -514,9 +514,9 @@ class OrderDialog extends Dialog {
                         elements.push(e);
                     }, this);
                     that.sendGenericMessage(senderId, elements);
-                    that.step = 12;
+                    that.step = 14;
                 } else {
-                    this.step = 13;
+                    this.step = 15;
                     this.continue('', senderId);
                 }
             });
@@ -550,13 +550,13 @@ class OrderDialog extends Dialog {
                         if (that.session.orderDialog.finalPrice == that.session.orderDialog.originalPrice) {
                             that.sendTextMessage(senderId, "Khuyến mãi này hông áp dụng được " + that.session.pronoun.toLowerCase() + " ơi. " + that.session.pronoun + " coi mấy khuyến mãi khác giùm em nha.")
                                 .then((response) => {
-                                    that.step = 11;
+                                    that.step = 13;
                                     that.continue(input, senderId);
                                 })
                         } else {
                             that.sendTextMessage(senderId, `Ok vậy em chọn khuyến mãi ${promotionCode} ha.`)
                                 .then((response) => {
-                                    that.step = 13;
+                                    that.step = 15;
                                     that.continue(input, senderId);
                                 })
                         }
@@ -817,12 +817,11 @@ class OrderDialog extends Dialog {
 
     /**step 20.4 */
     receiveDeliveryAdrress(input, senderId) {
-        this.sendTextMessage(senderId, this.session.pronoun + " kiểm tra lại đơn hàng giúp em nhé")
         this.session.orderDialog.orderDetails = input;
         this.step = 21;
         this.continue(input, senderId);
     }
-  
+
     /**
      * Step 20.5
      * @param {*} input 
@@ -863,16 +862,160 @@ class OrderDialog extends Dialog {
         this.continue(input, senderId);
     }
 
+    /**
+     * Step 23
+     * @param {*} senderId 
+     */
+    checkForMembership(senderId) {
+        let params = {
+            facebookPSID: senderId,
+        }
+        new Request().sendGetRequest('/LBFC/Membership/SearchMembershipCardByFacebookPSID', params, '')
+            .then((response) => {
+                if (response != '\"Membership card not found\"') {
+
+                    /**
+                     * @type {{Money, MembershipCardCode, Id, CustomerId}}
+                     */
+                    let card = JSON.parse(response);
+                    if (card.Money >= this.session.orderDialog.finalPrice) {
+                        let elements = [
+                            {
+                                content_type: "text",
+                                title: "Xài",
+                                payload: `membership card use ${card.MembershipCardCode}`,
+                                image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
+                            },
+                            {
+                                content_type: "text",
+                                title: "Hông xài đâu",
+                                payload: "membership card refuse",
+                                image_url: "https://cdn4.iconfinder.com/data/icons/wirecons-free-vector-icons/32/menu-alt-512.png"
+                            }
+                        ]
+                        this.sendQuickReply(senderId,
+                            `Em thấy ${this.session.pronoun} có tạo thẻ thành viên này,  ${this.session.pronoun} có muốn xài không?`,
+                            elements);
+                    } else {
+                        this.step = 24;
+                        this.continue('', senderId);
+                    }
+                } else {
+                    ConsoleLog.log("Card founddddddddd", this.getName(), 811);
+
+                    let elements = [
+                        {
+                            content_type: "text",
+                            title: "Có rùi",
+                            payload: `membership card available`,
+                            image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
+                        },
+                        {
+                            content_type: "text",
+                            title: "Không có",
+                            payload: `membership card unavailable`,
+                            image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
+                        }
+                    ];
+                    this.sendQuickReply(senderId, `${this.session.pronoun} có thẻ thành viên chưa?`, elements);
+                }
+            })
+    }
 
     /**
-     * Step 23: confirm lại order
+     * Step 24
+     * @param {*} input 
+     * @param {*} senderId 
+     */
+    askForMembershipCard(input, senderId) {
+        this.sendTextMessage(senderId, `${this.session.pronoun} nhập mã thẻ với`);
+        this.step = 25;
+    }
+
+    /**
+     * Step 25
+     * @param {*} input 
+     * @param {*} senderId 
+     * @param {{cardCode}} info 
+     */
+    receiveMembershipCardCode(input, senderId, info) {
+        let params = {
+            membershipCardCode: info == undefined ? input : info.cardCode,
+        }
+        ConsoleLog.log(params, this.getName(), 851);
+        new Request().sendGetRequest('/LBFC/Membership/SearchMembershipCard', params, '')
+            .then((response) => {
+                if (response == null) {
+                    this.sendTextMessage(senderId, 'Em không kiếm thấy mã thẻ vừa nhập :\'<');
+                } else {
+                    this.insertMembershipCard(params.membershipCardCode, senderId)
+                        .then((response) => {
+                            if (response !== '502') {
+                                this.sendTextMessage(senderId, 'Em đã liên kết mã thẻ với facebook.');
+                                let info = JSON.parse(response);
+                                this.step = 26;
+                                this.continue(input, senderId, info);
+                            } else {
+                                this.sendTextMessage(senderId, `Hì hì hệ thống đang trục trặc xíu, ${this.session.pronoun} đợi xíu lát nhập lại nha.`);
+                            }
+                        })
+                }
+            })
+    }
+
+    /**
+     * Step 26
+     * @param {*} input 
+     * @param {*} senderId 
+     * @param {{Money, MembershipCardCode, Id, CustomerId}} info 
+     */
+    checkForPaymentAbility(input, senderId, info) {
+        if (info.Money < this.session.orderDialog.finalPrice) {
+            this.sendTextMessage(senderId, `${this.session.pronoun} ơi, thẻ của ${this.session.pronoun} không đủ tiền rồi :\'< Em tính bằng tiền mặt đỡ nha.`)
+                .then((res) => {
+                    let response = {
+                        isUsed: false,
+                        cardCode: info.MembershipCardCode
+                    }
+                    this.step = 27;
+                    this.continue(input, senderId, response);
+                })
+        } else {
+            let response = {
+                isUsed: true,
+                cardCode: info.MembershipCardCode
+            }
+            this.step = 27;
+            this.continue(input, senderId, response);
+        }
+    }
+
+    /**
+     * Step 27
+     * @param {*} input 
+     * @param {*} senderId 
+     * @param {{isUsed:boolean, cardCode: string}} info 
+     */
+    receiveUsingCardConfirmation(input, senderId, info) {
+        if (info.isUsed) {
+            this.session.orderDialog.membershipCardCode = info.cardCode;
+            this.sendTextMessage(senderId, 'Vậy là mình xài thẻ ha');
+        } else {
+            this.session.orderDialog.membershipCardCode = null;
+            this.sendTextMessage(senderId, 'Vậy là mình không xài thẻ ha')
+        }
+        this.step = 28;
+        this.continue(input, senderId);
+    }
+
+    /**
+     * Step 28: confirm lại order
      * @param {number} senderId 
      */
     askForConfirmation(input, senderId) {
-        this.step = 24;
+        this.step = 29;
         var that = this;
-        this.session.orderDialog.orderDetails.forEach(function (element) {
-        }, this);
+        this.sendTextMessage(senderId, `${this.session.pronoun} kiểm tra lại đơn hàng giúp em nhé`);
         this.getSenderName(senderId)
             .then((sender) => {
                 var recipientName = sender.first_name + " " + sender.last_name + ". \n Phone: " + this.session.orderDialog.phoneNumber;
@@ -918,7 +1061,7 @@ class OrderDialog extends Dialog {
                 ConsoleLog.log(summary, this.getName(), 656);
                 that.sendReceipt(senderId, recipientName, orderNumber, orderUrl, address, summary, adjustments, elements, paymentMethod)
                     .then((data) => {
-                        that.step = 25;
+                        that.step = 29;
                         that.session.orderDialog.cancelLoop = 1;
 
                     });
@@ -929,7 +1072,7 @@ class OrderDialog extends Dialog {
 
 
     /**
-     * Step 24: Nhận coi user có đồng ý đặt hàng không
+     * Step 29: Nhận coi user có đồng ý đặt hàng không
      * @param {string} input 
      * @param {number} senderId 
      * @param {} info
@@ -956,7 +1099,7 @@ class OrderDialog extends Dialog {
                     .then((res) => {
                         this.sendTextMessage(senderId, `Sao tự nhiên hổng đặt nữa? ${this.session.pronoun} muốn hủy hả?`);
                     })
-                this.step = 25.1;
+                this.step = 29.1;
             } else {
                 this.sendTextMessage(senderId, `Ok hủy đơn hàng`)
                     .then((res) => {
@@ -968,14 +1111,14 @@ class OrderDialog extends Dialog {
                     .then((res) => {
                         this.sendTextMessage(senderId, `Cám ơn ${this.session.pronoun.toLowerCase()} đã ghé thăm gian hàng của em :*`);
                     })
-                this.step = 26;
+                this.step = 30;
                 this.continue('', '');
             }
         }
     }
 
     /**
-     * Step 25.1
+     * Step 29.1
      * @param {*} input 
      * @param {*} senderId 
      */
@@ -983,7 +1126,7 @@ class OrderDialog extends Dialog {
         if (input.match(/(ừ|hủy|ừm|ừn|uhm|uh|đúng)/i)) {
             this.sendTextMessage(senderId, `Dạ vậy hủy`)
                 .then((res) => this.sendTextMessage(senderId, `:'( :'( :'(`));
-            this.step = 26;
+            this.step = 30;
             this.continue('', '');
         } else {
             this.sendTextMessage(senderId, `Là sao?`)
@@ -993,7 +1136,7 @@ class OrderDialog extends Dialog {
                 .then((res) => {
                     this.sendTextMessage(senderId, `Đặt hàng thì hãy say yes, hông đặt thì say no nhé >:O`)
                 })
-            this.step = 25;
+            this.step = 29;
             ++this.session.orderDialog.cancelLoop;
         }
     }
@@ -1105,7 +1248,7 @@ class OrderDialog extends Dialog {
                 var data = JSON.parse(dataStr);
                 this.applyPromotion(data);
                 this.sendTextMessage(senderId, `Ok vậy em chọn khuyến mãi ${info.promotionCode} ha.`);
-                this.step = 19;
+                this.step = 15;
                 this.continue(input, senderId);
             });
     }

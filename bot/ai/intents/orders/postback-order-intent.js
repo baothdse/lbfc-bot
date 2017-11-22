@@ -3,7 +3,7 @@ let Intent = require('../intent');
 class PostbackOrderIntent extends Intent{
     constructor(step, exception) {
         super(step, exception);
-        this.addPatterns(['Đặt'], 1, true, false);
+        this.addPatterns(['Đặt \\$'], 1, true, false);
     }
 
     /**
@@ -32,7 +32,6 @@ class PostbackOrderIntent extends Intent{
         var price = info[3].trim();
         var productUrl = info[4].trim();
         var productCode = info[5].trim();
-        var brandId = info[6].trim();
 
         return {
             productId : parseInt(productId),

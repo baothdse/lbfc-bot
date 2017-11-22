@@ -1,6 +1,7 @@
 let Intent = require('../intent');
 let await = require('asyncawait/await')
 var Request = require('../../utils/request')
+const ConsoleLog = require('../../utils/console-log')
 
 class SelectPriceRangeIntent extends Intent {
     constructor(step, exception) {
@@ -12,8 +13,8 @@ class SelectPriceRangeIntent extends Intent {
         this.addPatterns(['Number', 'Dozen'], 5)
         this.addPatterns(['Number', 'Hundred'], 6)
         this.addPatterns(['MoneyTeenCode', '-', 'MoneyTeenCode'], 7, true, true)
-        this.addPatterns([/\d+k-\d+k/i], 8, false, true)
-        this.addPatterns([/\d/i], 9)
+        this.addPatterns([/\d+k-\d+k/i], 8, true, true)
+        // this.addPatterns([/\d+/i], 9)
 
     }
 
@@ -219,7 +220,7 @@ class SelectPriceRangeIntent extends Intent {
      * @param {*} pattern 
      */
     matchPattern8(input, match, pattern) {
-        console.log("------MATCH PATTERN 8 INPUT nk-nk ------")
+        ConsoleLog.log(`Match pattern 8`, 'select price range intent', 223);
         let that = this;
         //let range = input.replace(/k/g, "").split("-", 10);
         // console.log(newInput)
@@ -249,7 +250,7 @@ class SelectPriceRangeIntent extends Intent {
      * @param {*} pattern 
      */
     matchPattern9(input, match, pattern) {
-        console.log("------MATCH PATTERN 8 INPUT nk-nk ------")
+        ConsoleLog.log(`Match pattern 9`, 'select price range intent', 253);
         let fromPrice = 0;
         let toPrice = 0;
         if (parseInt(input) > 10 && parseInt(input) < 99) {

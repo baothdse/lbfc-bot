@@ -141,16 +141,6 @@ class Brain {
                 }
             })
 
-                    ConsoleLog.log("do ton performance", "brain.js", 136);
-                    if (sender.gender == 'male') {
-                        session.pronoun = 'Anh'
-                    } else if (sender.gender == 'female') {
-                        session.pronoun = 'Chị'
-                    }
-
-                }
-            });
-
     }
 
     getGender(senderId, session) {
@@ -266,7 +256,7 @@ class Brain {
                     new SearchPopularProducts(session),
                     new ShowMembershipEventDialog(session),
                     new OneStepDialog(session),
-                    new ChangeOrderDialog(session)
+                    new ChangeOrderDialog(session),
                     new AskDeliveryDialog(session),
                     new AskOpenCloseTimeDialog(session),
                     new AskDeliveryTimeDialog(session),
@@ -363,7 +353,8 @@ class Brain {
                 image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
             }
         ]
-        new Dialog(session).sendQuickReply(senderId, `Có phải ý ${session.pronoun.toLowerCase()} là *${minPattern.string}*?`, elements);
+        new Dialog(session).sendQuickReply(senderId, `Có phải ý ${session.pronoun.toLowerCase()} là *${minPattern.string}*?`, elements)
+        .catch((err) => ConsoleLog.log(err, 'brain.js', 357));
     }
 
 

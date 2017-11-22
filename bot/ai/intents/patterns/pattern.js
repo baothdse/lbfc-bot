@@ -15,7 +15,8 @@ class Pattern {
      */
     getString() {
         var str = this.string.toString();
-        return str.substring(1, str.length - 2);
+        str = str.substring(1, str.length - 2).replace('^', '').replace('\$', '').replace('d+', '[số]').replace('w+', '[chữ]');
+        return str;
     }
 }
 
