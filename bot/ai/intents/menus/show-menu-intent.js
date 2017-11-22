@@ -5,7 +5,7 @@ class ShowMenuIntent extends Intent {
         super(step, exception);
         this.addPatterns(['menu show'], 1, true);
         this.addPatterns(['DaiTu','DongTuYChi', 'DongTu', 'menu'], 1, true, false);
-        
+        this.addPatterns(['xem', 'menu'], 1);
     }
 
     /**

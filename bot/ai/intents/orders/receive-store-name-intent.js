@@ -35,27 +35,6 @@ class ReceiveStoreNameIntent extends Intent {
     }
 
     matchPattern2(input, match, pattern) {
-        // var promise = this.getAllStore()
-        //     .then((data) => {
-        //         listAllStore = JSON.parse(data)
-        //         return new Promise((resolve, reject) => {
-        //             let condition = listAllStore.length;
-        //                 for (var i = 0; i < condition;  i++) {
-        //                     if(that.levenshteinDistance(input, listAllStore[i].Name) <= 10) { 
-        //                         store = {
-        //                             storeId: listAllStore[i].ID,
-        //                             storeName: listAllStore[i].Name,
-        //                             ed: that.levenshteinDistance(input, listAllStore[i].Name)
-        //                         }
-        //                         listStoreMatching.push(store);                                
-        //                     }
-        //                 }
-                    
-        //             that.bubbleSort(listStoreMatching);
-                    
-        //             resolve(listStoreMatching)
-        //         })
-        //     })
         return {
             step: this.step,
             exception: this.exception

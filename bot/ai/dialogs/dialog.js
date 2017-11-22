@@ -3,7 +3,8 @@ let ClassParser = require('../utils/class-parser');
 let Intent = require('../intents/intent');
 let request = require('request-promise');
 let key = process.env.googleAPIkey || 'AIzaSyC2atcNmGkRy3pzTskzsPbV6pW68qe_drY';
-const FACEBOOK_ACCESS_TOKEN = 'EAAFHmBXhaYoBAJR68ofNMorzRjAXNmCyZCZBXOnRXMLDuiZA66KgvHxcijb2SidQc3zRm2AsAijnaGliTCZCf4iiDmApFMfEoRFVmatHIMrKKY7tdtDSzMqgOQXlOjqFHZCFRmquVAK0DERbnA8Gp57kGJlSwV9ZBqoXC5dxHAyAZDZD';
+const PASSIO_ACCESS_TOKEN = 'EAAGrlOZA1cX8BAPBSqjEfXdVDqnH7W0XSds555yhQBHKmYX1NpLWLb8ZBfZCtC8jRWLVefaLWV1JKEwH0BO5uTMZBTgsKFzZBJtrZBtOZAvhQVEsztGOWS0n4igEdJcY5bYMwOxScudevUwoMjFqGv4p5LJcZARSQTfd3kDWjhRmQsUTMHfVLWu2';
+const KFC_ACCESS_TOKEN = 'EAACnZBgtuUCEBAPe5ZB5dU6AceReE8GVZAinu2QglTfpsga33hMbCEIFACuhnSNHxY5SrZA38Wblo6zJ2H0BaBnmTVAU6i1f92GfyJqj7lK3AZCceCbLrmXfYkhyL5R5Rl5VoHZBvvMQFx0xWubM69J1KDGbuYqVovFfwwWxjU7wZDZD';
 let ConsoleLog = require('../utils/console-log');
 const ProductModel = require('./entities/products/product');
 
@@ -22,10 +23,11 @@ class Dialog {
          */
         this.intents = [];
         /**
-         * @type {{brandId: number, pronoun: string, coordinates: [], searchProductDialog: {productName, topPrice, bottomPrice}, orderDialog: {orderDetails: [{productID, productName, price, picURL, discountPrice, productCode, extras: [{productId, productName, price}], note: {extra: string, time: string}], originalPrice: number, finalPrice: number, currentProduct: ProductModel, currentPromotion: {PromotionDetailID, PromotionCode, BuyProductCode, DiscountRate, DiscountAmount}, address: string}}}
+         * @type {{brandId: number, pronoun: string, coordinates: [], searchProductDialog: {productName, topPrice, bottomPrice}, orderDialog: {orderDetails: [{productID, productName, price, picURL, discountPrice, productCode, extras: [{productId, productName, price}], note: {extra: string}], originalPrice: number, finalPrice: number, currentProduct: ProductModel, currentPromotion: {PromotionDetailID, PromotionCode, BuyProductCode, DiscountRate, DiscountAmount}, address: string, membershipCardCode: any, timeNote: string}, changeOrderDialog: {currentProduct}}}
          */
         this.session = session;
         this.exception = 0;
+        this.FACEBOOK_ACCESS_TOKEN = this.session.brandId == 1 ? PASSIO_ACCESS_TOKEN : KFC_ACCESS_TOKEN
     }
 
     pause() {
@@ -84,12 +86,12 @@ class Dialog {
     sendLocation(senderId) {
         return request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
-            qs: { access_token: FACEBOOK_ACCESS_TOKEN },
+            qs: { access_token: this.FACEBOOK_ACCESS_TOKEN },
             method: 'POST',
             json: {
                 recipient: { id: senderId },
                 message: {
-                    text: "Vui lòng cho chúng tôi biết địa điểm để có thể hỗ trợ bạn tốt hơn",
+                    text: `Cho em biết địa điểm của ${this.session.pronoun} đi`,
                     quick_replies: [
                         {
                             content_type: "location"
@@ -106,34 +108,62 @@ class Dialog {
         })
     }
 
-    sendReceipt(senderId, recipientName, orderNumber, orderUrl, address, summary, adjustments, elements) {
+    sendReceipt(senderId, recipientName, orderNumber, orderUrl, address, summary, adjustments, elements, paymentMethod) {
         console.log("đã chạy vào send receipt")
-        return request({
-            url: 'https://graph.facebook.com/v2.6/me/messages',
-            qs: { access_token: FACEBOOK_ACCESS_TOKEN },
-            method: 'POST',
-            json: {
-                recipient: { id: senderId },
-                message: {
-                    attachment: {
-                        type: "template",
-                        payload: {
-                            template_type: "receipt",
-                            recipient_name: recipientName,
-                            order_number: orderNumber,
-                            currency: "VND",
-                            payment_method: "Tiền mặt",
-                            order_url: orderUrl,
-                            timestamp: "1428444852",
-                            address: address,
-                            summary: summary,
-                            adjustments: adjustments,
-                            elements: elements
+        if (adjustments.length == 0) {
+            return request({
+                url: 'https://graph.facebook.com/v2.6/me/messages',
+                qs: { access_token: this.FACEBOOK_ACCESS_TOKEN },
+                method: 'POST',
+                json: {
+                    recipient: { id: senderId },
+                    message: {
+                        attachment: {
+                            type: "template",
+                            payload: {
+                                template_type: "receipt",
+                                recipient_name: recipientName,
+                                order_number: orderNumber,
+                                currency: "VND",
+                                payment_method: paymentMethod,
+                                order_url: orderUrl,
+                                timestamp: Math.round(new Date().getTime() / 1000) + "",
+                                address: address,
+                                summary: summary,
+                                elements: elements
+                            }
                         }
                     }
                 }
-            }
-        })
+            })
+        } else {
+            return request({
+                url: 'https://graph.facebook.com/v2.6/me/messages',
+                qs: { access_token: this.FACEBOOK_ACCESS_TOKEN },
+                method: 'POST',
+                json: {
+                    recipient: { id: senderId },
+                    message: {
+                        attachment: {
+                            type: "template",
+                            payload: {
+                                template_type: "receipt",
+                                recipient_name: recipientName,
+                                order_number: orderNumber,
+                                currency: "VND",
+                                payment_method: paymentMethod,
+                                order_url: orderUrl,
+                                timestamp: Math.round(new Date().getTime() / 1000) + "",
+                                address: address,
+                                summary: summary,
+                                adjustments: adjustments,
+                                elements: elements
+                            }
+                        }
+                    }
+                }
+            })
+        }
     }
 
     sendQuickReply(senderId, text, quickReplyElement) {
@@ -143,7 +173,7 @@ class Dialog {
         }
         return request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
-            qs: { access_token: FACEBOOK_ACCESS_TOKEN },
+            qs: { access_token: this.FACEBOOK_ACCESS_TOKEN },
             method: 'POST',
             json: {
                 recipient: { id: senderId },
@@ -163,7 +193,7 @@ class Dialog {
                 request({
                     url: `https://graph.facebook.com/v2.6/${senderId}`,
                     qs: {
-                        access_token: FACEBOOK_ACCESS_TOKEN
+                        access_token: this.FACEBOOK_ACCESS_TOKEN
                     },
                     method: 'GET',
 
@@ -182,7 +212,7 @@ class Dialog {
 
         return request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
-            qs: { access_token: FACEBOOK_ACCESS_TOKEN },
+            qs: { access_token: this.FACEBOOK_ACCESS_TOKEN },
             method: 'POST',
             json: {
                 recipient: { id: senderId },
@@ -194,7 +224,7 @@ class Dialog {
     sendTyping(senderId) {
         request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
-            qs: { access_token: FACEBOOK_ACCESS_TOKEN },
+            qs: { access_token: this.FACEBOOK_ACCESS_TOKEN },
             method: 'POST',
             json: {
                 recipient: { id: senderId },
@@ -215,7 +245,7 @@ class Dialog {
         return request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: {
-                access_token: FACEBOOK_ACCESS_TOKEN
+                access_token: this.FACEBOOK_ACCESS_TOKEN
             },
             method: 'POST',
             json: {
@@ -242,7 +272,7 @@ class Dialog {
         request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: {
-                access_token: FACEBOOK_ACCESS_TOKEN
+                access_token: this.FACEBOOK_ACCESS_TOKEN
             },
             method: 'POST',
             json: {
@@ -268,7 +298,7 @@ class Dialog {
         request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: {
-                access_token: FACEBOOK_ACCESS_TOKEN
+                access_token: this.FACEBOOK_ACCESS_TOKEN
             },
             method: 'POST',
             json: {
@@ -292,14 +322,14 @@ class Dialog {
             attachment: {
                 type: "image",
                 payload: {
-                    url: imageUrl
+                    url: imageUrl,
                 }
             }
         };
         return request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: {
-                access_token: FACEBOOK_ACCESS_TOKEN
+                access_token: this.FACEBOOK_ACCESS_TOKEN
             },
             method: 'POST',
             json: {
@@ -326,7 +356,7 @@ class Dialog {
         return request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: {
-                access_token: FACEBOOK_ACCESS_TOKEN
+                access_token: this.FACEBOOK_ACCESS_TOKEN
             },
             body:
             {

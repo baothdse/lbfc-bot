@@ -13,6 +13,10 @@ let ShowOrderDetailDialog = require('./dialogs/show-order-detail-dialog');
 let SearchProductNameDialog = require('./dialogs/search-product-name-dialog');
 let ShowStoreDialog = require('./dialogs/show-store-dialog');
 let AskDeliveryDialog = require('./dialogs/ask-delivery-dialog')
+let SearchPopularProducts = require('./dialogs/show-popular-products-dialog');
+const ShowMembershipEventDialog = require('./dialogs/show-membership-event-dialog');
+const OneStepDialog = require('./dialogs/one-step-dialog');
+const ChangeOrderDialog = require('./dialogs/change-order-dialog')
 let AskOpenCloseTimeDialog = require('./dialogs/ask-open-close-time-dialog');
 let AskDeliveryTimeDialog = require('./dialogs/delivery/ask-delivery-time-dialog');
 let EmojiDialog = require('./dialogs/emoji/emoji-dialog');
@@ -77,12 +81,13 @@ class Brain {
             default: message = event.message.quick_reply.payload; break;
         }
 
-        this.insertSender(senderId)
+
+        this.insertSender(senderId, event.recipient.id)
             .then((res) => {
                 var usingDialogs = this.getUsingDialogs(senderId);
                 var freeDialogs = this.getFreeDialogs(senderId);
 
-                ConsoleLog.log('text = ' + message, 'brain.js', 59);
+                ConsoleLog.log(event, 'brain.js', 60);
                 var that = this;
                 var currentDialog = usingDialogs[usingDialogs.length - 1];
 
@@ -115,7 +120,9 @@ class Brain {
                     var isMatch = currentDialog.isMatch(message, senderId);
                     understood = isMatch;
                     if (!isMatch) {
+                        let step = currentDialog.step;
                         currentDialog.continue(message, senderId);
+                        understood = currentDialog.step > step;
                     }
                     if (currentDialog.status == "end") {
                         var d = that.removeFromUsingList(usingDialogs, currentDialog);
@@ -127,30 +134,30 @@ class Brain {
                     }
 
                 }
+
+
+                if (!understood) {
+                    this.handleUnexpectedInput(message, senderId, usingDialogs, freeDialogs, this.getUserSession(senderId));
+                }
             })
 
-    //         if (!understood) {
-    //             var userSession = this.getUserSession(senderId);
-    //             switch(userSession.notUnderstood) {
-    //                 case 0: new Dialog().sendTextMessage(senderId, "Nói cái quần gì vậy?"); break;
-    //                 case 1: new Dialog().sendTextMessage(senderId, "Tôi chỉ cho đặt hàng đồ thôi nhé. Mấy vấn đề khác tôi không quan tâm nhé."); break;
-    //                 case 2: new Dialog().sendTextMessage(senderId, "Thử nhấn \"tôi muốn đặt hàng\" xem :)"); break;
-    //                 default: new Dialog().sendTextMessage(senderId, "Thôi bye bye, chúng ta không thuộc về nhau :)"); break;
-    //             }
-    //             ++userSession.notUnderstood;
-    //         } else {
-    //             var userSession = this.getUserSession(senderId);
-    //             userSession.notUnderstood = 0;                
-    //         }
+                    ConsoleLog.log("do ton performance", "brain.js", 136);
+                    if (sender.gender == 'male') {
+                        session.pronoun = 'Anh'
+                    } else if (sender.gender == 'female') {
+                        session.pronoun = 'Chị'
+                    }
+
+                }
+            });
+
     }
 
-
     getGender(senderId, session) {
-        return new Dialog().getSenderName(senderId)
+        return new Dialog(session).getSenderName(senderId)
             .then((sender) => {
                 if (!session.pronoun) {
 
-                    ConsoleLog.log("do ton performance", "brain.js", 136);
                     if (sender.gender == 'male') {
                         session.pronoun = 'Anh'
                     } else if (sender.gender == 'female') {
@@ -228,17 +235,22 @@ class Brain {
      * Kiểm tra senderId này có trong mảng chưa, chưa thì push vô rồi tạo mới các dialog
      * @param {number} senderId 
      */
-    insertSender(senderId) {
+    insertSender(senderId, pageId) {
         var result = false;
         this.senders.some(function (sender) {
-            if (sender.senderId == senderId) {
+            if (sender.senderId == senderId && sender.session.pageId == pageId) {
                 result = true;
                 return true;
             }
         });
 
         if (!result) {
-            var session = { brandId: 1, notUnderstood: 0 };
+            var session = { pageId: pageId, notUnderstood: 0 };
+            if (pageId == '119378645455883') {
+                session.brandId = 1;
+            } else {
+                session.brandId = 4;
+            }
             this.senders.push({
                 session: session,
                 senderId: senderId,
@@ -251,6 +263,10 @@ class Brain {
                     new ShowOrderHistoryDialog(session),
                     new ShowOrderDetailDialog(session),
                     new ShowStoreDialog(session),
+                    new SearchPopularProducts(session),
+                    new ShowMembershipEventDialog(session),
+                    new OneStepDialog(session),
+                    new ChangeOrderDialog(session)
                     new AskDeliveryDialog(session),
                     new AskOpenCloseTimeDialog(session),
                     new AskDeliveryTimeDialog(session),
@@ -260,7 +276,7 @@ class Brain {
             });
             return this.getGender(senderId, this.senders[this.senders.length - 1].session);
         } else {
-            return new Promise((resolve, reject) => {resolve("")});
+            return new Promise((resolve, reject) => { resolve("") });
         }
     }
 
@@ -282,6 +298,7 @@ class Brain {
     /**
      * Trả về usingDialog của một senderId
      * @param {number} senderId 
+     * @returns {[Dialog]}
      */
     getUsingDialogs(senderId) {
         var result = null;
@@ -304,6 +321,51 @@ class Brain {
         })
         return result;
     }
+
+    handleUnexpectedInput(input, senderId, usingDialogs, freeDialogs, session) {
+        if (input.match(/message refined /i)) {
+            let match = input.match(/message refined /i);
+            let message = input.substring(match.index + match.length, input.length);
+            this.response({ message: { text: message } }, 'message');
+            return;
+        } else if (input.match(/message decline/i)) {
+            new Dialog(session).sendTextMessage(senderId, `${session.pronoun} thử đổi vài chữ xem em có hiểu không, hì hì`);
+            return;
+        }
+        let minPattern = { string: '', distance: 1000 };
+        usingDialogs.forEach((dialog) => {
+            dialog.intents.forEach((intent) => {
+                let result = intent.getMinDistance(input);
+                if (result.distance < minPattern.distance) {
+                    minPattern = { distance: result.distance, string: result.string }
+                }
+            })
+        })
+        freeDialogs.forEach((dialog) => {
+            dialog.intents.forEach((intent) => {
+                let result = intent.getMinDistance(input);
+                if (result.distance < minPattern.distance) {
+                    minPattern = { distance: result.distance, string: result.string }
+                }
+            })
+        })
+        let elements = [
+            {
+                content_type: "text",
+                title: "Đúng rồi",
+                payload: `message refined ${minPattern.string}`,
+                image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
+            },
+            {
+                content_type: "text",
+                title: "Hông phải",
+                payload: `message decline`,
+                image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
+            }
+        ]
+        new Dialog(session).sendQuickReply(senderId, `Có phải ý ${session.pronoun.toLowerCase()} là *${minPattern.string}*?`, elements);
+    }
+
 
 }
 

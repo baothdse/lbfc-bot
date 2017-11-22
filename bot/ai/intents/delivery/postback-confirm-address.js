@@ -1,21 +1,10 @@
 let Intent = require('../intent');
 
-class HelloIntent extends Intent {
+class PostbackConfirmAddressIntent extends Intent {
     constructor(step, exception) {
         super(step, exception);
-        this.addPatterns(["hello"], 1);
-        this.addPatterns(["xin chào"], 1);
-        this.addPatterns(["chao xìn"], 1);
-        this.addPatterns(["halo"], 1);
-        this.addPatterns(["hé lô"], 1);
-        this.addPatterns(["hé nhô"], 1);
-        this.addPatterns(["hi"], 1, true, true);
-        this.addPatterns(["alo"], 1);
-        this.addPatterns(["ê"], 1, true, true);
-        this.addPatterns(["ê mày"], 1);
-        this.addPatterns(["chào"], 1);
-        this.addPatterns(["hey"], 1);
-        this.addPatterns(["a ey"], 1);
+        this.addPatterns(['address use '], 1, true);
+        this.addPatterns(['address refuse'], 2, true, false);
     }
 
     /**
@@ -29,17 +18,30 @@ class HelloIntent extends Intent {
         var result = null;
         switch (which) {
             case 1: result = this.matchPattern1(input, match, pattern); break;
+            case 2: result = this.matchPattern2(input, match, pattern); break;
             default: break;
         }
         return result;
     }
 
     matchPattern1(input, match, pattern) {
+        let address = input.substring('address use '.length, input.length);
         return {
+            address,
+            step: this.step,
+            exception: this.exception,
+        }
+    }
+
+    matchPattern2(input, match, pattern) {
+
+        return {
+            address: null,
             step: this.step,
             exception: this.exception,
         }
     }
 }
 
-module.exports = HelloIntent
+module.exports = PostbackConfirmAddressIntent
+

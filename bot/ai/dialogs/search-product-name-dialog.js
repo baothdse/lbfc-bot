@@ -196,7 +196,6 @@ class SearchProductNameDialog extends Dialog {
         }
         return this.sendGenericMessage(senderId, elements);
     }
-
     end() {
         this.session.searchProductDialog = null;
         super.end();

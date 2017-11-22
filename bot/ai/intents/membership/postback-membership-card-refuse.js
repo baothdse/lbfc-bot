@@ -1,21 +1,9 @@
 let Intent = require('../intent');
 
-class HelloIntent extends Intent {
+class PostbackMembershipCardRefuseIntent extends Intent {
     constructor(step, exception) {
         super(step, exception);
-        this.addPatterns(["hello"], 1);
-        this.addPatterns(["xin chào"], 1);
-        this.addPatterns(["chao xìn"], 1);
-        this.addPatterns(["halo"], 1);
-        this.addPatterns(["hé lô"], 1);
-        this.addPatterns(["hé nhô"], 1);
-        this.addPatterns(["hi"], 1, true, true);
-        this.addPatterns(["alo"], 1);
-        this.addPatterns(["ê"], 1, true, true);
-        this.addPatterns(["ê mày"], 1);
-        this.addPatterns(["chào"], 1);
-        this.addPatterns(["hey"], 1);
-        this.addPatterns(["a ey"], 1);
+        this.addPatterns(['membership card refuse'], 1, true, true);
     }
 
     /**
@@ -42,4 +30,4 @@ class HelloIntent extends Intent {
     }
 }
 
-module.exports = HelloIntent
+module.exports = PostbackMembershipCardRefuseIntent

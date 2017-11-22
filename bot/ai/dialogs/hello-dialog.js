@@ -4,7 +4,7 @@ let async = require("asyncawait/async");
 let await = require("asyncawait/await");
 let HelloIntent = require('../intents/hello/hello-intent');
 let Request = require('../utils/request');
-const googleAPIkey = 'AIzaSyC2atcNmGkRy3pzTskzsPbV6pW68qe_drY'
+const googleAPIkey = 'AIzaSyC2atcNmGkRy3pzTskzsPbV6pW68qe_drY';
 
 class HelloDialog extends Dialog {
     constructor(session) {
@@ -41,7 +41,6 @@ class HelloDialog extends Dialog {
      */
     showOption(input, senderId) {
         console.log(input)
-
         // if (input.constructor === Array) {
         //     var coordinates = input[0].payload.coordinates
         //     this.session.coordinates = coordinates;
@@ -49,12 +48,12 @@ class HelloDialog extends Dialog {
         // }
         var that = this;
         this.getSenderName(senderId).then(function (sender) {
-            var result = that.reply(senderId, { "text": "Chào " + that.session.pronoun + ' ' + sender.first_name + ", " + that.session.pronoun + " " + "cần em giúp gì không?" });
+            var result = that.reply(senderId, { "text": "Chào " + that.session.pronoun.toLowerCase() + ' ' + sender.first_name + ", " + that.session.pronoun + " " + "cần em giúp gì không?" });
             that.sendTyping(senderId);
             that.sendGenericMessage(senderId, [{
                 title: "Chào mừng " + sender.first_name + " đến với LBFC",
                 image_url: "https://images.unsplash.com/photo-1471691170738-9c6b554ebec1",
-                subtitle: "Vui lòng chọn option bên dưới để chúng tôi có thể giúp bạn 1 cách tốt nhất",
+                subtitle: "Vui lòng chọn option bên dưới để chúng tôi có thể giúp " + that.session.pronoun.toLowerCase() + " 1 cách tốt nhất",
                 default_action: {
                     "type": "web_url",
                     "url": "https://foody.vn",

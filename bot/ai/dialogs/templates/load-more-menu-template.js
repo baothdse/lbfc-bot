@@ -6,7 +6,7 @@ class LoadMoreMenuTemplate {
                 "type": "template",
                 "payload": {
                     "template_type": "button",
-                    'text' : 'Bạn có muốn xem thêm không?',
+                    'text' : `${this.session.pronoun.toLowerCase()} có muốn xem thêm không?`,
                     'buttons' : [
                         {
                             'type' : 'postback',

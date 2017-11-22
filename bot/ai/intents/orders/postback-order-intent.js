@@ -26,18 +26,20 @@ class PostbackOrderIntent extends Intent{
         // var tmp = input.match(/^Đặt .+?(?=\d+)/g);
         // var productName = tmp[0].substring(4, tmp[0].length - 1);
         // var productId = input.match(/\d+/g);
-        var info = (input.slice(5, input.length)).split("$", 5);
-        var productId = info[0]
-        var productName = info[1]
-        var price = info[2]
-        var productUrl = info[3]
-        var brandId = info[4]
+        var info = input.split("$");
+        var productId = info[1].trim();
+        var productName = info[2].trim();
+        var price = info[3].trim();
+        var productUrl = info[4].trim();
+        var productCode = info[5].trim();
+        var brandId = info[6].trim();
 
         return {
-            productId : productId,
+            productId : parseInt(productId),
             productName : productName,
             price : price,
             productUrl: productUrl,
+            productCode: productCode,
             step : this.step,
             exception : this.exception,
         }

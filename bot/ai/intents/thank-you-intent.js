@@ -1,21 +1,16 @@
-let Intent = require('../intent');
+let Intent = require('./intent');
 
-class HelloIntent extends Intent {
+class ThankyouIntent extends Intent {
     constructor(step, exception) {
         super(step, exception);
-        this.addPatterns(["hello"], 1);
-        this.addPatterns(["xin chào"], 1);
-        this.addPatterns(["chao xìn"], 1);
-        this.addPatterns(["halo"], 1);
-        this.addPatterns(["hé lô"], 1);
-        this.addPatterns(["hé nhô"], 1);
-        this.addPatterns(["hi"], 1, true, true);
-        this.addPatterns(["alo"], 1);
-        this.addPatterns(["ê"], 1, true, true);
-        this.addPatterns(["ê mày"], 1);
-        this.addPatterns(["chào"], 1);
-        this.addPatterns(["hey"], 1);
-        this.addPatterns(["a ey"], 1);
+        this.addPatterns(['cảm ơn'], 1);
+        this.addPatterns(['cám ơn'], 1);
+        this.addPatterns(['thanks'], 1);
+        this.addPatterns(['tks'], 1);
+        this.addPatterns(['ths'], 1);
+        this.addPatterns(['thank you'], 1);
+        this.addPatterns(['arigato'], 1);
+        this.addPatterns(['arigatou'], 1);
     }
 
     /**
@@ -34,6 +29,12 @@ class HelloIntent extends Intent {
         return result;
     }
 
+    /**
+     * 
+     * @param {string} input 
+     * @param {*} match 
+     * @param {Pattern} pattern 
+     */
     matchPattern1(input, match, pattern) {
         return {
             step: this.step,
@@ -42,4 +43,4 @@ class HelloIntent extends Intent {
     }
 }
 
-module.exports = HelloIntent
+module.exports = ThankyouIntent
