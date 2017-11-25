@@ -29,29 +29,25 @@ class ShowStoreDialog extends Dialog {
             .then((response) => {
                 this.getStore()
                 .then((info) => {
-                    if (info.listStore) {
-                        let condition = info.listStore.length;
+                        let condition = info.length;
                         for (var i = 0; i < condition; i++) {
                             // console.log(info.listStore[i])
-                            reply += '-' + info.listStore[i].Name + '\n'
+                            reply += '-' + info[i].Name + '\n'
                             if (i % 10 == 0 || i == condition - 1) {
                                 this.sendTextMessage(senderId, reply);
                                 reply = "";
                             }
                         }
-                    }
                 })
             })
     }
 
     getStore() {
-        return new Promise((resolve, reject) => {
-            new Request().sendGetRequest('/LBFC/Store/GetAllStoresByBrand', { 'brandId': 1 }, '')
+        return new Request().sendGetRequest('/LBFC/Store/GetAllStoresByBrand', { 'brandId': this.session.brandId }, '')
             .then((data) => {
                 let listStore = JSON.parse(data);
                 return listStore;
             })
-        })
     }
 
     getName() {

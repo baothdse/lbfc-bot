@@ -870,6 +870,7 @@ class OrderDialog extends Dialog {
         let params = {
             facebookPSID: senderId,
         }
+        this.step = 24;
         new Request().sendGetRequest('/LBFC/Membership/SearchMembershipCardByFacebookPSID', params, '')
             .then((response) => {
                 if (response != '\"Membership card not found\"') {
@@ -942,6 +943,7 @@ class OrderDialog extends Dialog {
         let params = {
             membershipCardCode: info == undefined ? input : info.cardCode,
         }
+        this.step = 26;
         ConsoleLog.log(params, this.getName(), 851);
         new Request().sendGetRequest('/LBFC/Membership/SearchMembershipCard', params, '')
             .then((response) => {
@@ -971,13 +973,13 @@ class OrderDialog extends Dialog {
      */
     checkForPaymentAbility(input, senderId, info) {
         if (info.Money < this.session.orderDialog.finalPrice) {
+            this.step = 27;
             this.sendTextMessage(senderId, `${this.session.pronoun} ơi, thẻ của ${this.session.pronoun} không đủ tiền rồi :\'< Em tính bằng tiền mặt đỡ nha.`)
                 .then((res) => {
                     let response = {
                         isUsed: false,
                         cardCode: info.MembershipCardCode
                     }
-                    this.step = 27;
                     this.continue(input, senderId, response);
                 })
         } else {

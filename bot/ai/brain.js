@@ -137,8 +137,11 @@ class Brain {
 
 
                 if (!understood) {
-                    this.handleUnexpectedInput(message, senderId, usingDialogs, freeDialogs, this.getUserSession(senderId));
+                    this.handleUnexpectedInput(message, senderId, usingDialogs, freeDialogs, this.getUserSession(senderId), event.recipient);
                 }
+            })
+            .catch((err) => {
+                ConsoleLog.log(err, 'brain.js', 144);
             })
 
     }
@@ -312,11 +315,12 @@ class Brain {
         return result;
     }
 
-    handleUnexpectedInput(input, senderId, usingDialogs, freeDialogs, session) {
+    handleUnexpectedInput(input, senderId, usingDialogs, freeDialogs, session, recipient) {
         if (input.match(/message refined /i)) {
             let match = input.match(/message refined /i);
-            let message = input.substring(match.index + match.length, input.length);
-            this.response({ message: { text: message } }, 'message');
+            let message = input.substring(match.index + match[0].length, input.length);
+            let event = { message: { text: message }, sender: {id: senderId}, recipient: recipient };
+            this.response(event, 'message');
             return;
         } else if (input.match(/message decline/i)) {
             new Dialog(session).sendTextMessage(senderId, `${session.pronoun} thử đổi vài chữ xem em có hiểu không, hì hì`);
