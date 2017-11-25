@@ -76,7 +76,7 @@ class Brain {
             case 'attachments': message = event.message.attachments; break;
             default: message = event.message.quick_reply.payload; break;
         }
-
+        ConsoleLog.log(event, 'brain.js', 79);
 
         this.insertSender(senderId, event.recipient.id)
             .then((res) => {
@@ -236,7 +236,7 @@ class Brain {
 
         if (!result) {
             var session = { pageId: pageId, notUnderstood: 0 };
-            if (pageId == '1696031340420493') {
+            if (pageId == '119378645455883') {
                 session.brandId = 1;
             } else {
                 session.brandId = 4;

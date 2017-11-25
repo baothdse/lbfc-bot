@@ -3,8 +3,8 @@ let ClassParser = require('../utils/class-parser');
 let Intent = require('../intents/intent');
 let request = require('request-promise');
 let key = process.env.googleAPIkey || 'AIzaSyC2atcNmGkRy3pzTskzsPbV6pW68qe_drY';
-const PASSIO_ACCESS_TOKEN = 'EAAFHmBXhaYoBAB1yFOWK3YR74AOvLmZBykxjucchGhWFFiK5HUEBWeLAIlDqtAs5QLi3ZCqPTvZBHwKBI2ZAfi6fYNBMJIAkV7UTt1WEPXkedJQLa82yOTtzOKzW2mEVBH3666ltmcEkHEiSxvX67eR9MkSJIZAtEWfzSWL2JZCAZDZD';
-const KFC_ACCESS_TOKEN = 'EAAFHmBXhaYoBAB1yFOWK3YR74AOvLmZBykxjucchGhWFFiK5HUEBWeLAIlDqtAs5QLi3ZCqPTvZBHwKBI2ZAfi6fYNBMJIAkV7UTt1WEPXkedJQLa82yOTtzOKzW2mEVBH3666ltmcEkHEiSxvX67eR9MkSJIZAtEWfzSWL2JZCAZDZD';
+const PASSIO_ACCESS_TOKEN = 'EAAGrlOZA1cX8BALk38ZCZCVwGadiQG8X8cglhVwvLjrRWOcrneqwA9sw8coTsVNIBmJvr0vS39b9WZADBZC0NnCDzUlNVzGCIhz1ZBCCO7KZAdIT5ryFJkKJfWXcJgIBbqQckZAm1w4BeX8WinjCAZAMtSVEXE3c5lfSeowS2ZAuqnZCwZDZD';
+const KFC_ACCESS_TOKEN = 'EAAGrlOZA1cX8BAIXSyYkobopHjWIXCPcT0Oo9fTKzBVnej48M4QcZBMok2yVzcpmPfOw7ZBixDH5cAPMNG1ZC60lrRV97y4sBZB9d2z1IN3uZA4EVwBiF36QucAPHQZCiiGsSVlj92qij7zmAYUX4RKkQqpbZAB0ctKZAZBLWDjNgfOAZDZD';
 let ConsoleLog = require('../utils/console-log');
 const ProductModel = require('./entities/products/product');
 

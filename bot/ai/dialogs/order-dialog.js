@@ -415,8 +415,6 @@ class OrderDialog extends Dialog {
      */
     askExtraBelongToWhichProduct(input, senderId) {
         let currentProduct = this.session.orderDialog.currentProduct;
-        console.log('CURRENT PRIDUCT =')
-        console.log(this.session.orderDialog.currentProduct)
         let currentExtra = currentProduct.extras[currentProduct.extras.length - 1];
         if (currentProduct.quantity == 1) {
             this.step = 11
@@ -553,9 +551,8 @@ class OrderDialog extends Dialog {
         new Request().sendPostRequest("/LBFC/Promotion/GetSuitablePromotions", data)
             .then((dataStr) => {
                 var listPromotion = JSON.parse(dataStr);
-                console.log(data)
-                let condition = (data.length > 9) ? 9 : data.length;
-                if (data.length > 0) {
+                let condition = (listPromotion.length > 9) ? 9 : listPromotion.length;
+                if (condition > 0) {
                     that.sendTextMessage(senderId, `Bên em có một số chương trình khuyến mãi nè. ${this.session.pronoun} có muốn áp dụng ko?`);
                     var elements = [];
                     for (let i = 0; i < condition; i++) {
@@ -577,7 +574,7 @@ class OrderDialog extends Dialog {
                                 }
                             ]
                         }
-                        listPromotion.push(element);
+                        elements.push(element);
                     }
                     that.sendGenericMessage(senderId, elements);
                     that.step = 14;
@@ -884,9 +881,38 @@ class OrderDialog extends Dialog {
 
     /**step 20.4 */
     receiveDeliveryAdrress(input, senderId) {
-        this.session.orderDialog.orderDetails = input;
-        this.step = 21;
-        this.continue(input, senderId);
+        this.step = 20.5;
+        ConsoleLog.log(input, this.getName(), 761);
+        const GOOGLE_API_KEY = 'AIzaSyD6D1KPx1dD32u0BHDHK2Pp0bDMnfkXLLM';
+        const URL = 'https://maps.googleapis.com/maps/api/place/autocomplete/json';
+        const params = {
+            input,
+            types: 'geocode',
+            key: GOOGLE_API_KEY
+        }
+        new Request().sendUniversalGetRequest(URL, params, '')
+        .then((response) => {
+            let places = JSON.parse(response);
+            let topPlace = places.predictions[0].description;
+            let elements = [
+                {
+                    content_type: "text",
+                    title: "Đúng rồi",
+                    payload: `address use ${topPlace}`,
+                    image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
+                 },
+                 {
+                     content_type: "text",
+                     title: "Hông phải",
+                     payload: `address refuse`,
+                     image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
+                 }
+             ];
+             this.sendQuickReply(senderId, `Có phải ý ${this.session.pronoun} là ${topPlace}?`, elements);
+         })
+         .catch((err) => {
+             ConsoleLog.log(err, this.getName(), 789);
+         })
     }
 
     /**
@@ -1427,7 +1453,6 @@ class OrderDialog extends Dialog {
                 }
             }
         }
-        console.log("CALCULATE TOTAL PRICE TOTAL = " + total)
         return total;
     }
 
