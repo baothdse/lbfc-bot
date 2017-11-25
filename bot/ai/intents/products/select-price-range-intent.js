@@ -13,8 +13,7 @@ class SelectPriceRangeIntent extends Intent {
         this.addPatterns(['Number', 'Dozen'], 5)
         this.addPatterns(['Number', 'Hundred'], 6)
         this.addPatterns(['MoneyTeenCode', '-', 'MoneyTeenCode'], 7, true, true)
-        this.addPatterns([/\d+k-\d+k/i], 8)
-        console.log(this.patterns)
+        this.addPatterns([/\d+k-\d+k/i], 8, true, true)
         // this.addPatterns([/\d+/i], 9)
 
     }
