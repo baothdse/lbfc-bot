@@ -112,12 +112,6 @@ class SearchProductNameDialog extends Dialog {
             this.step = 6;
         } else {
             this.step = 6;
-            // var params = {
-            //     'keyword': this.session.searchProductDialog.productName,
-            //     'from': this.session.searchProductDialog.bottomPrice == undefined ? 0 : this.session.searchProductDialog.bottomPrice,
-            //     'to': this.session.searchProductDialog.topPrice == undefined ? 0 : this.session.searchProductDialog.topPrice,
-            //     'brandId': this.session.brandId,
-            // }
             var params = {
                 'keyword': this.session.searchProductDialog.productName,
                 'from': info.fromPrice,
@@ -146,6 +140,7 @@ class SearchProductNameDialog extends Dialog {
     showProducts(products, senderId) {
         var elements = [];
         var condition = products.length
+        console.log(this.session)
         if (condition <= 4) {
             for (var i = 0; i < condition; i++) {
                 var element = {

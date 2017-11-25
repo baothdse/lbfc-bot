@@ -3,8 +3,8 @@ let ClassParser = require('../utils/class-parser');
 let Intent = require('../intents/intent');
 let request = require('request-promise');
 let key = process.env.googleAPIkey || 'AIzaSyC2atcNmGkRy3pzTskzsPbV6pW68qe_drY';
-const PASSIO_ACCESS_TOKEN = 'EAAGrlOZA1cX8BAPBSqjEfXdVDqnH7W0XSds555yhQBHKmYX1NpLWLb8ZBfZCtC8jRWLVefaLWV1JKEwH0BO5uTMZBTgsKFzZBJtrZBtOZAvhQVEsztGOWS0n4igEdJcY5bYMwOxScudevUwoMjFqGv4p5LJcZARSQTfd3kDWjhRmQsUTMHfVLWu2';
-const KFC_ACCESS_TOKEN = 'EAACnZBgtuUCEBAPe5ZB5dU6AceReE8GVZAinu2QglTfpsga33hMbCEIFACuhnSNHxY5SrZA38Wblo6zJ2H0BaBnmTVAU6i1f92GfyJqj7lK3AZCceCbLrmXfYkhyL5R5Rl5VoHZBvvMQFx0xWubM69J1KDGbuYqVovFfwwWxjU7wZDZD';
+const PASSIO_ACCESS_TOKEN = 'EAAFHmBXhaYoBAB1yFOWK3YR74AOvLmZBykxjucchGhWFFiK5HUEBWeLAIlDqtAs5QLi3ZCqPTvZBHwKBI2ZAfi6fYNBMJIAkV7UTt1WEPXkedJQLa82yOTtzOKzW2mEVBH3666ltmcEkHEiSxvX67eR9MkSJIZAtEWfzSWL2JZCAZDZD';
+const KFC_ACCESS_TOKEN = 'EAAFHmBXhaYoBAB1yFOWK3YR74AOvLmZBykxjucchGhWFFiK5HUEBWeLAIlDqtAs5QLi3ZCqPTvZBHwKBI2ZAfi6fYNBMJIAkV7UTt1WEPXkedJQLa82yOTtzOKzW2mEVBH3666ltmcEkHEiSxvX67eR9MkSJIZAtEWfzSWL2JZCAZDZD';
 let ConsoleLog = require('../utils/console-log');
 const ProductModel = require('./entities/products/product');
 
@@ -28,6 +28,7 @@ class Dialog {
         this.session = session;
         this.exception = 0;
         this.FACEBOOK_ACCESS_TOKEN = this.session.brandId == 1 ? PASSIO_ACCESS_TOKEN : KFC_ACCESS_TOKEN
+        //this.FACEBOOK_ACCESS_TOKEN = PASSIO_ACCESS_TOKEN
     }
 
     pause() {
@@ -60,6 +61,30 @@ class Dialog {
 
     end() {
         this.status = "end";
+    }
+
+    convertWordToNumber(input) {
+        let result = 0;
+        let khong = {words: 'không khong', number: 0};
+        let mot = {words: 'một mot', number: 1};
+        let hai = {words: 'hai', number: 2};
+        let ba = {words: 'ba', number: 3};
+        let bon = {words: 'bốn bon', number: 4};
+        let nam = {words: 'năm nam', number: 5};
+        let sau = {words: 'sáu sau', number: 6};
+        let bay = {words: 'bảy bay', number: 7};
+        let tam = {words: 'tám tam', number: 8};
+        let chin = {words: 'chín chin', number: 9};
+        let muoi = {words: 'mười muoi', number: 10};
+        let numberByWordArray = [mot, hai, ba, bon, nam, sau, bay, tam, chin, muoi];
+        for (var i = 0; i < numberByWordArray.length; i++) {
+            if(numberByWordArray[i].words.match(input)) {
+                result  =numberByWordArray[i].number;
+                break;
+            }
+        }
+        console.log("RESULT CONVERT WORD TO NUMBER : " + result)
+        return parseInt(result);
     }
 
     /**

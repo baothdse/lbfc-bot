@@ -222,8 +222,6 @@ class SelectPriceRangeIntent extends Intent {
     matchPattern8(input, match, pattern) {
         ConsoleLog.log(`Match pattern 8`, 'select price range intent', 223);
         let that = this;
-        //let range = input.replace(/k/g, "").split("-", 10);
-        // console.log(newInput)
         var priceRange = input.match(/\d+/g);
         let fromPrice = 0;
         let toPrice = 0;

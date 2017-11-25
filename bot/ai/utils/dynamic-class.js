@@ -26,9 +26,7 @@ let MoneyTeenCode = require('../entities/money-teen-code')
 let DongTuGiaoHang = require('../entities/dong-tu-giao-hang');
 let DanhTuChiKhachHang = require('../entities/danh-tu-chi-khach-hang');
 let ChiTuGiNao = require('../entities/chi-tu-gi-nao');
-
-
-
+let NumberByWords = require('../entities/number-by-words');
 
 class DynamicClass {
     constructor(name) {
@@ -36,7 +34,7 @@ class DynamicClass {
             case "DaiTu": return new DaiTu(); break;
             case "YeuCau": return new YeuCau(); break;
             case "DongTuDatHang": return new DongTuDatHang(); break;
-            case "DonVi": return new DonVi.DonVi(); break;
+            case "DonVi": return new DonVi(); break;
             case "Number": return new Number(); break;
             case "End": return new End(); break;
             case 'DanhTuKhuyenMai': return new DanhTuKhuyenMai(); break;
@@ -59,7 +57,8 @@ class DynamicClass {
             case 'DongTuGiaoHang': return new DongTuGiaoHang(); break;
             case 'DanhTuChiKhachHang': return new DanhTuChiKhachHang(); break;
             case 'ChiTuGiNao': return new ChiTuGiNao(); break;
-            
+            case 'NumberByWords': return new NumberByWords(); break;
+            c
             default: 
 
                 return new class C {

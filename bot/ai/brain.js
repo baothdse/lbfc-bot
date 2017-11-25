@@ -1,8 +1,4 @@
-
-
 var VietnameseConverter = require('../vietnamese/vietnamese-converter');
-
-
 var OrderDialog = require('./dialogs/order-dialog');
 var HelpDiaglog = require('./dialogs/help-dialog');
 let ShowMenuDialog = require('./dialogs/show-menu-dialog');
@@ -87,7 +83,7 @@ class Brain {
                 var usingDialogs = this.getUsingDialogs(senderId);
                 var freeDialogs = this.getFreeDialogs(senderId);
 
-                ConsoleLog.log(event, 'brain.js', 60);
+                ConsoleLog.log(event, 'brain.js', 86);
                 var that = this;
                 var currentDialog = usingDialogs[usingDialogs.length - 1];
 
@@ -140,6 +136,7 @@ class Brain {
                     this.handleUnexpectedInput(message, senderId, usingDialogs, freeDialogs, this.getUserSession(senderId), event.recipient);
                 }
             })
+
             .catch((err) => {
                 ConsoleLog.log(err, 'brain.js', 144);
             })
@@ -239,7 +236,7 @@ class Brain {
 
         if (!result) {
             var session = { pageId: pageId, notUnderstood: 0 };
-            if (pageId == '119378645455883') {
+            if (pageId == '1696031340420493') {
                 session.brandId = 1;
             } else {
                 session.brandId = 4;

@@ -1,12 +1,8 @@
+class DonVi {
+    constructor() {
+        this.words = ["ly", "cái", "chén", "phần", "tô", 'dĩa', 'cốc', 'cái', 'hộp'];
+    }
 
-function DonVi(){
-    this.words = ["ly", "cái", "chén", "phần", "tô", 'dĩa', 'cốc', 'cái', 'hộp'];
 }
 
-DonVi.prototype.getWords = function () {
-    return this.words;
-}
-
-module.exports = {
-    DonVi : DonVi
-}
+module.exports = DonVi
