@@ -24,6 +24,7 @@ class PostbackMembershipCardRefuseIntent extends Intent {
 
     matchPattern1(input, match, pattern) {
         return {
+            isUsed: false,
             step: this.step,
             exception: this.exception,
         }

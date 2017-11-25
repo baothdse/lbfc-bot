@@ -112,12 +112,6 @@ class SearchProductNameDialog extends Dialog {
             this.step = 6;
         } else {
             this.step = 6;
-            // var params = {
-            //     'keyword': this.session.searchProductDialog.productName,
-            //     'from': this.session.searchProductDialog.bottomPrice == undefined ? 0 : this.session.searchProductDialog.bottomPrice,
-            //     'to': this.session.searchProductDialog.topPrice == undefined ? 0 : this.session.searchProductDialog.topPrice,
-            //     'brandId': this.session.brandId,
-            // }
             var params = {
                 'keyword': this.session.searchProductDialog.productName,
                 'from': info.fromPrice,
@@ -144,10 +138,9 @@ class SearchProductNameDialog extends Dialog {
      * @param {*} senderId 
      */
     showProducts(products, senderId) {
-        console.log('STANDING AT SHOW PRODUCTS')
-        console.log(products)
         var elements = [];
         var condition = products.length
+        console.log(this.session)
         if (condition <= 4) {
             for (var i = 0; i < condition; i++) {
                 var element = {
@@ -194,7 +187,16 @@ class SearchProductNameDialog extends Dialog {
                 elements.push(element);
             }
         }
-        return this.sendGenericMessage(senderId, elements);
+        return this.sendGenericMessage(senderId, elements)
+        .then((res) => {
+            return this.sendQuickReply(senderId, "Nếu không thấy sản phẩm muốn đặt thì bấm nút \"Tìm nữa\" nha",
+            [{
+                content_type: "text",
+                title: "Tìm nữa",
+                payload: "search product simple",
+                image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
+            }]);
+        })
     }
     end() {
         this.session.searchProductDialog = null;

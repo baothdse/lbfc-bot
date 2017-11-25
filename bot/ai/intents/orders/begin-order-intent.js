@@ -6,6 +6,7 @@ class BeginOrderIntent extends Intent{
         this.addPatterns(['DaiTu', 'DongTuYChi', 'DongTuDatHang'], 1);
         this.addPatterns(['DongTuYChi', 'DaiTu', 'DongTuDatHang'], 1);
         this.addPatterns(['order begin'], 1, true, true);
+        this.addPatterns(['DongTuDatHang'], 1, true, true);
     }
 
 

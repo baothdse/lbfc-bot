@@ -1,8 +1,4 @@
-
-
 var VietnameseConverter = require('../vietnamese/vietnamese-converter');
-
-
 var OrderDialog = require('./dialogs/order-dialog');
 var HelpDiaglog = require('./dialogs/help-dialog');
 let ShowMenuDialog = require('./dialogs/show-menu-dialog');
@@ -87,7 +83,7 @@ class Brain {
                 var usingDialogs = this.getUsingDialogs(senderId);
                 var freeDialogs = this.getFreeDialogs(senderId);
 
-                ConsoleLog.log(event, 'brain.js', 60);
+                ConsoleLog.log(event, 'brain.js', 86);
                 var that = this;
                 var currentDialog = usingDialogs[usingDialogs.length - 1];
 
@@ -140,16 +136,6 @@ class Brain {
                     this.handleUnexpectedInput(message, senderId, usingDialogs, freeDialogs, this.getUserSession(senderId));
                 }
             })
-
-                    ConsoleLog.log("do ton performance", "brain.js", 136);
-                    if (sender.gender == 'male') {
-                        session.pronoun = 'Anh'
-                    } else if (sender.gender == 'female') {
-                        session.pronoun = 'Chị'
-                    }
-
-                }
-            });
 
     }
 
@@ -246,7 +232,7 @@ class Brain {
 
         if (!result) {
             var session = { pageId: pageId, notUnderstood: 0 };
-            if (pageId == '119378645455883') {
+            if (pageId == '1696031340420493') {
                 session.brandId = 1;
             } else {
                 session.brandId = 4;
@@ -266,7 +252,7 @@ class Brain {
                     new SearchPopularProducts(session),
                     new ShowMembershipEventDialog(session),
                     new OneStepDialog(session),
-                    new ChangeOrderDialog(session)
+                    new ChangeOrderDialog(session),
                     new AskDeliveryDialog(session),
                     new AskOpenCloseTimeDialog(session),
                     new AskDeliveryTimeDialog(session),
@@ -363,7 +349,8 @@ class Brain {
                 image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
             }
         ]
-        new Dialog(session).sendQuickReply(senderId, `Có phải ý ${session.pronoun.toLowerCase()} là *${minPattern.string}*?`, elements);
+        new Dialog(session).sendQuickReply(senderId, `Có phải ý ${session.pronoun.toLowerCase()} là *${minPattern.string}*?`, elements)
+        .catch((err) => ConsoleLog.log(err, 'brain.js', 357));
     }
 
 
