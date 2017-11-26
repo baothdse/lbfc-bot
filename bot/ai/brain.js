@@ -18,17 +18,21 @@ let AskDeliveryTimeDialog = require('./dialogs/delivery/ask-delivery-time-dialog
 let EmojiDialog = require('./dialogs/emoji/emoji-dialog');
 var Response = require('./dialogs/entities/response');
 let Dialog = require('./dialogs/dialog');
+const Enums = require('./enum');
+const Util = require('./utils/util');
 
 let ConsoleLog = require('./utils/console-log');
+const EditDistance = require('./utils/edit-distance');
 
+const Intent = require('./intents/intent');
 
 class Brain {
 
-    constructor() {
-        // this.usingDialog = [];
-        // this.freeDialogs = [new OrderDialog(), new ShowMenuDialog(), new ShowPromotionDialog(), new SearchDialog()
-        //     , new HelloDialog(), new ShowOrderHistoryDialog(), new ShowOrderDetailDialog()];
-
+    /**
+     * 
+     * @param {RedisClient} client 
+     */
+    constructor(client) {
         this.vietnameseConverter = new VietnameseConverter();
 
         /**
@@ -36,6 +40,7 @@ class Brain {
          */
         this.senders = [];
 
+        this.client = client;
     }
 
     receive(req, res) {
@@ -80,61 +85,54 @@ class Brain {
 
         this.insertSender(senderId, event.recipient.id)
             .then((res) => {
-                var usingDialogs = this.getUsingDialogs(senderId);
-                var freeDialogs = this.getFreeDialogs(senderId);
 
-                ConsoleLog.log(event, 'brain.js', 86);
-                var that = this;
-                var currentDialog = usingDialogs[usingDialogs.length - 1];
+                this.client.get(Enums.REDIS_KEY(), (err, value) => {
+                    /**
+                     * @type {[{DialogId: number, Exception: number, Id: number, Step: number, Patterns: [{Id: number, Entities: [{Id, Words}]}]}]}
+                     */
+                    let intents = JSON.parse(value);
+                    var usingDialogs = this.getUsingDialogs(senderId);
+                    let session = this.getUserSession(senderId);
 
-                var beginNewDialog = false;
-                freeDialogs.some(function (dialog) {
-                    var match = dialog.isMatch(message, senderId);
-                    if (match == true) {
-                        understood = true;
-                        if (!that.isInStack(usingDialogs, dialog)) {
+                    ConsoleLog.log(event, 'brain.js', 86);
+                    var currentDialog = usingDialogs[usingDialogs.length - 1];
+
+                    var beginNewDialog = false;
+
+                    let intent = this.getSuitableIntent(message, intents);
+                    if (intent.Results == null && currentDialog != null) {
+                        let currentStep = currentDialog.step;
+                        currentDialog.continue(message, senderId);
+                        understood = currentDialog.step > currentStep;
+
+                        if (currentDialog.status == "end") {
+                            this.removeFromUsingList(usingDialogs, currentDialog);
+                        }
+                    } else if (intent.Results != null) {
+                        let dialog = this.getDialog(intent.DialogId, session);
+                        if (!this.isInStack(usingDialogs, dialog)) {
                             usingDialogs.push(dialog);
-                            that.removeFromFreeList(freeDialogs, dialog);
-                            if (currentDialog != null) currentDialog.pause();
-                            beginNewDialog = true;
+                        } else {
+                            this.removeToUsingList(usingDialogs, dialog);
                         }
+
+                        let info = Intent.analyze(intent);
+
+                        dialog.step = intent.Step;
+                        dialog.exception = intent.Exception;
+                        dialog.continue(message, senderId, info);
+                        understood = true;
+
                         if (dialog.status == "end") {
-                            var d = that.removeFromUsingList(usingDialogs, dialog);
-                            freeDialogs.push(dialog);
-                            if (d != null) {
-                                currentDialog = d;
-                            }
-                            dialog.reset();
-                            beginNewDialog = false;
+                            this.removeFromUsingList(usingDialogs, dialog);
                         }
-                        return true;
+                    }
+
+                    if (!understood) {
+                        this.handleUnexpectedInput(message, senderId, this.getUserSession(senderId), event.recipient);
                     }
                 });
 
-
-                if (!beginNewDialog && currentDialog != null) {
-                    var isMatch = currentDialog.isMatch(message, senderId);
-                    understood = isMatch;
-                    if (!isMatch) {
-                        let step = currentDialog.step;
-                        currentDialog.continue(message, senderId);
-                        understood = currentDialog.step > step;
-                    }
-                    if (currentDialog.status == "end") {
-                        var d = that.removeFromUsingList(usingDialogs, currentDialog);
-                        freeDialogs.push(currentDialog);
-                        if (d != null) {
-                            d.continue(null, senderId);
-                        }
-                        currentDialog.reset();
-                    }
-
-                }
-
-
-                if (!understood) {
-                    this.handleUnexpectedInput(message, senderId, usingDialogs, freeDialogs, this.getUserSession(senderId), event.recipient);
-                }
             })
 
             .catch((err) => {
@@ -174,6 +172,22 @@ class Brain {
             }
         }
         return result;
+    }
+
+    /**
+     * Loại bỏ các dialog hiện tại và trở về dialog được chọn
+     * @param {[]} usingDialogs 
+     * @param {*} dialog 
+     */
+    removeToUsingList(usingDialogs, dialog) {
+        for (var i = usingDialogs.length; i >= 0; i++) {
+            var element = usingDialogs[i];
+            if (element.getName() != dialog.getName()) {
+                usingDialogs.splice(i, 1);
+            } else {
+                break;
+            }
+        }
     }
 
     /**
@@ -244,24 +258,6 @@ class Brain {
             this.senders.push({
                 session: session,
                 senderId: senderId,
-                freeDialogs: [
-                    new OrderDialog(session),
-                    new ShowMenuDialog(session),
-                    new ShowPromotionDialog(session),
-                    new HelloDialog(session),
-                    new SearchProductNameDialog(session),
-                    new ShowOrderHistoryDialog(session),
-                    new ShowOrderDetailDialog(session),
-                    new ShowStoreDialog(session),
-                    new SearchPopularProducts(session),
-                    new ShowMembershipEventDialog(session),
-                    new OneStepDialog(session),
-                    new ChangeOrderDialog(session),
-                    new AskDeliveryDialog(session),
-                    new AskOpenCloseTimeDialog(session),
-                    new AskDeliveryTimeDialog(session),
-                    new EmojiDialog(session)
-                ],
                 usingDialogs: [],
             });
             return this.getGender(senderId, this.senders[this.senders.length - 1].session);
@@ -312,11 +308,18 @@ class Brain {
         return result;
     }
 
-    handleUnexpectedInput(input, senderId, usingDialogs, freeDialogs, session, recipient) {
+    /**
+     * 
+     * @param {*} input 
+     * @param {*} senderId 
+     * @param {*} session 
+     * @param {*} recipient 
+     */
+    handleUnexpectedInput(input, senderId, session, recipient) {
         if (input.match(/message refined /i)) {
             let match = input.match(/message refined /i);
             let message = input.substring(match.index + match[0].length, input.length);
-            let event = { message: { text: message }, sender: {id: senderId}, recipient: recipient };
+            let event = { message: { text: message }, sender: { id: senderId }, recipient: recipient };
             this.response(event, 'message');
             return;
         } else if (input.match(/message decline/i)) {
@@ -324,40 +327,168 @@ class Brain {
             return;
         }
         let minPattern = { string: '', distance: 1000 };
-        usingDialogs.forEach((dialog) => {
-            dialog.intents.forEach((intent) => {
-                let result = intent.getMinDistance(input);
-                if (result.distance < minPattern.distance) {
-                    minPattern = { distance: result.distance, string: result.string }
+        
+        this.client.get('BotPatterns', (err, value) => {
+
+            /**
+             * @type {[string]}
+             */
+            let patterns = JSON.parse(value);
+            let minPattern = {string: '', min: 1000}
+            patterns.forEach((pattern) => {
+                let d = EditDistance.levenshteinDistance(input, pattern);
+                if (d < minPattern.min) {
+                    minPattern.string = pattern.replace('\\d+', '[số]').replace('\\w+', '[chữ]').replace('.*?', '[chữ]');
+                    minPattern.min = d;
                 }
             })
-        })
-        freeDialogs.forEach((dialog) => {
-            dialog.intents.forEach((intent) => {
-                let result = intent.getMinDistance(input);
-                if (result.distance < minPattern.distance) {
-                    minPattern = { distance: result.distance, string: result.string }
+
+            let elements = [
+                {
+                    content_type: "text",
+                    title: "Đúng rồi",
+                    payload: `message refined ${minPattern.string}`,
+                    image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
+                },
+                {
+                    content_type: "text",
+                    title: "Hông phải",
+                    payload: `message decline`,
+                    image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
                 }
-            })
+            ]
+            new Dialog(session).sendQuickReply(senderId, `Có phải ý ${session.pronoun.toLowerCase()} là *${minPattern.string}*?`, elements)
+                .catch((err) => ConsoleLog.log(err, 'brain.js', 357));
+
         })
-        let elements = [
-            {
-                content_type: "text",
-                title: "Đúng rồi",
-                payload: `message refined ${minPattern.string}`,
-                image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
-            },
-            {
-                content_type: "text",
-                title: "Hông phải",
-                payload: `message decline`,
-                image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
-            }
-        ]
-        new Dialog(session).sendQuickReply(senderId, `Có phải ý ${session.pronoun.toLowerCase()} là *${minPattern.string}*?`, elements)
-        .catch((err) => ConsoleLog.log(err, 'brain.js', 357));
+
     }
 
+
+    /**
+     * @param {string} input
+     * @param {[{DialogId: number, Exception: number, Id: number, Step: number, Patterns: [{Id: number, MatchBegin: boolean, MatchEnd: boolean, Group: number, Entities: [{Id, Words}]}]}]} intents 
+     * @returns {{DialogId: number, Exception: number, Id: number, Step: number, PatternGroup: number, Results: {}}}
+     */
+    getSuitableIntent(input, intents) {
+        let maxElements = 0;
+
+        /**
+         * @type {{DialogId: number, Exception: number, Id: number, Step: number, Patterns: [{Id: number, MatchBegin: boolean, MatchEnd: boolean, Entities: [{Id, Words}]}]}}
+         */
+        let matchIntent = null;
+
+        let matchPattern = null;
+
+        /**
+         * @type {{}}}
+         */
+        let matches = null;
+        let specialValues = ""; //when the entity simply just want some words
+
+        intents.forEach((intent) => {
+            intent.Patterns.forEach((pattern) => {
+
+                let matchesTmp = {};
+                let inputTmp = input.trim();
+                for (var i = 0; i < pattern.Entities.length; i++) {
+                    /**
+                     * @type {RegExp}
+                     */
+                    let regex = null;
+                    if (pattern.Entities[i].Words == ".*?") {
+                        specialValues = inputTmp;
+                    }
+                    else {
+                        if (i == pattern.Entities.length - 1 && pattern.MatchBegin) {
+                            regex = new RegExp("(?:^|\\W)" + pattern.Entities[i].Words + "$(?:$|\\W)", 'i');
+                        }
+                        else if (specialValues == "") {
+                            regex = new RegExp("(?:^|\\W)^" + pattern.Entities[i].Words + "(?:$|\\W)", 'i');
+                        }
+                        else {
+                            regex = new RegExp("(?:^|\\W)" + pattern.Entities[i].Words + "(?:$|\\W)", 'i');
+                        }
+
+                        let result = regex.exec(inputTmp);
+
+                        if (result != null) {
+                            matchesTmp[pattern.Entities[i].Id] = result[0];
+                            if (specialValues != "") {
+                                matchesTmp[8] = specialValues.substring(0, specialValues.length - result[0].length).trim();
+                                specialValues = "";
+                            }
+                            if (i == pattern.Entities.length - 1) {
+                                if (pattern.Entities.length > maxElements) {
+                                    matchIntent = intent;
+                                    matchPattern = pattern;
+                                    matches = matchesTmp;
+                                    if (result.index + result[0].trim().length + 1 < inputTmp.length) {
+                                        specialValues = inputTmp.substring(result.index + result[0].trim().length + 1);
+                                    }
+                                    break;
+                                }
+                            }
+                            else {
+                                if (result.index + result[0].trim().length + 1 < inputTmp.length) {
+                                    inputTmp = inputTmp.substring(result.index + result[0].trim().length + 1);
+                                }
+                            }
+                        }
+                        else {
+                            break;
+                        }
+                    }
+
+                }
+                if (specialValues != "") {
+                    if (matches == null && pattern.Entities.length > maxElements) {
+                        matches = matchesTmp;
+                        matchIntent = intent;
+                        matchPattern = pattern;
+                        matches[8] = specialValues.trim();
+                    } else if (matches != null && matches[8] == null && pattern.Entities.length > maxElements) {
+                        matches[8] = specialValues.trim();
+                        matchIntent = intent;
+                        matchPattern = pattern;
+                    }
+                    specialValues = "";
+                }
+            });
+        });
+
+        ConsoleLog.log(matches, 'brain.js', 428);
+        
+
+        return {
+            DialogId: matchIntent == null ? 0 : matchIntent.DialogId,
+            Exception: matchIntent == null ? 0 : matchIntent.Exception,
+            Id: matchIntent == null ? 0 : matchIntent.Id,
+            Step: matchIntent == null ? 0 : matchIntent.Step,
+            PatternGroup: matchPattern == null ? 0 : matchPattern.Group,
+            Results: matches,
+        };
+    }
+
+    getDialog(dialogId, session) {
+        switch(dialogId) {
+            case Enums.ASK_DELIVERY_DIALOG_ID(): return new AskDeliveryDialog(session); break;
+            case Enums.ASK_OPEN_CLOSE_TIME_DIALOG_ID(): return new AskOpenCloseTimeDialog(session); break;
+            case Enums.CHANGE_ORDER_DIALOG_ID(): return new ChangeOrderDialog(session); break;
+            case Enums.HELLO_DIALOG_ID(): return new HelloDialog(session); break;
+            case Enums.ONE_STEP_DIALOG_ID(): return new OneStepDialog(session); break;
+            case Enums.ORDER_DIALOG_ID(): return new OrderDialog(session); break;
+            case Enums.SEARCH_PRODUCT_NAME_DIALOG_ID(): return new SearchProductNameDialog(session); break;
+            case Enums.SHOW_MEMBERSHIP_EVENT_DIALOG_ID(): return new ShowMembershipEventDialog(session); break;
+            case Enums.SHOW_MENU_DIALOG_ID(): return new ShowMenuDialog(session); break;
+            case Enums.SHOW_ORDER_DETAIL_DIALOG_ID(): return new ShowOrderDetailDialog(session); break;
+            case Enums.SHOW_ORDER_HISTORY_DIALOG_ID(): return new ShowOrderHistoryDialog(session); break;
+            case Enums.SHOW_POPULAR_PRODUCT_DIALOG_ID(): return new SearchPopularProducts(session); break;
+            case Enums.SHOW_PROMOTION_DIALOG_ID(): return new ShowPromotionDialog(session); break;
+            case Enums.SHOW_STORE_DIALOG_ID(): return new ShowStoreDialog(session); break;
+            default: return null;
+        }
+    }
 
 }
 

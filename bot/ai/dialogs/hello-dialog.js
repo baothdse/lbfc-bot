@@ -2,18 +2,12 @@
 let Dialog = require('./dialog');
 let async = require("asyncawait/async");
 let await = require("asyncawait/await");
-let HelloIntent = require('../intents/hello/hello-intent');
 let Request = require('../utils/request');
 const googleAPIkey = 'AIzaSyC2atcNmGkRy3pzTskzsPbV6pW68qe_drY';
 
 class HelloDialog extends Dialog {
     constructor(session) {
         super(session);
-        this.push();
-    }
-
-    push() {
-        this.addIntent(new HelloIntent(1, 0));
     }
 
     continue(input, senderId, info = null) {

@@ -6,7 +6,6 @@ var Async = require('asyncawait/async');
 let ProductModel = require('./entities/products/product');
 
 /*-------------------Import intents-------------------*/
-const ReceiveFullOrderIntent = require('../intents/orders/receive-full-order-intent');
 const BeginOrderIntent = require('../intents/orders/begin-order-intent');
 const PostbackOrderIntent = require('../intents/orders/postback-order-intent');
 const ReceiveStoreNameIntent = require('../intents/orders/receive-store-name-intent')
@@ -49,7 +48,6 @@ class OrderDialog extends Dialog {
     }
 
     push() {
-        this.addIntent(new ReceiveFullOrderIntent(0, 1));
         this.addIntent(new BeginOrderIntent(2, 0));
         this.addIntent(new PostbackOrderIntent(0, 2));
         this.addIntent(new ReceiveStoreNameIntent(20, 0, this.session));
@@ -324,7 +322,7 @@ class OrderDialog extends Dialog {
         ConsoleLog.log(input, this.getName(), 288);
         if (this.session.orderDialog.currentProduct.productName) {
             if (input.match(/^(không|ko|nô|không muốn|không áp dụng|ko mua|không mua|kg)/i)) {
-                this.step = 9;
+                this.step = 11;
                 this.continue(input, senderId);
             } else {
                 console.log(info)

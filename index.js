@@ -1,12 +1,19 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const verificationController = require('./controllers/verification');
+const redis = require('redis');
 
 const Brain = require('./bot/ai/brain');
 var request = require('request');
 const FB_TOKEN = 'EAAFHmBXhaYoBAFdbrN3n2nazaGfq3UOdzqvr2ZA750TZBaEi2rKorkMlZCXIo6Yl7pn9tZBBBwt6iAmV9VyKKqyX5pmB05zBLZC3iBwqgFth4ClGhWE7EPqvDsHjULGBGj4oG7qIcecqwzxoQ4w4NmCO5EAZALIvj1cgerF5nTCwZDZD';
 const app = express();
-var brain = new Brain();
+
+let client = redis.createClient();
+client.on("connected", () => {
+    console.log('connected to redis');
+})
+
+var brain = new Brain(client);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
@@ -14,6 +21,8 @@ app.post('/', brain.receive.bind(brain));
 app.get('/', verificationController);
 
 app.listen(5000, () => console.log("Webhook server start at 5000"));
+
+
 
 function addPersistentMenu() {
     request({
@@ -87,6 +96,9 @@ function addPersistentMenu() {
         }
     })
 }
+
+
+
 
 // function removePersistentMenu() {
 //     request({
