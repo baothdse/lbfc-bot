@@ -81,7 +81,7 @@ class Brain {
             case 'attachments': message = event.message.attachments; break;
             default: message = event.message.quick_reply.payload; break;
         }
-        ConsoleLog.log(event, 'brain.js', 79);
+        // ConsoleLog.log(event, 'brain.js', 79);
 
         this.insertSender(senderId, event.recipient.id)
             .then((res) => {
@@ -100,15 +100,18 @@ class Brain {
                     var beginNewDialog = false;
 
                     let intent = this.getSuitableIntent(message, intents);
+
+                    
                     if (intent.Results == null && currentDialog != null) {
                         let currentStep = currentDialog.step;
                         currentDialog.continue(message, senderId);
                         understood = currentDialog.step > currentStep;
-
+                        
                         if (currentDialog.status == "end") {
                             this.removeFromUsingList(usingDialogs, currentDialog);
                         }
                     } else if (intent.Results != null) {
+                        ConsoleLog.log(usingDialogs, 'brain.js', 104);
                         let dialog = this.getDialog(intent.DialogId, session);
                         if (!this.isInStack(usingDialogs, dialog)) {
                             usingDialogs.push(dialog);
@@ -327,14 +330,14 @@ class Brain {
             return;
         }
         let minPattern = { string: '', distance: 1000 };
-        
+
         this.client.get('BotPatterns', (err, value) => {
 
             /**
              * @type {[string]}
              */
             let patterns = JSON.parse(value);
-            let minPattern = {string: '', min: 1000}
+            let minPattern = { string: '', min: 1000 }
             patterns.forEach((pattern) => {
                 let d = EditDistance.levenshteinDistance(input, pattern);
                 if (d < minPattern.min) {
@@ -400,7 +403,10 @@ class Brain {
                         specialValues = inputTmp;
                     }
                     else {
-                        if (i == pattern.Entities.length - 1 && pattern.MatchBegin) {
+                        if (pattern.MatchBegin && pattern.MatchEnd) {
+                            regex = new RegExp("(?:^|\\W)^" + pattern.Entities[i].Words + "$(?:$|\\W)", 'i');                            
+                        }
+                        else if (i == pattern.Entities.length - 1 && pattern.MatchBegin) {
                             regex = new RegExp("(?:^|\\W)" + pattern.Entities[i].Words + "$(?:$|\\W)", 'i');
                         }
                         else if (specialValues == "") {
@@ -413,15 +419,20 @@ class Brain {
                         let result = regex.exec(inputTmp);
 
                         if (result != null) {
-                            matchesTmp[pattern.Entities[i].Id] = result[0];
+                            if (matchesTmp[pattern.Entities[i].Id] != null) {
+                                matchesTmp[pattern.Entities[i].Id] = matchesTmp[pattern.Entities[i].Id] + ";" + result[0];
+                            } else {
+                                matchesTmp[pattern.Entities[i].Id] = result[0];
+                            }
                             if (specialValues != "") {
                                 matchesTmp[8] = specialValues.substring(0, specialValues.length - result[0].length).trim();
                                 specialValues = "";
                             }
                             if (i == pattern.Entities.length - 1) {
-                                if (pattern.Entities.length > maxElements) {
+                                if (Object.keys(matchesTmp).length > maxElements) {
                                     matchIntent = intent;
                                     matchPattern = pattern;
+                                    maxElements = Object.keys(matchesTmp).length;
                                     matches = matchesTmp;
                                     if (result.index + result[0].trim().length + 1 < inputTmp.length) {
                                         specialValues = inputTmp.substring(result.index + result[0].trim().length + 1);
@@ -442,23 +453,22 @@ class Brain {
 
                 }
                 if (specialValues != "") {
-                    if (matches == null && pattern.Entities.length > maxElements) {
+                    if (matches == null && Object.keys(matchesTmp).length > maxElements) {
                         matches = matchesTmp;
                         matchIntent = intent;
                         matchPattern = pattern;
                         matches[8] = specialValues.trim();
-                    } else if (matches != null && matches[8] == null && pattern.Entities.length > maxElements) {
+                        maxElements = Object.keys(matchesTmp).length;
+                    } else if (matches != null && matches[8] == null && Object.keys(matchesTmp).length > maxElements) {
                         matches[8] = specialValues.trim();
                         matchIntent = intent;
+                        maxElements = Object.keys(matchesTmp).length;
                         matchPattern = pattern;
                     }
                     specialValues = "";
                 }
             });
         });
-
-        ConsoleLog.log(matches, 'brain.js', 428);
-        
 
         return {
             DialogId: matchIntent == null ? 0 : matchIntent.DialogId,
@@ -471,7 +481,7 @@ class Brain {
     }
 
     getDialog(dialogId, session) {
-        switch(dialogId) {
+        switch (dialogId) {
             case Enums.ASK_DELIVERY_DIALOG_ID(): return new AskDeliveryDialog(session); break;
             case Enums.ASK_OPEN_CLOSE_TIME_DIALOG_ID(): return new AskOpenCloseTimeDialog(session); break;
             case Enums.CHANGE_ORDER_DIALOG_ID(): return new ChangeOrderDialog(session); break;

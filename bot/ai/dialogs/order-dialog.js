@@ -48,21 +48,21 @@ class OrderDialog extends Dialog {
     }
 
     push() {
-        this.addIntent(new BeginOrderIntent(2, 0));
-        this.addIntent(new PostbackOrderIntent(0, 2));
-        this.addIntent(new ReceiveStoreNameIntent(20, 0, this.session));
-        this.addIntent(new PostbackApplyPromotion(14, 0));
-        this.addIntent(new PostbackChangePromotionIntent(0, 3));
-        this.addIntent(new CancelApplyPromotionIntent(0, 4));
-        this.addIntent(new AddExtraIntent(7, 0));
-        this.addIntent(new RequestFinishOrderIntent(13, 0));
-        this.addIntent(new PostbackMembershipCardAvailableIntent(24, 0));
-        this.addIntent(new PostbackMembershipCardRefuseIntent(27, 0));
-        this.addIntent(new PostbackMembershipCardUnavailableIntent(27, 0));
-        this.addIntent(new PostbackMembershipCardUseIntent(25, 0));
-        this.addIntent(new PostbackConfirmAddressIntent(20.5, 0));
-        this.addIntent(new ReceiveProductNameIntent(0, 5));
-        this.addIntent(new ConfirmExtraQuantityIntent(10, 0));
+        // this.addIntent(new BeginOrderIntent(2, 0));
+        // this.addIntent(new PostbackOrderIntent(0, 2));
+        // this.addIntent(new ReceiveStoreNameIntent(20, 0, this.session));
+        // this.addIntent(new PostbackApplyPromotion(14, 0));
+        // this.addIntent(new PostbackChangePromotionIntent(0, 3));
+        // this.addIntent(new CancelApplyPromotionIntent(0, 4));
+        // this.addIntent(new AddExtraIntent(7, 0));
+        // this.addIntent(new RequestFinishOrderIntent(13, 0));
+        // this.addIntent(new PostbackMembershipCardAvailableIntent(24, 0));
+        // this.addIntent(new PostbackMembershipCardRefuseIntent(27, 0));
+        // this.addIntent(new PostbackMembershipCardUnavailableIntent(27, 0));
+        // this.addIntent(new PostbackMembershipCardUseIntent(25, 0));
+        // this.addIntent(new PostbackConfirmAddressIntent(20.5, 0));
+        // this.addIntent(new ReceiveProductNameIntent(0, 5));
+        // this.addIntent(new ConfirmExtraQuantityIntent(10, 0));
     }
 
     continue(input, senderId, info = null) {

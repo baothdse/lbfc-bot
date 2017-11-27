@@ -13,10 +13,10 @@ class SearchProductNameDialog extends Dialog {
     }
 
     push() {
-        this.addIntent(new SearchProductByNameIntent(1, 0));
-        this.addIntent(new SearchProductByNameSimpleIntent(1, 0));
-        this.addIntent(new SelectPriceRangeIntent(4, 0));
-        this.addIntent(new SearchProductIntent(1, 0));
+        // this.addIntent(new SearchProductByNameIntent(1, 0));
+        // this.addIntent(new SearchProductByNameSimpleIntent(1, 0));
+        // this.addIntent(new SelectPriceRangeIntent(4, 0));
+        // this.addIntent(new SearchProductIntent(1, 0));
     }
 
     continue(input, senderId, info = null) {

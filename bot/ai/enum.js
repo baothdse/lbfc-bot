@@ -28,7 +28,7 @@ class Enums {
     static ADD_EXTRA_INTENT_ID() { return -1; }
     static ASK_FOR_DELIVERY_TIME_INTENT_ID() { return -1; }
     static BEGIN_ORDER_INTENT_ID() { return 1; }
-    static POSTBACK_ORDER_INTENT_ID() { return 5; }
+    static POSTBACK_ORDER_INTENT_ID() { return 8; }
     static POSTBACK_SHOW_ORDER_DETAIL_INTENT_ID() { return -1; }
     static RECEIVE_FULL_CHANGE_ORDER_INTENT_ID() { return -1; }
     static RECEIVE_FULL_ORDER_INTENT_ID() { return 6; }
@@ -36,6 +36,9 @@ class Enums {
     static RECEIVE_STORE_NAME_ID() { return -1; }
     static REQUEST_FINISH_ORDER_INTENT_ID() { return -1; }
     static SHOW_MY_ORDER_HISTORY_INTENT_ID() { return -1; }
+    static SEARCH_PRODUCT_NAME_INTENT_ID() { return 9; }
+    static SELECT_PRICE_RANGE_INTENT_ID() { return 10; }
+    static SHOW_PROMOTION_INTENT_ID() { return 10; }
     
 }
 

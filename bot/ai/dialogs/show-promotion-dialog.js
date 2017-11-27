@@ -13,7 +13,7 @@ class ShowPromotionDialog extends Dialog{
     }
 
     push() {
-        this.addIntent(new ShowPromotionIntent(1, 0));
+        //this.addIntent(new ShowPromotionIntent(1, 0));
     }
 
     continue(input, senderId) {

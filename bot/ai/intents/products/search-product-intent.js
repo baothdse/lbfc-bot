@@ -3,9 +3,7 @@ let Intent = require('../intent');
 class SearchProductIntent extends Intent {
     constructor(step, exception) {
         super(step, exception);
-        this.addPatterns(["DaiTu", "DongTu", "DongTuTimKiem"], 1);
-        this.addPatterns(["DongTuTimKiem"], 1, true, false);
-        this.addPatterns(['Tìm sản phẩm'], 1, true, true);
+        
     }
 
     /**
