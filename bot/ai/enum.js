@@ -23,6 +23,7 @@ class Enums {
     static SHOW_STORE_DIALOG_ID() { return 3; }
     static ASK_OPEN_CLOSE_TIME_DIALOG_ID() { return 3; }
     static SHOW_POPULAR_PRODUCT_DIALOG_ID() { return 3; }
+    static SHOW_NEAREST_STORE_DIALOG_ID() { return 16; }
 
 
     static ADD_EXTRA_INTENT_ID() { return -1; }
@@ -39,6 +40,7 @@ class Enums {
     static SEARCH_PRODUCT_NAME_INTENT_ID() { return 9; }
     static SELECT_PRICE_RANGE_INTENT_ID() { return 10; }
     static SHOW_PROMOTION_INTENT_ID() { return 10; }
+    static SHOW_NEAREST_STORE_INTENT_ID() { return 14; }
     
 }
 

@@ -18,6 +18,7 @@ let AskDeliveryTimeDialog = require('./dialogs/delivery/ask-delivery-time-dialog
 let EmojiDialog = require('./dialogs/emoji/emoji-dialog');
 var Response = require('./dialogs/entities/response');
 let Dialog = require('./dialogs/dialog');
+const ShowNearestStoreDialog = require('./dialogs/show-nearest-store-dialog');
 const Enums = require('./enum');
 const Util = require('./utils/util');
 
@@ -99,7 +100,7 @@ class Brain {
 
                     var beginNewDialog = false;
 
-                    let intent = this.getSuitableIntent(message, intents);
+                    let intent = type == 'message' ? this.getSuitableIntent(message, intents) : {Results: null};
 
                     
                     if (intent.Results == null && currentDialog != null) {
@@ -183,7 +184,7 @@ class Brain {
      * @param {*} dialog 
      */
     removeToUsingList(usingDialogs, dialog) {
-        for (var i = usingDialogs.length; i >= 0; i++) {
+        for (var i = usingDialogs.length - 1; i >= 0; i++) {
             var element = usingDialogs[i];
             if (element.getName() != dialog.getName()) {
                 usingDialogs.splice(i, 1);
@@ -496,6 +497,7 @@ class Brain {
             case Enums.SHOW_POPULAR_PRODUCT_DIALOG_ID(): return new SearchPopularProducts(session); break;
             case Enums.SHOW_PROMOTION_DIALOG_ID(): return new ShowPromotionDialog(session); break;
             case Enums.SHOW_STORE_DIALOG_ID(): return new ShowStoreDialog(session); break;
+            case Enums.SHOW_NEAREST_STORE_DIALOG_ID(): return new ShowNearestStoreDialog(session); break;
             default: return null;
         }
     }
