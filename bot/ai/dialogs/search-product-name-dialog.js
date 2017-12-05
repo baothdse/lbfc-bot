@@ -4,6 +4,7 @@ let SearchProductByNameSimpleIntent = require('../intents/products/search-produc
 const SelectPriceRangeIntent = require('../intents/products/select-price-range-intent');
 const SearchProductIntent = require('../intents/products/search-product-intent');
 let Request = require('../utils/request');
+const ConsoleLog = require('../utils/console-log');
 
 class SearchProductNameDialog extends Dialog {
     constructor(session) {
@@ -95,30 +96,38 @@ class SearchProductNameDialog extends Dialog {
      */
     receivePriceFilterConfirmation(input, senderId, info) {
         var that = this;
-        console.log(info)
         if (input.match(/(không|ko|hông|nô|no|bỏ qua|khỏi|thôi)/i)) {
             var params = {
                 'keyword': this.session.searchProductDialog.productName,
                 'from': 0,
                 'to': 1000000,
-                'brandId': 1,
+                'brandId': this.session.brandId,
             }
             new Request().sendGetRequest('/LBFC/Product/SearchProductInRange', params, '')
                 .then((data) => {
                     let listProduct = JSON.parse(data);
                     that.showProducts(listProduct, senderId);
                 })
-            this.showProducts()
             this.step = 6;
         } else {
+            var priceRange = input.match(/\d+/g);
+            let fromPrice = 0;
+            let toPrice = 0;
+            if (priceRange.length < 2) {
+                fromPrice = 0;
+                toPrice = priceRange[0] * 1000;
+            } else {
+                fromPrice = priceRange[0] * 1000;
+                toPrice = priceRange[1] * 1000;
+            }
             this.step = 6;
             var params = {
                 'keyword': this.session.searchProductDialog.productName,
-                'from': info.fromPrice,
-                'to': info.toPrice,
-                'brandId': 1,
+                'from': fromPrice,
+                'to': toPrice,
+                'brandId': this.session.brandId,
             }
-            
+            ConsoleLog.log(params, this.getName(), 120);
             new Request().sendGetRequest('/LBFC/Product/SearchProductInRange', params, "")
                 .then(function (dataStr) {
                     let data = JSON.parse(dataStr);
@@ -126,8 +135,9 @@ class SearchProductNameDialog extends Dialog {
                     that.showProducts(data, senderId);
 
                 });
-
         }
+
+        this.continue('', '');
     }
 
     /*---------------Private method------------------*/
@@ -139,9 +149,9 @@ class SearchProductNameDialog extends Dialog {
      */
     showProducts(products, senderId) {
         var elements = [];
-        var condition = products.length
+        var condition = products.length >= 4 ? 4 : products.length;
         console.log(this.session)
-        if (condition <= 4) {
+        if (condition > 0) {
             for (var i = 0; i < condition; i++) {
                 var element = {
                     title: products[i].ProductName,
@@ -163,40 +173,28 @@ class SearchProductNameDialog extends Dialog {
                 }
                 elements.push(element);
             }
+            return this.sendGenericMessage(senderId, elements)
+            .then((res) => {
+                return this.sendQuickReply(senderId, "Nếu không thấy sản phẩm muốn đặt thì bấm nút \"Tìm nữa\" nha",
+                [{
+                    content_type: "text",
+                    title: "Tìm nữa",
+                    payload: "search product simple",
+                    image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
+                }]);
+            })
         } else {
-            condition = 4
-            for (var i = 0; i < condition; i++) {
-                var element = {
-                    title: products[i].ProductName,
-                    image_url: products[i].PicURL,
-                    subtitle: products[i].ProductName,
-                    default_action: {
-                        "type": "web_url",
-                        "url": "https://foody.vn",
-                        "messenger_extensions": true,
-                        "webview_height_ratio": "tall"
-                    },
-                    buttons: [
-                        {
-                            type: "postback",
-                            title: "Đặt sản phẩm",
-                            payload: "Đặt $" + products[i].ProductID + " $" + products[i].ProductName + " $" + products[i].Price + " $" + products[i].PicURL + " $" + products[i].ProductCode
-                        }
-                    ]
-                }
-                elements.push(element);
-            }
+            return this.sendTextMessage(senderId, `Không kiếm thấy sản phẩm nào hết ${this.session.pronoun.toLowerCase()} à`)
+            .then((res) => {
+                return this.sendQuickReply(senderId, "Nếu không thấy sản phẩm muốn đặt thì bấm nút \"Tìm nữa\" nha",
+                [{
+                    content_type: "text",
+                    title: "Tìm nữa",
+                    payload: "search product simple",
+                    image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
+                }]);
+            })
         }
-        return this.sendGenericMessage(senderId, elements)
-        .then((res) => {
-            return this.sendQuickReply(senderId, "Nếu không thấy sản phẩm muốn đặt thì bấm nút \"Tìm nữa\" nha",
-            [{
-                content_type: "text",
-                title: "Tìm nữa",
-                payload: "search product simple",
-                image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
-            }]);
-        })
     }
     end() {
         this.session.searchProductDialog = null;

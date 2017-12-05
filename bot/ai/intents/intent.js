@@ -12,6 +12,7 @@ const DOZEN = 26;
 const HUNDRED = 27;
 const MONEY_TEEN_CODE = 28;
 const DAU_GACH_NGANG = 29;
+const MONEY_TEEN_CODE_2 = 39;
 class Intent {
 
     /**
@@ -19,6 +20,7 @@ class Intent {
      * @param {{DialogId: number, Exception: number, Id: number, Step: number, PatternGroup: number, Results: {}}} intent 
      */
     static analyze(intent) {
+        ConsoleLog.log('Intent detected', 'intent.js', 23);
         switch (intent.Id) {
             case Enums.BEGIN_ORDER_INTENT_ID(): return { step: intent.Step, exception: intent.Exception }; break;
             case Enums.RECEIVE_FULL_ORDER_INTENT_ID(): return this.receiveFullOrderIntent(intent.Step, intent.Exception, intent.Results, intent.PatternGroup); break;
@@ -30,6 +32,118 @@ class Intent {
 
             default: return null;
         }
+    }
+
+    /**
+     * @param {string} input
+     * @param {[{DialogId: number, Exception: number, Id: number, Step: number, Patterns: [{Id: number, MatchBegin: boolean, MatchEnd: boolean, Group: number, Entities: [{Id, Words}]}]}]} intents 
+     * @returns {{DialogId: number, Exception: number, Id: number, Step: number, PatternGroup: number, Results: {}}}
+     */
+    static getSuitableIntent(input, intents) {
+        let maxElements = 0;
+
+        /**
+         * @type {{DialogId: number, Exception: number, Id: number, Step: number, Patterns: [{Id: number, MatchBegin: boolean, MatchEnd: boolean, Entities: [{Id, Words}]}]}}
+         */
+        let matchIntent = null;
+
+        let matchPattern = null;
+
+        /**
+         * @type {{}}}
+         */
+        let matches = null;
+        let specialValues = ""; //when the entity simply just want some words
+
+        intents.forEach((intent) => {
+            intent.Patterns.forEach((pattern) => {
+
+                let matchesTmp = {};
+                let inputTmp = input.trim();
+                for (var i = 0; i < pattern.Entities.length; i++) {
+                    /**
+                     * @type {RegExp}
+                     */
+                    let regex = null;
+                    if (pattern.Entities[i].Words == ".*?") {
+                        specialValues = inputTmp;
+                    }
+                    else {
+                        if (pattern.MatchBegin && pattern.MatchEnd) {
+                            regex = new RegExp("(?:^|\\W)^(" + pattern.Entities[i].Words + ")$(?:$|\\W)", 'i');                            
+                        }
+                        else if (i == pattern.Entities.length - 1 && pattern.MatchEnd) {
+                            regex = new RegExp("(?:^|\\W)(" + pattern.Entities[i].Words + ")$(?:$|\\W)", 'i');
+                        }
+                        else if (specialValues == "") {
+                            regex = new RegExp("(?:^|\\W)^(" + pattern.Entities[i].Words + ")(?:$|\\W)", 'i');
+                        }
+                        else {
+                            regex = new RegExp("(?:^|\\W)" + pattern.Entities[i].Words + "(?:$|\\W)", 'i');
+                        }
+
+                        let result = regex.exec(inputTmp);
+
+                        if (result != null) {
+                            if (matchesTmp[pattern.Entities[i].Id] != null) {
+                                matchesTmp[pattern.Entities[i].Id] = matchesTmp[pattern.Entities[i].Id] + ";" + result[0];
+                            } else {
+                                matchesTmp[pattern.Entities[i].Id] = result[0];
+                            }
+                            if (specialValues != "") {
+                                matchesTmp[8] = specialValues.substring(0, specialValues.length - result[0].length).trim();
+                                specialValues = "";
+                            }
+                            if (i == pattern.Entities.length - 1) {
+                                if (Object.keys(matchesTmp).length > maxElements) {
+                                    matchIntent = intent;
+                                    matchPattern = pattern;
+                                    maxElements = Object.keys(matchesTmp).length;
+                                    matches = matchesTmp;
+                                    if (result.index + result[0].trim().length + 1 < inputTmp.length) {
+                                        specialValues = inputTmp.substring(result.index + result[0].trim().length + 1);
+                                    }
+                                    break;
+                                }
+                            }
+                            else {
+                                if (result.index + result[0].trim().length + 1 < inputTmp.length) {
+                                    inputTmp = inputTmp.substring(result.index + result[0].trim().length + 1);
+                                }
+                            }
+                        }
+                        else {
+                            break;
+                        }
+                    }
+
+                }
+                if (specialValues != "") {
+                    if (matches == null && Object.keys(matchesTmp).length > maxElements) {
+                        matches = matchesTmp;
+                        matchIntent = intent;
+                        matchPattern = pattern;
+                        matches[8] = specialValues.trim();
+                        maxElements = Object.keys(matchesTmp).length;
+                    } else if (matches != null && matches[8] == null && Object.keys(matchesTmp).length > maxElements) {
+                        matches[8] = specialValues.trim();
+                        matchIntent = intent;
+                        maxElements = Object.keys(matchesTmp).length;
+                        matchPattern = pattern;
+                    }
+                    specialValues = "";
+                }
+            });
+        });
+
+        return {
+            DialogId: matchIntent == null ? 0 : matchIntent.DialogId,
+            Exception: matchIntent == null ? 0 : matchIntent.Exception,
+            Id: matchIntent == null ? 0 : matchIntent.Id,
+            Step: matchIntent == null ? 0 : matchIntent.Step,
+            PatternGroup: matchPattern == null ? 0 : matchPattern.Group,
+            Results: matches,
+        };
     }
 
 
@@ -80,11 +194,13 @@ class Intent {
     }
 
     static selectPriceRangeIntent(step, exception, results, patternGroup) {
+        var fromPrice = 0;
+        var toPrice = 0;
         switch (patternGroup) {
             case 1:
                 let info = results[SO].split(";");
-                let fromPrice = parseInt(info[0]) * 10000;
-                let toPrice = parseInt(info[1]) * 10000;
+                fromPrice = parseInt(info[0]) * 10000;
+                toPrice = parseInt(info[1]) * 10000;
                 return {
                     step,
                     exception,
@@ -135,6 +251,24 @@ class Intent {
                     exception,
                 };
                 break;
+            // case 7: 
+            //     var priceRange = results[MONEY_TEEN_CODE_2].match(/\d+/g);
+            //     fromPrice = 0;
+            //     toPrice = 0;
+            //     console.log(priceRange)
+            //     if (priceRange.length < 2) {
+            //         fromPrice = 0;
+            //         toPrice = priceRange[0] * 1000;
+            //     } else {
+            //         fromPrice = priceRange[0] * 1000;
+            //         toPrice = priceRange[1] * 1000;
+            //     }
+            //     return {
+            //         fromPrice: fromPrice,
+            //         toPrice: toPrice,
+            //         step,
+            //         exception,
+            //     }
             default: return null;
         }
     }

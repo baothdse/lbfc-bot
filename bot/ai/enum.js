@@ -42,6 +42,8 @@ class Enums {
     static SHOW_PROMOTION_INTENT_ID() { return 10; }
     static SHOW_NEAREST_STORE_INTENT_ID() { return 14; }
     
+    static LIKE_ICON_URL() {return 'https://www.shareicon.net/data/128x128/2016/07/09/119075_thumb_512x512.png';}
+    static DISLIKE_ICON_URL() {return 'https://www.shareicon.net/data/128x128/2015/11/05/667168_hand_512x512.png';}
 }
 
 module.exports = Enums

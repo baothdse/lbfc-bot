@@ -35,22 +35,6 @@ class Dialog {
         --this.step;
     }
 
-    isMatch(input, senderId) {
-        var result = null;
-        var that = this;
-
-        this.intents.some(function (intent) {
-            result = intent.match(input);
-            if (result != null) {
-                that.step = result.step;
-                that.exception = result.exception;
-                that.continue(input, senderId, result);
-                return true;
-            }
-        }, this);
-        return result != null;
-    }
-
     reset() {
         this.status = "new";
     }

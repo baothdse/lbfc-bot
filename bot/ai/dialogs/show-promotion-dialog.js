@@ -66,18 +66,6 @@ class ShowPromotionDialog extends Dialog{
     
 
     /*---------------------------------Exception----------------------------- */
-    
-    /**
-     * Xử lý khi user áp dụng một promotion
-     * @param {string} input 
-     * @param {int} senderId 
-     */
-    applyPromotion(input, senderId) {
-        var promotionIdPos = input.match(/$/i).index;
-        var promotionId = input.substring(promotionIdPos + 1, input.length);
-
-        
-    }
 
 
     /*--------------------Private methods-----------------------*/

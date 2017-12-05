@@ -34,7 +34,7 @@ class Brain {
      * @param {RedisClient} client 
      */
     constructor(client) {
-        this.vietnameseConverter = new VietnameseConverter();
+        //this.vietnameseConverter = new VietnameseConverter();
 
         /**
          * @type {[{'senderId' : number, 'freeDialogs' : [], 'usingDialogs' : [], 'session': any}]}
@@ -100,8 +100,8 @@ class Brain {
 
                     var beginNewDialog = false;
 
-                    let intent = type == 'message' ? this.getSuitableIntent(message, intents) : {Results: null};
-
+                    let intent = (type == 'message' || type == 'quick_reply' || type == 'postback') ? Intent.getSuitableIntent(message, intents) : {Results: null};
+                    ConsoleLog.log(intent, 'brain.js', 104);
                     
                     if (intent.Results == null && currentDialog != null) {
                         let currentStep = currentDialog.step;
@@ -352,13 +352,13 @@ class Brain {
                     content_type: "text",
                     title: "Đúng rồi",
                     payload: `message refined ${minPattern.string}`,
-                    image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
+                    image_url: Enums.LIKE_ICON_URL(),
                 },
                 {
                     content_type: "text",
                     title: "Hông phải",
                     payload: `message decline`,
-                    image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
+                    image_url: Enums.DISLIKE_ICON_URL()
                 }
             ]
             new Dialog(session).sendQuickReply(senderId, `Có phải ý ${session.pronoun.toLowerCase()} là *${minPattern.string}*?`, elements)
@@ -368,118 +368,6 @@ class Brain {
 
     }
 
-
-    /**
-     * @param {string} input
-     * @param {[{DialogId: number, Exception: number, Id: number, Step: number, Patterns: [{Id: number, MatchBegin: boolean, MatchEnd: boolean, Group: number, Entities: [{Id, Words}]}]}]} intents 
-     * @returns {{DialogId: number, Exception: number, Id: number, Step: number, PatternGroup: number, Results: {}}}
-     */
-    getSuitableIntent(input, intents) {
-        let maxElements = 0;
-
-        /**
-         * @type {{DialogId: number, Exception: number, Id: number, Step: number, Patterns: [{Id: number, MatchBegin: boolean, MatchEnd: boolean, Entities: [{Id, Words}]}]}}
-         */
-        let matchIntent = null;
-
-        let matchPattern = null;
-
-        /**
-         * @type {{}}}
-         */
-        let matches = null;
-        let specialValues = ""; //when the entity simply just want some words
-
-        intents.forEach((intent) => {
-            intent.Patterns.forEach((pattern) => {
-
-                let matchesTmp = {};
-                let inputTmp = input.trim();
-                for (var i = 0; i < pattern.Entities.length; i++) {
-                    /**
-                     * @type {RegExp}
-                     */
-                    let regex = null;
-                    if (pattern.Entities[i].Words == ".*?") {
-                        specialValues = inputTmp;
-                    }
-                    else {
-                        if (pattern.MatchBegin && pattern.MatchEnd) {
-                            regex = new RegExp("(?:^|\\W)^" + pattern.Entities[i].Words + "$(?:$|\\W)", 'i');                            
-                        }
-                        else if (i == pattern.Entities.length - 1 && pattern.MatchBegin) {
-                            regex = new RegExp("(?:^|\\W)" + pattern.Entities[i].Words + "$(?:$|\\W)", 'i');
-                        }
-                        else if (specialValues == "") {
-                            regex = new RegExp("(?:^|\\W)^" + pattern.Entities[i].Words + "(?:$|\\W)", 'i');
-                        }
-                        else {
-                            regex = new RegExp("(?:^|\\W)" + pattern.Entities[i].Words + "(?:$|\\W)", 'i');
-                        }
-
-                        let result = regex.exec(inputTmp);
-
-                        if (result != null) {
-                            if (matchesTmp[pattern.Entities[i].Id] != null) {
-                                matchesTmp[pattern.Entities[i].Id] = matchesTmp[pattern.Entities[i].Id] + ";" + result[0];
-                            } else {
-                                matchesTmp[pattern.Entities[i].Id] = result[0];
-                            }
-                            if (specialValues != "") {
-                                matchesTmp[8] = specialValues.substring(0, specialValues.length - result[0].length).trim();
-                                specialValues = "";
-                            }
-                            if (i == pattern.Entities.length - 1) {
-                                if (Object.keys(matchesTmp).length > maxElements) {
-                                    matchIntent = intent;
-                                    matchPattern = pattern;
-                                    maxElements = Object.keys(matchesTmp).length;
-                                    matches = matchesTmp;
-                                    if (result.index + result[0].trim().length + 1 < inputTmp.length) {
-                                        specialValues = inputTmp.substring(result.index + result[0].trim().length + 1);
-                                    }
-                                    break;
-                                }
-                            }
-                            else {
-                                if (result.index + result[0].trim().length + 1 < inputTmp.length) {
-                                    inputTmp = inputTmp.substring(result.index + result[0].trim().length + 1);
-                                }
-                            }
-                        }
-                        else {
-                            break;
-                        }
-                    }
-
-                }
-                if (specialValues != "") {
-                    if (matches == null && Object.keys(matchesTmp).length > maxElements) {
-                        matches = matchesTmp;
-                        matchIntent = intent;
-                        matchPattern = pattern;
-                        matches[8] = specialValues.trim();
-                        maxElements = Object.keys(matchesTmp).length;
-                    } else if (matches != null && matches[8] == null && Object.keys(matchesTmp).length > maxElements) {
-                        matches[8] = specialValues.trim();
-                        matchIntent = intent;
-                        maxElements = Object.keys(matchesTmp).length;
-                        matchPattern = pattern;
-                    }
-                    specialValues = "";
-                }
-            });
-        });
-
-        return {
-            DialogId: matchIntent == null ? 0 : matchIntent.DialogId,
-            Exception: matchIntent == null ? 0 : matchIntent.Exception,
-            Id: matchIntent == null ? 0 : matchIntent.Id,
-            Step: matchIntent == null ? 0 : matchIntent.Step,
-            PatternGroup: matchPattern == null ? 0 : matchPattern.Group,
-            Results: matches,
-        };
-    }
 
     getDialog(dialogId, session) {
         switch (dialogId) {
