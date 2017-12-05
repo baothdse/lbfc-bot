@@ -102,7 +102,6 @@ class Brain {
                     let intent = (type == 'message' || type == 'quick_reply' || type == 'postback') ? Intent.getSuitableIntent(message, intents) : { Results: null };
 
                     if (intent.Results == null && currentDialog != null) {
-                        ConsoleLog.log(usingDialogs.length > 0 ? usingDialogs[usingDialogs.length - 1].session.orderDialog : 'no using', 'brain.js', 107)
 
                         let currentStep = currentDialog.step;
                         currentDialog.continue(message, senderId);
@@ -208,7 +207,6 @@ class Brain {
     removeToUsingList(usingDialogs, dialog) {
         for (var i = 0; i < usingDialogs.length; i++) {
             var element = usingDialogs[i];
-            ConsoleLog.log(usingDialogs[i].session.orderDialog, 'brain.js', 205);
             if (element.getName() == dialog.getName()) {
                 return usingDialogs.splice(i, 1);
                 break;

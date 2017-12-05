@@ -4,6 +4,7 @@ let ConsoleLog = require('../utils/console-log');
 var Await = require('asyncawait/await')
 var Async = require('asyncawait/async');
 let ProductModel = require('./entities/products/product');
+const Enums = require('../enum');
 
 /*-------------------Import intents-------------------*/
 const BeginOrderIntent = require('../intents/orders/begin-order-intent');
@@ -268,7 +269,6 @@ class OrderDialog extends Dialog {
     * if(data != null) => receiveExtraProduct() else => askForMore() 
     */
     askExtraProduct(input, senderId) {
-        ConsoleLog.log(this.session.orderDialog.currentProduct, this.getName(), 271);        
         let that = this;
         this.step = 7;
         let currentProduct = this.session.orderDialog.currentProduct;
@@ -594,6 +594,7 @@ class OrderDialog extends Dialog {
         var that = this;
         var applied = false;
         this.step = 15;
+        ConsoleLog.log(info, this.getName(), 598);
         if (input.match(/^promotion select \$/i)) {
             if (this.session.orderDialog.orderDetails == 0) {
                 this.sendTextMessage(senderId, "" + that.session.pronoun + " ơi, đặt hàng trước đã " + that.session.pronoun.toLowerCase() + " ơi")
@@ -899,13 +900,13 @@ class OrderDialog extends Dialog {
                     content_type: "text",
                     title: "Đúng rồi",
                     payload: `address use ${topPlace}`,
-                    image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
+                    image_url: Enums.LIKE_ICON_URL(),
                  },
                  {
                      content_type: "text",
                      title: "Hông phải",
                      payload: `address refuse`,
-                     image_url: "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/shop-icon.png"
+                     image_url: Enums.DISLIKE_ICON_URL()
                  }
              ];
              this.sendQuickReply(senderId, `Có phải ý ${this.session.pronoun} là ${topPlace}?`, elements);
@@ -1484,7 +1485,6 @@ class OrderDialog extends Dialog {
         var that = this;
         this.session.orderDialog.finalPrice = this.session.orderDialog.originalPrice;
         data.some(function (element) {
-            ConsoleLog.log(element, that.getName(), 294);
             that.session.orderDialog.currentPromotion = element;
             if (element.BuyProductCode != null) {
                 that.session.orderDialog.orderDetails.forEach(function (detail) {

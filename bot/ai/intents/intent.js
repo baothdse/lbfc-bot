@@ -16,6 +16,8 @@ const MONEY_TEEN_CODE_2 = 39;
 const POSTBACK_NUT_CHON_EXTRA = 47;
 const CUM_TU = 8;
 const POSTBACK_CHON_KHUYEN_MAI = 20;
+const ADDRESS_USE = 49;
+const ADDRESS_REFUSE = 50;
 class Intent {
 
     /**
@@ -23,7 +25,7 @@ class Intent {
      * @param {{DialogId: number, Exception: number, Id: number, Step: number, PatternGroup: number, Results: {}}} intent 
      */
     static analyze(intent) {
-        ConsoleLog.log('Intent detected', 'intent.js', 23);
+        ConsoleLog.log(`Intent #${intent.Id} detected`, 'intent.js', 23);
         switch (intent.Id) {
             case Enums.BEGIN_ORDER_INTENT_ID(): return { step: intent.Step, exception: intent.Exception }; break;
             case Enums.RECEIVE_FULL_ORDER_INTENT_ID(): return this.receiveFullOrderIntent(intent.Step, intent.Exception, intent.Results, intent.PatternGroup); break;
@@ -35,6 +37,7 @@ class Intent {
             case Enums.SHOW_CHAIN_STORE_INTENT_ID(): return { step: intent.Step, exception: intent.Exception }; break;
             case Enums.ADD_EXTRA_INTENT_ID(): return this.postbackExtraIntent(intent.Step, intent.Exception, intent.Results, intent.PatternGroup); break;
             case Enums.POSTBACK_APPLY_PROMOTION_INTENT_ID(): return this.postbackApplyPromotion(intent.Step, intent.Exception, intent.Results, intent.PatternGroup); break;
+            case Enums.POSTBACK_CONFIRM_DELIVERY_LOCATION_INTENT_ID(): return this.postbackConfirmDeliveryLocation(intent.Step, intent.Exception, intent.Results, intent.PatternGroup); break;
             default: return null;
         }
     }
@@ -45,7 +48,7 @@ class Intent {
      * @returns {{DialogId: number, Exception: number, Id: number, Step: number, PatternGroup: number, Results: {}}}
      */
     static getSuitableIntent(input, intents) {
-        let maxElements = 0;
+        let maxElements = -1;
 
         /**
          * @type {{DialogId: number, Exception: number, Id: number, Step: number, Patterns: [{Id: number, MatchBegin: boolean, MatchEnd: boolean, Entities: [{Id, Words}]}]}}
@@ -75,7 +78,7 @@ class Intent {
                     }
                     else {
                         if (pattern.MatchBegin && pattern.MatchEnd && pattern.Entities.length == 1) {
-                            regex = new RegExp("(?:^|\\W)^(" + pattern.Entities[i].Words + ")$(?:$|\\W)", 'i');                            
+                            regex = new RegExp("(?:^|\\W)^(" + pattern.Entities[i].Words + ")$(?:$|\\W)", 'i');
                         }
                         else if (i == pattern.Entities.length - 1 && pattern.MatchEnd) {
                             regex = new RegExp("(?:^|\\W)(" + pattern.Entities[i].Words + ")$(?:$|\\W)", 'i');
@@ -299,11 +302,31 @@ class Intent {
     }
 
     static postbackApplyPromotion(step, exception, results, patternGroup) {
-        var promotionCode = results[POSTBACK_CHON_KHUYEN_MAI].substring('promotion select \$'.length, input.length);
+        var promotionCode = results[POSTBACK_CHON_KHUYEN_MAI].substring('promotion select \$'.length, results[POSTBACK_CHON_KHUYEN_MAI].length);
         return {
             promotionCode: promotionCode,
             step,
             exception,
+        }
+    }
+
+    static postbackConfirmDeliveryLocation(step, exception, results, patternGroup) {
+        switch (patternGroup) {
+            case 1:
+                let address = results[CUM_TU];
+                return {
+                    address: address,
+                    step,
+                    exception,
+                }
+                break;
+            case 2:
+                return {
+                    step,
+                    exception,
+                }
+                break;
+            default: break;
         }
     }
 
