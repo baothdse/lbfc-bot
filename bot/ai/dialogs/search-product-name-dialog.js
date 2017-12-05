@@ -1,8 +1,5 @@
 let Dialog = require('./dialog');
-let SearchProductByNameIntent = require('../intents/products/search-product-by-name-intent');
-let SearchProductByNameSimpleIntent = require('../intents/products/search-product-by-name-simple-intent');
-const SelectPriceRangeIntent = require('../intents/products/select-price-range-intent');
-const SearchProductIntent = require('../intents/products/search-product-intent');
+
 let Request = require('../utils/request');
 const ConsoleLog = require('../utils/console-log');
 
