@@ -29,7 +29,7 @@ class Intent {
             case Enums.SELECT_PRICE_RANGE_INTENT_ID(): return this.selectPriceRangeIntent(intent.Step, intent.Exception, intent.Results, intent.PatternGroup); break;
             case Enums.SHOW_PROMOTION_INTENT_ID(): return { step: intent.Step, exception: intent.Exception }; break;
             case Enums.SHOW_NEAREST_STORE_INTENT_ID(): return { step: intent.Step, exception: intent.Exception }; break;
-
+            case Enums.SHOW_CHAIN_STORE_INTENT_ID(): return { step: intent.Step, exception: intent.Exception }; break;
             default: return null;
         }
     }

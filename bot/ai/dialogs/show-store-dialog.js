@@ -1,16 +1,10 @@
 let Dialog = require('./dialog');
 let await = require('asyncawait/await')
-let ShowStoreIntent = require('../intents/store/show-store-intent')
 const Request = require('../utils/request');
 
 class ShowStoreDialog extends Dialog {
     constructor(session) {
         super(session);
-        this.push();
-    }
-
-    push() {
-        this.addIntent(new ShowStoreIntent(1, 0));
     }
 
     continue(input, senderId, info = null) {

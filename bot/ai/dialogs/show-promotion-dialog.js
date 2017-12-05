@@ -2,7 +2,6 @@ let Dialog = require('./dialog');
 let Pattern = require('../intents/patterns/pattern');
 let PromotionListTemplate = require('./templates/promotion-list-template');
 let Request = require('../utils/request');
-const ShowPromotionIntent = require('../intents/promotions/show-promotion-intent');
 const ConsoleLog = require('../utils/console-log');
 
 class ShowPromotionDialog extends Dialog{
