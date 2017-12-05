@@ -271,10 +271,10 @@ class OrderDialog extends Dialog {
     */
     askExtraProduct(input, senderId) {
         let that = this;
-        this.step = 7;
         let currentProduct = this.session.orderDialog.currentProduct;
         new Request().sendGetRequest('/LBFC/Product/GetProductExtra', { 'productId': currentProduct.productID }, "")
             .then((data) => {
+                that.step = 7;
                 let listExtraProduct;
                 if (data != "") {
                     that.step = 7;
@@ -326,7 +326,7 @@ class OrderDialog extends Dialog {
             if (input.match(/^(không|ko|nô|không muốn|không áp dụng|ko mua|không mua|kg)/i)) {
                 this.step = 9;
                 this.continue(input, senderId);
-            } else {
+            } else if (info != null){
                 console.log(info)
                 this.step = 8;
                 let currentProduct = this.session.orderDialog.currentProduct
@@ -365,6 +365,8 @@ class OrderDialog extends Dialog {
                         payload: "5",
                         image_url: "https://upload.wikimedia.org/wikipedia/commons/9/99/STC_line_5_icon.png"
                     }])
+            } else {
+                this.step = 7
             }
         } else {
             this.sendQuickReply(senderId, `Bên em ko có bán lẻ mấy món extra nhen ${this.session.pronoun.toLowerCase()}. ${this.session.pronoun.toLowerCase()} vui lòng đặt món trước nha!`,
@@ -377,8 +379,6 @@ class OrderDialog extends Dialog {
             this.step = 30;
             this.continue(input, senderId);
         }
-
-
     }
 
 
@@ -415,15 +415,21 @@ class OrderDialog extends Dialog {
      */
     askExtraBelongToWhichProduct(input, senderId) {
         let currentProduct = this.session.orderDialog.currentProduct;
-        console.log('CURRENT PRIDUCT =')
-        console.log(this.session.orderDialog.currentProduct)
         let currentExtra = currentProduct.extras[currentProduct.extras.length - 1];
-        if (currentProduct.quantity == 1) {
-            this.step = 11
-        } else if (currentProduct.quantity > 1) {
-            this.step = 10;
-            this.sendTextMessage(senderId, `${currentProduct.quantity} phần ${currentProduct.productName} đều thêm ${currentExtra.quantity} phần ${currentExtra.productName} hay sao ${this.session.pronoun.toLowerCase()}?`);
-            currentProduct.note = `(Mỗi phần ${currentProduct.quantity} đều thêm ${currentExtra.quantity} phần ${currentExtra.productName})`;
+        console.log('CURRENT PRIDUCT =')
+        console.log(currentExtra)
+        if (typeof currentExtra === 'undefined') {
+            console.log("VÔ UNDEFINED")
+            this.step = 11;   
+            this.continue(input, senderId);         
+        } else {
+            if (currentProduct.quantity == 1) {
+                this.step = 11
+            } else if (currentProduct.quantity > 1) {
+                this.step = 10;
+                this.sendTextMessage(senderId, `${currentProduct.quantity} phần ${currentProduct.productName} đều thêm ${currentExtra.quantity} phần ${currentExtra.productName} hay sao ${this.session.pronoun.toLowerCase()}?`);
+                currentProduct.note = `(Mỗi phần ${currentProduct.quantity} đều thêm ${currentExtra.quantity} phần ${currentExtra.productName})`;
+            }
         }
     }
 

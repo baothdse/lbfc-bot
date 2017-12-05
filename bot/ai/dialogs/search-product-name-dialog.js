@@ -169,7 +169,7 @@ class SearchProductNameDialog extends Dialog {
                 var element = {
                     title: products[i].ProductName,
                     image_url: products[i].PicURL,
-                    subtitle: products[i].ProductName,
+                    subtitle: products[i].Price,
                     default_action: {
                         "type": "web_url",
                         "url": "https://foody.vn",

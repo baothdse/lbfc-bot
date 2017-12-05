@@ -20,10 +20,11 @@ class ShowMenuDialog extends Dialog {
     }
 
     showMenu(senderId) {
+        var skip = Math.floor(Math.random() * 70);
         var url = '/LBFC/Brand/GetMenu';
         var params = {
             'brandId': this.session.brandId,
-            'skip': 0,
+            'skip': skip,
         }
         var that = this;
         this.sendTyping(senderId);
@@ -42,7 +43,7 @@ class ShowMenuDialog extends Dialog {
             var element = {
                 title: d.ProductName,
                 image_url: d.PicURL,
-                subtitle: d.ProductName,
+                subtitle: d.Price,
                 default_action: {
                     "type": "web_url",
                     "url": "https://foody.vn",
@@ -54,6 +55,10 @@ class ShowMenuDialog extends Dialog {
                         type: "postback",
                         title: "Đặt sản phẩm",
                         payload: "Đặt $" + d.ProductID + " $" + d.ProductName + " $" + d.Price + " $" + d.PicURL + " $" + d.ProductCode + " $" + this.session.brandId,
+                    }, {
+                        type: "postback",
+                        title: "Xem tiếp",
+                        payload: "Xem menu"
                     }
                 ]
             }
