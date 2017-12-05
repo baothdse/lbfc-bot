@@ -1,6 +1,5 @@
 let Dialog = require('./dialog');
 let await = require('asyncawait/await')
-let ShowStoreIntent = require('../intents/store/show-store-intent')
 const Request = require('../utils/request');
 const ConsoleLog = require('../utils/console-log');
 

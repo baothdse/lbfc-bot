@@ -13,6 +13,9 @@ const HUNDRED = 27;
 const MONEY_TEEN_CODE = 28;
 const DAU_GACH_NGANG = 29;
 const MONEY_TEEN_CODE_2 = 39;
+const POSTBACK_NUT_CHON_EXTRA = 47;
+const CUM_TU = 8;
+const POSTBACK_CHON_KHUYEN_MAI = 20;
 class Intent {
 
     /**
@@ -30,6 +33,8 @@ class Intent {
             case Enums.SHOW_PROMOTION_INTENT_ID(): return { step: intent.Step, exception: intent.Exception }; break;
             case Enums.SHOW_NEAREST_STORE_INTENT_ID(): return { step: intent.Step, exception: intent.Exception }; break;
             case Enums.SHOW_CHAIN_STORE_INTENT_ID(): return { step: intent.Step, exception: intent.Exception }; break;
+            case Enums.ADD_EXTRA_INTENT_ID(): return this.postbackExtraIntent(intent.Step, intent.Exception, intent.Results, intent.PatternGroup); break;
+            case Enums.POSTBACK_APPLY_PROMOTION_INTENT_ID(): return this.postbackApplyPromotion(intent.Step, intent.Exception, intent.Results, intent.PatternGroup); break;
             default: return null;
         }
     }
@@ -57,7 +62,7 @@ class Intent {
 
         intents.forEach((intent) => {
             intent.Patterns.forEach((pattern) => {
-
+                let hasUnknwonPhrase = false;
                 let matchesTmp = {};
                 let inputTmp = input.trim();
                 for (var i = 0; i < pattern.Entities.length; i++) {
@@ -69,7 +74,7 @@ class Intent {
                         specialValues = inputTmp;
                     }
                     else {
-                        if (pattern.MatchBegin && pattern.MatchEnd) {
+                        if (pattern.MatchBegin && pattern.MatchEnd && pattern.Entities.length == 1) {
                             regex = new RegExp("(?:^|\\W)^(" + pattern.Entities[i].Words + ")$(?:$|\\W)", 'i');                            
                         }
                         else if (i == pattern.Entities.length - 1 && pattern.MatchEnd) {
@@ -95,10 +100,10 @@ class Intent {
                                 specialValues = "";
                             }
                             if (i == pattern.Entities.length - 1) {
-                                if (Object.keys(matchesTmp).length > maxElements) {
+                                if ((!hasUnknwonPhrase && Object.keys(matchesTmp).length > maxElements) || (hasUnknwonPhrase && Object.keys(matchesTmp).length - 1 > maxElements)) {
                                     matchIntent = intent;
                                     matchPattern = pattern;
-                                    maxElements = Object.keys(matchesTmp).length;
+                                    maxElements = hasUnknwonPhrase ? Object.keys(matchesTmp).length - 1 : Object.keys(matchesTmp).length;
                                     matches = matchesTmp;
                                     if (result.index + result[0].trim().length + 1 < inputTmp.length) {
                                         specialValues = inputTmp.substring(result.index + result[0].trim().length + 1);
@@ -119,16 +124,16 @@ class Intent {
 
                 }
                 if (specialValues != "") {
-                    if (matches == null && Object.keys(matchesTmp).length > maxElements) {
+                    if (matches == null && (!hasUnknwonPhrase && Object.keys(matchesTmp).length > maxElements) || (hasUnknwonPhrase && Object.keys(matchesTmp).length - 1 > maxElements)) {
                         matches = matchesTmp;
                         matchIntent = intent;
                         matchPattern = pattern;
                         matches[8] = specialValues.trim();
-                        maxElements = Object.keys(matchesTmp).length;
-                    } else if (matches != null && matches[8] == null && Object.keys(matchesTmp).length > maxElements) {
+                        maxElements = hasUnknwonPhrase ? Object.keys(matchesTmp).length - 1 : Object.keys(matchesTmp).length;
+                    } else if (matches != null && matches[8] == null && (!hasUnknwonPhrase && Object.keys(matchesTmp).length > maxElements) || (hasUnknwonPhrase && Object.keys(matchesTmp).length - 1 > maxElements)) {
                         matches[8] = specialValues.trim();
                         matchIntent = intent;
-                        maxElements = Object.keys(matchesTmp).length;
+                        maxElements = hasUnknwonPhrase ? Object.keys(matchesTmp).length - 1 : Object.keys(matchesTmp).length;
                         matchPattern = pattern;
                     }
                     specialValues = "";
@@ -186,6 +191,26 @@ class Intent {
                     price: price,
                     productUrl: productUrl,
                     productCode: productCode,
+                    step: this.step,
+                    exception: this.exception,
+                }
+            default: return null;
+        }
+    }
+
+    static postbackExtraIntent(step, exception, results, patternGroup) {
+        switch (patternGroup) {
+            case 1:
+                ConsoleLog.log(results, 'intent.js', 48);
+                var extraId = results[POSTBACK_NUT_CHON_EXTRA].split("$")[1].trim();
+                var info = results[CUM_TU].split("$");
+                var productName = info[1].trim();
+                var price = info[2].trim();
+
+                return {
+                    productId: parseInt(extraId),
+                    productName: productName,
+                    price: price,
                     step: this.step,
                     exception: this.exception,
                 }
@@ -270,6 +295,15 @@ class Intent {
             //         exception,
             //     }
             default: return null;
+        }
+    }
+
+    static postbackApplyPromotion(step, exception, results, patternGroup) {
+        var promotionCode = results[POSTBACK_CHON_KHUYEN_MAI].substring('promotion select \$'.length, input.length);
+        return {
+            promotionCode: promotionCode,
+            step,
+            exception,
         }
     }
 

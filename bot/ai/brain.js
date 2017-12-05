@@ -93,32 +93,48 @@ class Brain {
                      */
                     let intents = JSON.parse(value);
                     var usingDialogs = this.getUsingDialogs(senderId);
+
                     let session = this.getUserSession(senderId);
 
-                    ConsoleLog.log(event, 'brain.js', 86);
                     var currentDialog = usingDialogs[usingDialogs.length - 1];
-
                     var beginNewDialog = false;
 
-                    let intent = (type == 'message' || type == 'quick_reply' || type == 'postback') ? Intent.getSuitableIntent(message, intents) : {Results: null};
-                    ConsoleLog.log(intent, 'brain.js', 104);
-                    
+                    let intent = (type == 'message' || type == 'quick_reply' || type == 'postback') ? Intent.getSuitableIntent(message, intents) : { Results: null };
+
                     if (intent.Results == null && currentDialog != null) {
+                        ConsoleLog.log(usingDialogs.length > 0 ? usingDialogs[usingDialogs.length - 1].session.orderDialog : 'no using', 'brain.js', 107)
+
                         let currentStep = currentDialog.step;
                         currentDialog.continue(message, senderId);
                         understood = currentDialog.step > currentStep;
-                        
                         if (currentDialog.status == "end") {
                             this.removeFromUsingList(usingDialogs, currentDialog);
+                            let newCurrentDialog = usingDialogs[usingDialogs.length - 1];
+                            if (newCurrentDialog != null) {
+                                newCurrentDialog.continue(message, senderId);
+                            }
                         }
                     } else if (intent.Results != null) {
-                        ConsoleLog.log(usingDialogs, 'brain.js', 104);
-                        let dialog = this.getDialog(intent.DialogId, session);
-                        if (!this.isInStack(usingDialogs, dialog)) {
-                            usingDialogs.push(dialog);
+
+                        var newSession = { pageId: event.recipient.id, notUnderstood: 0, pronoun: 'Anh' };
+                        if (newSession.pageId == '119378645455883') {
+                            newSession.brandId = 1;
                         } else {
-                            this.removeToUsingList(usingDialogs, dialog);
+                            newSession.brandId = 4;
                         }
+
+                        let dialog = this.getDialog(intent.DialogId, newSession);
+                        let matchedDialog = this.removeToUsingList(usingDialogs, dialog);
+
+                        if (matchedDialog != null) {
+                            usingDialogs.push(matchedDialog[0]);
+                            dialog = matchedDialog[0];
+
+                        } else {
+                            usingDialogs.push(dialog);
+
+                        }
+
 
                         let info = Intent.analyze(intent);
 
@@ -127,8 +143,14 @@ class Brain {
                         dialog.continue(message, senderId, info);
                         understood = true;
 
+                        // setTimeout(() => ConsoleLog.log(usingDialogs[0].session.orderDialog, 'brain.js', 138), 5000);
+
                         if (dialog.status == "end") {
                             this.removeFromUsingList(usingDialogs, dialog);
+                            let newCurrentDialog = usingDialogs[usingDialogs.length - 1];
+                            if (newCurrentDialog != null) {
+                                newCurrentDialog.continue(message, senderId);
+                            }
                         }
                     }
 
@@ -184,14 +206,15 @@ class Brain {
      * @param {*} dialog 
      */
     removeToUsingList(usingDialogs, dialog) {
-        for (var i = usingDialogs.length - 1; i >= 0; i++) {
+        for (var i = 0; i < usingDialogs.length; i++) {
             var element = usingDialogs[i];
-            if (element.getName() != dialog.getName()) {
-                usingDialogs.splice(i, 1);
-            } else {
+            ConsoleLog.log(usingDialogs[i].session.orderDialog, 'brain.js', 205);
+            if (element.getName() == dialog.getName()) {
+                return usingDialogs.splice(i, 1);
                 break;
             }
         }
+        return null;
     }
 
     /**

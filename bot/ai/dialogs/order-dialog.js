@@ -268,6 +268,7 @@ class OrderDialog extends Dialog {
     * if(data != null) => receiveExtraProduct() else => askForMore() 
     */
     askExtraProduct(input, senderId) {
+        ConsoleLog.log(this.session.orderDialog.currentProduct, this.getName(), 271);        
         let that = this;
         this.step = 7;
         let currentProduct = this.session.orderDialog.currentProduct;
@@ -319,7 +320,7 @@ class OrderDialog extends Dialog {
      * @param {*} info 
      */
     receiveExtra(input, senderId, info) {
-        ConsoleLog.log(input, this.getName(), 288);
+        ConsoleLog.log(this.session.orderDialog.currentProduct, this.getName(), 322);
         if (this.session.orderDialog.currentProduct.productName) {
             if (input.match(/^(không|ko|nô|không muốn|không áp dụng|ko mua|không mua|kg)/i)) {
                 this.step = 11;
@@ -592,6 +593,7 @@ class OrderDialog extends Dialog {
     receivePromotion(input, senderId, info) {
         var that = this;
         var applied = false;
+        this.step = 15;
         if (input.match(/^promotion select \$/i)) {
             if (this.session.orderDialog.orderDetails == 0) {
                 this.sendTextMessage(senderId, "" + that.session.pronoun + " ơi, đặt hàng trước đã " + that.session.pronoun.toLowerCase() + " ơi")
@@ -624,7 +626,7 @@ class OrderDialog extends Dialog {
                     });
             }
         } else if (input.match(/(bỏ qua|không|ko|kg|khong)/i)) {
-            this.step = 13;
+            this.step = 15;
             this.continue(input, senderId);
         } else {
             that.step = 11;
