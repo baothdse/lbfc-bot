@@ -681,8 +681,10 @@ class OrderDialog extends Dialog {
      * @param {*} senderId 
      */
     askCurrentLocation(input, senderId) {
-        console.log(this.session)
-        this.sendLocation(senderId);
+        this.sendTextMessage(senderId, `Để em kiếm cửa hàng gần nhất cho ${this.session.pronoun.toLowerCase()} cho.`)
+        .then((res) => {
+            this.sendLocation(senderId);
+        })
         this.step = 18;
     }
 
@@ -693,7 +695,6 @@ class OrderDialog extends Dialog {
      * @param {*} senderId 
      */
     receiveCurrentLocation(input, senderId) {
-        console.log('INPUT = : ' + input[0].payload.coordinates.lat)
         if (input.constructor === Array) {
             this.session.coordinates = input[0].payload.coordinates;
             this.step = 19;
@@ -719,10 +720,10 @@ class OrderDialog extends Dialog {
     askStore(input, senderId) {
         if (this.session.coordinates) {
             this.step = 20;
+            this.sendTextMessage(senderId, `Mấy cửa hàng gần đây nè ${this.session.pronoun.toLowerCase()}.`);
             new Request().sendGetRequest('/LBFC/Store/GetNearbyStoreOutdoor', { "lat": this.session.coordinates.lat, "lon": this.session.coordinates.long, "brandId": this.session.brandId })
                 .then((data) => {
                     let listStoreNearBy = JSON.parse(data)
-                    console.log("DATA = " + data)
                     let top4NearByStore = []
                     for (let i = 0; i < 4; i++) {
                         let element = {
@@ -748,6 +749,8 @@ class OrderDialog extends Dialog {
                     this.sendGenericMessage(senderId, top4NearByStore)
                 })
         } else {
+            this.step = 20;
+            this.sendTextMessage(senderId, `Mấy cửa hàng gần đây nè ${this.session.pronoun.toLowerCase()}.`);
             new Request().sendGetRequest('/LBFC/Store/GetAllStoresByBrand', { 'brandId': 1 }, "")
                 .then((data) => {
                     let listStoreByBrand = JSON.parse(data);

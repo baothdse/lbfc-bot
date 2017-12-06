@@ -19,6 +19,7 @@ const POSTBACK_CHON_KHUYEN_MAI = 20;
 const ADDRESS_USE = 49;
 const ADDRESS_REFUSE = 50;
 const MEMBERSHIPCARD_USE = 52;
+const CHOOSING_STORE = 55;
 class Intent {
 
     /**
@@ -41,6 +42,7 @@ class Intent {
             case Enums.POSTBACK_CONFIRM_DELIVERY_LOCATION_INTENT_ID(): return this.postbackConfirmDeliveryLocation(intent.Step, intent.Exception, intent.Results, intent.PatternGroup); break;
             case Enums.POSTBACK_MEMBERSHIP_CARD_USE_INTENT_ID(): return this.postbackConfirmUsingCard(intent.Step, intent.Exception, intent.Results, intent.PatternGroup); break;
             case Enums.POSTBACK_MEMBERSHIP_CARD_REFUSE_INTENT_ID(): return this.postbackConfirmNotUsingCard(intent.Step, intent.Exception, intent.Results, intent.PatternGroup); break;
+            case Enums.RECEIVE_STORE_NAME_INTENT_ID(): return this.postbackReceivingStore(intent.Step, intent.Exception, intent.Results, intent.PatternGroup); break;
             default: return { step: intent.Step, exception: intent.Exception }; break;
         }
     }
@@ -357,6 +359,21 @@ class Intent {
                     step,
                     exception,
                 }
+                break;
+            default: break;
+        }
+    }
+
+    static postbackReceivingStore(step, exception, results, patternGroup) {
+        switch (patternGroup) {
+            case 1:
+            var info = (results[CHOOSING_STORE].slice(15, results[CHOOSING_STORE].length)).split("$", 2);
+            return {
+                storeId: info[0],
+                storeName: info[1],
+                step,
+                exception,
+            };
                 break;
             default: break;
         }

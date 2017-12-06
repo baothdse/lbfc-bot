@@ -34,7 +34,7 @@ class Enums {
     static RECEIVE_FULL_CHANGE_ORDER_INTENT_ID() { return -1; }
     static RECEIVE_FULL_ORDER_INTENT_ID() { return 6; }
     static RECEIVE_PRODUCT_NAME_INTENT_ID() { return -1; }
-    static RECEIVE_STORE_NAME_ID() { return -1; }
+    static RECEIVE_STORE_NAME_INTENT_ID() { return 5; }
     static REQUEST_FINISH_ORDER_INTENT_ID() { return -1; }
     static SHOW_MY_ORDER_HISTORY_INTENT_ID() { return -1; }
     static SEARCH_PRODUCT_NAME_INTENT_ID() { return 9; }
