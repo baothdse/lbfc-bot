@@ -90,7 +90,17 @@ class Intent {
                             regex = new RegExp("(?:^|\\W)(" + pattern.Entities[i].Words + ")$(?:$|\\W)", 'i');
                         }
                         else if (specialValues == "") {
-                            regex = new RegExp("(?:^|\\W)^(" + pattern.Entities[i].Words + ")(?:$|\\W)", 'i');
+                            if (i == 0) {
+                                if (pattern.MatchBegin) {
+                                    regex = new RegExp("(?:^|\\W)^(" + pattern.Entities[i].Words + ")(?:$|\\W)", 'i');
+                                }
+                                else {
+                                    regex = new RegExp("(?:^|\\W)(" + pattern.Entities[i].Words + ")(?:$|\\W)", 'i');
+                                }
+                            }
+                            else {
+                                regex = new RegExp("(?:^|\\W)^(" + pattern.Entities[i].Words + ")(?:$|\\W)", 'i');
+                            }
                         }
                         else {
                             regex = new RegExp("(?:^|\\W)" + pattern.Entities[i].Words + "(?:$|\\W)", 'i');
@@ -122,7 +132,7 @@ class Intent {
                             }
                             else {
                                 if (result.index + result[0].trim().length + 1 < inputTmp.length) {
-                                    inputTmp = inputTmp.substring(result.index + result[0].trim().length + 1);
+                                    inputTmp = inputTmp.substring(result.index + result[0].trim().length + 1).trim();
                                 }
                             }
                         }
@@ -367,13 +377,13 @@ class Intent {
     static postbackReceivingStore(step, exception, results, patternGroup) {
         switch (patternGroup) {
             case 1:
-            var info = (results[CHOOSING_STORE].slice(15, results[CHOOSING_STORE].length)).split("$", 2);
-            return {
-                storeId: info[0],
-                storeName: info[1],
-                step,
-                exception,
-            };
+                var info = (results[CHOOSING_STORE].slice(15, results[CHOOSING_STORE].length)).split("$", 2);
+                return {
+                    storeId: info[0],
+                    storeName: info[1],
+                    step,
+                    exception,
+                };
                 break;
             default: break;
         }
