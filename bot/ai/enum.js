@@ -44,6 +44,10 @@ class Enums {
     static SHOW_CHAIN_STORE_INTENT_ID() { return 17; }
     static POSTBACK_APPLY_PROMOTION_INTENT_ID() { return 19; }
     static POSTBACK_CONFIRM_DELIVERY_LOCATION_INTENT_ID() { return 21; }
+    static POSTBACK_MEMBERSHIP_CARD_USE_INTENT_ID() { return 22; }
+    static POSTBACK_MEMBERSHIP_CARD_REFUSE_INTENT_ID() { return 23; }
+    static POSTBACK_MEMBERSHIP_CARD_AVAILABLED_INTENT_ID() { return 24; }
+    static POSTBACK_MEMBERSHIP_CARD_UNAVAILABLED_INTENT_ID() { return 25; }
     
     static LIKE_ICON_URL() {return 'https://www.shareicon.net/data/128x128/2016/07/09/119075_thumb_512x512.png';}
     static DISLIKE_ICON_URL() {return 'https://www.shareicon.net/data/128x128/2015/11/05/667168_hand_512x512.png';}

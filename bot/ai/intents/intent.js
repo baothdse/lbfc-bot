@@ -18,6 +18,7 @@ const CUM_TU = 8;
 const POSTBACK_CHON_KHUYEN_MAI = 20;
 const ADDRESS_USE = 49;
 const ADDRESS_REFUSE = 50;
+const MEMBERSHIPCARD_USE = 52;
 class Intent {
 
     /**
@@ -38,7 +39,9 @@ class Intent {
             case Enums.ADD_EXTRA_INTENT_ID(): return this.postbackExtraIntent(intent.Step, intent.Exception, intent.Results, intent.PatternGroup); break;
             case Enums.POSTBACK_APPLY_PROMOTION_INTENT_ID(): return this.postbackApplyPromotion(intent.Step, intent.Exception, intent.Results, intent.PatternGroup); break;
             case Enums.POSTBACK_CONFIRM_DELIVERY_LOCATION_INTENT_ID(): return this.postbackConfirmDeliveryLocation(intent.Step, intent.Exception, intent.Results, intent.PatternGroup); break;
-            default: return null;
+            case Enums.POSTBACK_MEMBERSHIP_CARD_USE_INTENT_ID(): return this.postbackConfirmUsingCard(intent.Step, intent.Exception, intent.Results, intent.PatternGroup); break;
+            case Enums.POSTBACK_MEMBERSHIP_CARD_REFUSE_INTENT_ID(): return this.postbackConfirmNotUsingCard(intent.Step, intent.Exception, intent.Results, intent.PatternGroup); break;
+            default: return { step: intent.Step, exception: intent.Exception }; break;
         }
     }
 
@@ -75,6 +78,7 @@ class Intent {
                     let regex = null;
                     if (pattern.Entities[i].Words == ".*?") {
                         specialValues = inputTmp;
+                        hasUnknwonPhrase = true;
                     }
                     else {
                         if (pattern.MatchBegin && pattern.MatchEnd && pattern.Entities.length == 1) {
@@ -330,6 +334,33 @@ class Intent {
         }
     }
 
+    static postbackConfirmUsingCard(step, exception, results, patternGroup) {
+        switch (patternGroup) {
+            case 1:
+                let cardCode = results[MEMBERSHIPCARD_USE].substring('membership card use '.length, results[MEMBERSHIPCARD_USE].length);
+                return {
+                    cardCode,
+                    isUsed: true,
+                    step,
+                    exception,
+                }
+                break;
+            default: break;
+        }
+    }
+
+    static postbackConfirmNotUsingCard(step, exception, results, patternGroup) {
+        switch (patternGroup) {
+            case 1:
+                return {
+                    isUsed: false,
+                    step,
+                    exception,
+                }
+                break;
+            default: break;
+        }
+    }
 }
 
 module.exports = Intent

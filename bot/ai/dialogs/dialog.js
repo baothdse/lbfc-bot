@@ -208,7 +208,6 @@ class Dialog {
 
                 })
                     .then((body) => {
-                        console.log(body);
                         var person = JSON.parse(body);
                         that._storedUsers[senderId] = person;
                         resolve(person);

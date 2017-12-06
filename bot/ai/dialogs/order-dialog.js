@@ -967,6 +967,7 @@ class OrderDialog extends Dialog {
         this.step = 24;
         new Request().sendGetRequest('/LBFC/Membership/SearchMembershipCardByFacebookPSID', params, '')
             .then((response) => {
+                ConsoleLog.log(response, this.getName(), 970);
                 if (response != '\"Membership card not found\"') {
 
                     /**
@@ -996,7 +997,7 @@ class OrderDialog extends Dialog {
                         this.continue('', senderId);
                     }
                 } else {
-                    ConsoleLog.log("Card founddddddddd", this.getName(), 811);
+                    ConsoleLog.log("Card not founddddddddd", this.getName(), 811);
 
                     let elements = [
                         {
@@ -1040,8 +1041,10 @@ class OrderDialog extends Dialog {
         ConsoleLog.log(params, this.getName(), 851);
         new Request().sendGetRequest('/LBFC/Membership/SearchMembershipCard', params, '')
             .then((response) => {
-                if (response == null) {
+                if (response == "") {
                     this.sendTextMessage(senderId, 'Em không kiếm thấy mã thẻ vừa nhập :\'<');
+                    this.step = 24;
+                    this.continue('', senderId);
                 } else {
                     this.insertMembershipCard(params.membershipCardCode, senderId)
                         .then((response) => {

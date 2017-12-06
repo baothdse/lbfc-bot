@@ -82,7 +82,7 @@ class Brain {
             case 'attachments': message = event.message.attachments; break;
             default: message = event.message.quick_reply.payload; break;
         }
-        // ConsoleLog.log(event, 'brain.js', 79);
+        ConsoleLog.log(event, 'brain.js', 79);
 
         this.insertSender(senderId, event.recipient.id)
             .then((res) => {
