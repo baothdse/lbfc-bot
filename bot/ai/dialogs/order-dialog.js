@@ -15,10 +15,6 @@ const PostbackChangePromotionIntent = require('../intents/promotions/postback-ch
 const CancelApplyPromotionIntent = require('../intents/promotions/cancel-apply-promotion-intent');
 const AddExtraIntent = require('../intents/orders/add-extra-intent');
 const RequestFinishOrderIntent = require('../intents/orders/request-finish-order-intent');
-const PostbackMembershipCardUseIntent = require('../intents/membership/postback-membership-card-use');
-const PostbackMembershipCardRefuseIntent = require('../intents/membership/postback-membership-card-refuse');
-const PostbackMembershipCardAvailableIntent = require('../intents/membership/postback-membership-card-available');
-const PostbackMembershipCardUnavailableIntent = require('../intents/membership/postback-membership-card-unavailable');
 const PostbackConfirmAddressIntent = require('../intents/delivery/postback-confirm-address');
 const ReceiveProductNameIntent = require('../intents/orders/receive-product-name-intent')
 const ConfirmExtraQuantityIntent = require('../intents/extra/confirm-extra-quantity-intent')
@@ -37,14 +33,17 @@ class OrderDialog extends Dialog {
         /**
          * @type {}
          */
-        this.session.orderDialog = {};
-        this.session.orderDialog.orderDetails = [];
-        this.session.orderDialog.finalPrice = this.session.orderDialog.originalPrice = 0;
-
-        /**
+        if (this.session.orderDialog == undefined) {
+            this.session.orderDialog = {};
+            this.session.orderDialog.orderDetails = [];
+            this.session.orderDialog.finalPrice = this.session.orderDialog.originalPrice = 0;
+            /**
          * @type {{ProductModel}}
          */
-        this.session.orderDialog.currentProduct = {};
+            this.session.orderDialog.currentProduct = {};
+        }
+
+        
         this.push();
     }
 
@@ -57,10 +56,6 @@ class OrderDialog extends Dialog {
         // this.addIntent(new CancelApplyPromotionIntent(0, 4));
         // this.addIntent(new AddExtraIntent(7, 0));
         // this.addIntent(new RequestFinishOrderIntent(13, 0));
-        // this.addIntent(new PostbackMembershipCardAvailableIntent(24, 0));
-        // this.addIntent(new PostbackMembershipCardRefuseIntent(27, 0));
-        // this.addIntent(new PostbackMembershipCardUnavailableIntent(27, 0));
-        // this.addIntent(new PostbackMembershipCardUseIntent(25, 0));
         // this.addIntent(new PostbackConfirmAddressIntent(20.5, 0));
         // this.addIntent(new ReceiveProductNameIntent(0, 5));
         // this.addIntent(new ConfirmExtraQuantityIntent(10, 0));
@@ -506,9 +501,6 @@ class OrderDialog extends Dialog {
     * @param {number} senderId 
     */
     askForMore(senderId) {
-        console.log("SESSION = ")
-        console.log(this.session)
-        console.log(this.session.orderDialog.currentProduct.extras)
         this.step = 12;
         this.sendTextMessage(senderId, `${this.session.pronoun} muốn gọi thêm món gì không?`);
     }

@@ -19,6 +19,7 @@ let EmojiDialog = require('./dialogs/emoji/emoji-dialog');
 var Response = require('./dialogs/entities/response');
 let Dialog = require('./dialogs/dialog');
 const ShowNearestStoreDialog = require('./dialogs/show-nearest-store-dialog');
+const ShowCartDialog = require('./dialogs/show-cart-dialog');
 const Enums = require('./enum');
 const Util = require('./utils/util');
 
@@ -115,23 +116,18 @@ class Brain {
                         }
                     } else if (intent.Results != null) {
 
-                        var newSession = { pageId: event.recipient.id, notUnderstood: 0, pronoun: 'Anh' };
-                        if (newSession.pageId == '119378645455883') {
-                            newSession.brandId = 1;
-                        } else {
-                            newSession.brandId = 4;
-                        }
-
-                        let dialog = this.getDialog(intent.DialogId, newSession);
+                        let dialog = this.getDialog(intent.DialogId, session);
                         let matchedDialog = this.removeToUsingList(usingDialogs, dialog);
 
                         if (matchedDialog != null) {
+                            usingDialogs[usingDialogs.length - 1].step -= 1;
                             usingDialogs.push(matchedDialog[0]);
                             dialog = matchedDialog[0];
 
                         } else {
+                            let d = usingDialogs[usingDialogs.length - 1];
+                            if (d != undefined) d.pause();
                             usingDialogs.push(dialog);
-
                         }
 
 
@@ -407,6 +403,7 @@ class Brain {
             case Enums.SHOW_PROMOTION_DIALOG_ID(): return new ShowPromotionDialog(session); break;
             case Enums.SHOW_STORE_DIALOG_ID(): return new ShowStoreDialog(session); break;
             case Enums.SHOW_NEAREST_STORE_DIALOG_ID(): return new ShowNearestStoreDialog(session); break;
+            case Enums.SHOW_CART_DIALOG_ID(): return new ShowCartDialog(session); break;
             default: return null;
         }
     }

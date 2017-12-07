@@ -23,7 +23,7 @@ class Dialog {
          */
         this.intents = [];
         /**
-         * @type {{brandId: number, pronoun: string, coordinates: [], searchProductDialog: {productName, topPrice, bottomPrice}, orderDialog: {orderDetails: [{productID, productName, price, picURL, discountPrice, productCode, extras: [{productId, productName, price}], note: {extra: string}], originalPrice: number, finalPrice: number, currentProduct: ProductModel, currentPromotion: {PromotionDetailID, PromotionCode, BuyProductCode, DiscountRate, DiscountAmount}, address: string, membershipCardCode: any, timeNote: string}, changeOrderDialog: {currentProduct}}}
+         * @type {{brandId: number, pronoun: string, coordinates: [], searchProductDialog: {productName, topPrice, bottomPrice}, orderDialog: {orderDetails: [{productID, productName, price, picURL, discountPrice, productCode, quantity: number, extras: [{productId, productName, price}], note: {extra: string}], originalPrice: number, finalPrice: number, currentProduct: ProductModel, currentPromotion: {PromotionDetailID, PromotionCode, BuyProductCode, DiscountRate, DiscountAmount}, address: string, membershipCardCode: any, timeNote: string}, changeOrderDialog: {currentProduct}}}
          */
         this.session = session;
         this.exception = 0;
@@ -230,7 +230,7 @@ class Dialog {
     };
 
     sendTyping(senderId) {
-        request({
+        return request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: { access_token: this.FACEBOOK_ACCESS_TOKEN },
             method: 'POST',

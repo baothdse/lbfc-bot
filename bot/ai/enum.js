@@ -24,6 +24,7 @@ class Enums {
     static ASK_OPEN_CLOSE_TIME_DIALOG_ID() { return -1; }
     static SHOW_POPULAR_PRODUCT_DIALOG_ID() { return -1; }
     static SHOW_NEAREST_STORE_DIALOG_ID() { return 16; }
+    static SHOW_CART_DIALOG_ID() { return 22; }
 
 
     static ADD_EXTRA_INTENT_ID() { return 18; }
@@ -48,6 +49,7 @@ class Enums {
     static POSTBACK_MEMBERSHIP_CARD_REFUSE_INTENT_ID() { return 23; }
     static POSTBACK_MEMBERSHIP_CARD_AVAILABLED_INTENT_ID() { return 24; }
     static POSTBACK_MEMBERSHIP_CARD_UNAVAILABLED_INTENT_ID() { return 25; }
+    static SHOW_CART_INTENT_ID() { return 27; }
     
     static LIKE_ICON_URL() {return 'https://www.shareicon.net/data/128x128/2016/07/09/119075_thumb_512x512.png';}
     static DISLIKE_ICON_URL() {return 'https://www.shareicon.net/data/128x128/2015/11/05/667168_hand_512x512.png';}

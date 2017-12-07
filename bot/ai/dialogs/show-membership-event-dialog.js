@@ -1,13 +1,11 @@
 let Dialog = require('./dialog');
 let Request = require('../utils/request');
-let AskForMembershipIntent = require('../intents/membership/ask-for-membership');
 
 const ConsoleLog = require('../utils/console-log');
 
 class ShowMembershipEventDialog extends Dialog {
     constructor(session) {
         super(session);
-        this.addIntent(new AskForMembershipIntent(1, 0));
         this.error = 0;
     }
 

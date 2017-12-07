@@ -43,35 +43,37 @@ class HelloDialog extends Dialog {
         var that = this;
         this.getSenderName(senderId).then(function (sender) {
             var result = that.reply(senderId, { "text": "Chào " + that.session.pronoun.toLowerCase() + ' ' + sender.first_name + ", " + that.session.pronoun + " " + "cần em giúp gì không?" });
-            that.sendTyping(senderId);
-            that.sendGenericMessage(senderId, [{
-                title: "Chào mừng " + sender.first_name + " đến với LBFC",
-                image_url: "https://images.unsplash.com/photo-1471691170738-9c6b554ebec1",
-                subtitle: "Vui lòng chọn option bên dưới để chúng tôi có thể giúp " + that.session.pronoun.toLowerCase() + " 1 cách tốt nhất",
-                default_action: {
-                    "type": "web_url",
-                    "url": "https://foody.vn",
-                    "messenger_extensions": true,
-                    "webview_height_ratio": "tall"
-                },
-                buttons: [
-                    {
-                        type: "postback",
-                        title: "Tìm sản phẩm",
-                        payload: "Tìm sản phẩm"
+            that.sendTyping(senderId).then((res) => {
+                that.sendGenericMessage(senderId, [{
+                    title: "Chào mừng " + sender.first_name + " đến với " + (that.session.brandId == 1 ? "Passio" : "KFC"),
+                    image_url: "https://images.unsplash.com/photo-1471691170738-9c6b554ebec1",
+                    subtitle: "Vui lòng chọn option bên dưới để chúng tôi có thể giúp " + that.session.pronoun.toLowerCase() + " 1 cách tốt nhất",
+                    default_action: {
+                        "type": "web_url",
+                        "url": "https://foody.vn",
+                        "messenger_extensions": true,
+                        "webview_height_ratio": "tall"
                     },
-                    {
-                        type: "postback",
-                        title: "Khuyến mãi",
-                        payload: "Khuyến mãi"
-                    },
-                    {
-                        type: "postback",
-                        title: "Đặt hàng",
-                        payload: "order begin"
-                    }
-                ]
-            }]);
+                    buttons: [
+                        {
+                            type: "postback",
+                            title: "Tìm sản phẩm",
+                            payload: "Tìm sản phẩm"
+                        },
+                        {
+                            type: "postback",
+                            title: "Khuyến mãi",
+                            payload: "Khuyến mãi"
+                        },
+                        {
+                            type: "postback",
+                            title: "Đặt hàng",
+                            payload: "order begin"
+                        }
+                    ]
+                }]);
+            });
+            
         });
         that.step = 2;
         that.continue(input, senderId);

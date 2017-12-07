@@ -5,7 +5,7 @@ const redis = require('redis');
 
 const Brain = require('./bot/ai/brain');
 var request = require('request');
-const FB_TOKEN = 'EAAFHmBXhaYoBAFdbrN3n2nazaGfq3UOdzqvr2ZA750TZBaEi2rKorkMlZCXIo6Yl7pn9tZBBBwt6iAmV9VyKKqyX5pmB05zBLZC3iBwqgFth4ClGhWE7EPqvDsHjULGBGj4oG7qIcecqwzxoQ4w4NmCO5EAZALIvj1cgerF5nTCwZDZD';
+const FB_TOKEN = 'EAAGrlOZA1cX8BAPM7ij4396bh4ZC0EjY8bfnxosk589K6eBvPQZCtCCONzDSN3e3zgVHKyyVcZCv0of1pmaKvp3EIZC3Gm7aDSOWmglUIoofBFLoaNurG31TQZBm8xvKuL01kPPqz9k8AFDKa7DP2XUU6UYCxDhePkRZCtoTY8ZCSgZDZD';
 const app = express();
 
 let client = redis.createClient();
@@ -52,33 +52,10 @@ function addPersistentMenu() {
                     "locale": "default",
                     "call_to_actions": [
                         {
-                            "title": "Trang chủ",
-                            "type": "web_url",
-                            "url": "http://localhost:42013",
-                            "webview_height_ratio": "compact"
+                            "title": "Giỏ hàng của tôi",
+                            "type": "postback",
+                            "payload": "my cart"
                         },
-                        {
-                            "title": "Tài khoản của tôi",
-                            "type": "nested",
-                            "call_to_actions": [
-                                {
-                                    "title": "Khuyến mãi của tôi",
-                                    "type": "postback",
-                                    "payload": "Khuyến mãi của tôi"
-                                },
-                                {
-                                    "title": "Điểm tích lũy",
-                                    "type": "postback",
-                                    "payload": "Điểm tích lũy"
-                                },
-                                {
-                                    "title": "Lịch sử giao dịch",
-                                    "type": "web_url",
-                                    "url" : "https://tiki.vn/sales/order/history/",                                    
-                                    "webview_height_ratio": "compact"
-                                }
-                            ]
-                        }
                     ]
                 },
                 {
