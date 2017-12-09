@@ -242,19 +242,24 @@ class OrderDialog extends Dialog {
         var currentProduct = this.session.orderDialog.currentProduct;
         var that = this;
         if (input.match(/^\d+$/g)) {
-            currentProduct.quantity = parseInt(input);
-            this.whenUserOrderTooMuch(currentProduct.quantity, senderId)
-                .then((response) => {
-                    this.step = 6;
-                    this.insertProductToOrder(currentProduct.simplify());
-                    ConsoleLog.log(currentProduct, this.getName(), 214);
-                    this.sendTextMessage(senderId, 'Ok ' + input + ' phần ' + currentProduct.productName)
-                        .then(function (data) {
-                            that.continue(input, senderId);
-                        });
-                })
+            if (input <= 0) {
+                this.requireGreaterThanZero(5, senderId);
+            } else {
+                currentProduct.quantity = parseInt(input);
+                this.whenUserOrderTooMuch(currentProduct.quantity, senderId)
+                    .then((response) => {
+                        this.step = 6;
+                        this.insertProductToOrder(currentProduct.simplify());
+                        ConsoleLog.log(currentProduct, this.getName(), 214);
+                        this.sendTextMessage(senderId, 'Ok ' + input + ' phần ' + currentProduct.productName)
+                            .then(function (data) {
+                                that.continue(input, senderId);
+                            });
+                    })
+
+            }
         } else {
-            this.requireNumber(4, senderId);
+            this.requireNumber(5, senderId);
         }
     }
 
@@ -385,15 +390,19 @@ class OrderDialog extends Dialog {
         let currentProduct = this.session.orderDialog.currentProduct;
         let that = this;
         let currentExtra = currentProduct.extras[currentProduct.extras.length - 1];
-        console.log(input)
-        console.log(currentExtra)
         if (input.match(/\d+/g)) {
-            this.step = 9;
-            currentExtra.quantity = input;
-            this.sendTextMessage(senderId, 'Vâng, thêm ' + input + ' phần ' + currentExtra.productName)
-                .then((response) => {
-                    this.continue(input, senderId)
-                })
+            if (input <= 0) {
+                this.requireGreaterThanZero(8, senderId);
+            } 
+            else {
+                this.step = 9;
+                currentExtra.quantity = input;
+                this.sendTextMessage(senderId, 'Vâng, thêm ' + input + ' phần ' + currentExtra.productName)
+                    .then((response) => {
+                        this.continue(input, senderId)
+                    })
+
+            }
         } else {
             this.requireNumber(8, senderId);
         }
@@ -446,7 +455,7 @@ class OrderDialog extends Dialog {
                         payload: `Mỗi ly 1 phần`,
                         image_url: "https://upload.wikimedia.org/wikipedia/commons/7/73/STC_line_1_icon.png"
                     }])
-            } else if (input.match(/(đúng rồi|phải|nó đó|ok|đúng|chính xác|ờ|ừ|ừm|ừn|uhm|uh|oh|ohm|ừa)/i)) {
+            } else if (input.match(/(đúng rồi|phải|nó đó|ok|đúng|chính xác|ờ|ừ|ừm|ừn|uhm|uh|oh|ohm|ừa|yes)/i)) {
                 this.step = 11
                 currentExtra.quantity *= currentProduct.quantity;
                 console.log("CURENT EXTRA quantity : " + currentExtra.quantity)
@@ -531,7 +540,16 @@ class OrderDialog extends Dialog {
         var that = this;
 
         this.step = 14;
+
+        
         this.session.orderDialog.originalPrice = this.calculateTotalPrice(this.session.orderDialog.orderDetails);
+        if (this.session.orderDialog.originalPrice == 0) {
+            this.sendTextMessage(senderId, `${this.session.pronoun} đã đặt gì đâu???`)
+            .then((res) => this.sendImage(senderId, Enums.USAGI_URL()));
+            this.step = 40;
+            this.continue('', '');
+            return;
+        }
         var data = {
             "order": {
                 "OrderDetails": this.session.orderDialog.orderDetails,
@@ -877,6 +895,11 @@ class OrderDialog extends Dialog {
 
     /**step 20.4 */
     receiveDeliveryAdrress(input, senderId) {
+        if (!input.match(/\d+/i)) {
+            this.sendTextMessage(senderId, `Nhập cả số nhà nha ${this.session.pronoun.toLowerCase()}`);
+            this.step = 20.4;
+            return;
+        }
         this.step = 20.5;
         ConsoleLog.log(input, this.getName(), 761);
         const GOOGLE_API_KEY = 'AIzaSyD6D1KPx1dD32u0BHDHK2Pp0bDMnfkXLLM';
@@ -946,9 +969,14 @@ class OrderDialog extends Dialog {
      * @param {*} senderId 
      */
     receivePhoneNumber(input, senderId) {
-        this.session.orderDialog.phoneNumber = input;
-        this.step = 23;
-        this.continue(input, senderId);
+        if (!input.match(/\d{10,11}/i)) {
+            this.sendTextMessage(senderId, `Nhập số điện thoại di động nha ${this.session.pronoun.toLowerCase()}`);
+            this.step = 22;
+        } else {
+            this.session.orderDialog.phoneNumber = input;
+            this.step = 23;
+            this.continue(input, senderId);
+        }
     }
 
     /**
@@ -1108,6 +1136,7 @@ class OrderDialog extends Dialog {
     askForConfirmation(input, senderId) {
         this.step = 29;
         var that = this;
+        this.session.orderDialog.finalPrice = this.session.orderDialog.finalPrice == 0 ? this.session.orderDialog.originalPrice : this.session.orderDialog.finalPrice;
         this.sendTextMessage(senderId, `${this.session.pronoun} kiểm tra lại đơn hàng giúp em nhé`);
         this.getSenderName(senderId)
             .then((sender) => {
@@ -1398,7 +1427,22 @@ class OrderDialog extends Dialog {
     requireNumber(step, senderId) {
         var that = this;
 
-        this.reply(senderId, new SimpleTextTemplate('Số thôi thêm chữ em ko hiểu 😱😱😱').template).then(
+        this.reply(senderId, new SimpleTextTemplate(`Nhập số tự nhiên lớn hơn 0 thôi nha ${this.session.pronoun.toLowerCase()} 😱😱😱`).template).then(
+            function (data) {
+                that.step = step;
+            }
+        );
+    }
+
+    /**
+     * Báo lỗi yêu cầu nhập số > 0
+     * @param {int} step Step để trở về sau khi báo lỗi
+     * @param {int} senderId 
+     */
+    requireGreaterThanZero(step, senderId) {
+        var that = this;
+
+        this.reply(senderId, new SimpleTextTemplate(`Nhập số lớn hơn 0 nha ${this.session.pronoun.toLowerCase()}`).template).then(
             function (data) {
                 that.step = step;
             }

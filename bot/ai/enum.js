@@ -25,6 +25,7 @@ class Enums {
     static SHOW_POPULAR_PRODUCT_DIALOG_ID() { return -1; }
     static SHOW_NEAREST_STORE_DIALOG_ID() { return 16; }
     static SHOW_CART_DIALOG_ID() { return 22; }
+    static SIMPLE_CHANGE_DIALOG_ID() { return 23; }
 
 
     static ADD_EXTRA_INTENT_ID() { return 18; }
@@ -50,9 +51,12 @@ class Enums {
     static POSTBACK_MEMBERSHIP_CARD_AVAILABLED_INTENT_ID() { return 24; }
     static POSTBACK_MEMBERSHIP_CARD_UNAVAILABLED_INTENT_ID() { return 25; }
     static SHOW_CART_INTENT_ID() { return 27; }
+    static EDIT_PRODUCT_INTENT_ID() { return 28; }
+    static DELETE_PRODUCT_INTENT_ID() { return 29; }
     
     static LIKE_ICON_URL() {return 'https://www.shareicon.net/data/128x128/2016/07/09/119075_thumb_512x512.png';}
     static DISLIKE_ICON_URL() {return 'https://www.shareicon.net/data/128x128/2015/11/05/667168_hand_512x512.png';}
+    static USAGI_URL() {return 'https://scontent.fsgn2-2.fna.fbcdn.net/v/t1.0-9/24796600_1564300987018197_6878657186565876156_n.jpg?oh=d952ffd148a233dff1d30c9cbd4d019d&oe=5A8C45FD';}
 }
 
 module.exports = Enums

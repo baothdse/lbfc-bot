@@ -43,6 +43,8 @@ class Intent {
             case Enums.POSTBACK_MEMBERSHIP_CARD_USE_INTENT_ID(): return this.postbackConfirmUsingCard(intent.Step, intent.Exception, intent.Results, intent.PatternGroup); break;
             case Enums.POSTBACK_MEMBERSHIP_CARD_REFUSE_INTENT_ID(): return this.postbackConfirmNotUsingCard(intent.Step, intent.Exception, intent.Results, intent.PatternGroup); break;
             case Enums.RECEIVE_STORE_NAME_INTENT_ID(): return this.postbackReceivingStore(intent.Step, intent.Exception, intent.Results, intent.PatternGroup); break;
+            case Enums.EDIT_PRODUCT_INTENT_ID(): return this.postbackEditProduct(intent.Step, intent.Exception, intent.Results, intent.PatternGroup); break;
+            case Enums.DELETE_PRODUCT_INTENT_ID(): return this.postbackDeleteProduct(intent.Step, intent.Exception, intent.Results, intent.PatternGroup); break;
             default: return { step: intent.Step, exception: intent.Exception }; break;
         }
     }
@@ -381,6 +383,34 @@ class Intent {
                 return {
                     storeId: info[0],
                     storeName: info[1],
+                    step,
+                    exception,
+                };
+                break;
+            default: break;
+        }
+    }
+
+    static postbackEditProduct(step, exception, results, patternGroup) {
+        switch (patternGroup) {
+            case 1:
+                var productId = parseInt(results[SO]);
+                return {
+                    productId,
+                    step,
+                    exception,
+                };
+                break;
+            default: break;
+        }
+    }
+
+    static postbackDeleteProduct(step, exception, results, patternGroup) {
+        switch (patternGroup) {
+            case 1:
+                var productId = parseInt(results[SO]);
+                return {
+                    productId,
                     step,
                     exception,
                 };

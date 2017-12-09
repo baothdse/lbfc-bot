@@ -28,7 +28,6 @@ class ShowNearestStore extends Dialog {
             new Request().sendGetRequest('/LBFC/Store/GetNearbyStoreOutdoor', { "lat": coordinates.lat, "lon": coordinates.long, "brandId": this.session.brandId })
             .then((data) => {
                 let listStoreNearBy = JSON.parse(data)
-                console.log("DATA = " + data)
                 let top4NearByStore = []
                 for (let i = 0; i < 10; i++) {
                     let element = {

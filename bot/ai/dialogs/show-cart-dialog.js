@@ -19,6 +19,11 @@ class ShowCartDialog extends Dialog {
 
     showCart(input, senderId, info) {
         this.step = 2;
+        if (this.session.orderDialog == undefined) {
+            this.sendTextMessage(senderId, `${this.session.pronoun} chưa đặt hàng mà`);
+            this.end();
+            return;
+        }
         let orderDetails = this.session.orderDialog.orderDetails;
         let elements = [];
         orderDetails.forEach((orderDetail) => {
@@ -26,7 +31,7 @@ class ShowCartDialog extends Dialog {
                 title: orderDetail.productName,
                 image_url: orderDetail.picURL,
                 subtitle: `Số lượng: ${orderDetail.quantity}
-                            Tổng tiền: ${orderDetail.price}`,
+                            Đơn giá: ${orderDetail.price}`,
                 buttons: [
                     {
                         "type": "postback",

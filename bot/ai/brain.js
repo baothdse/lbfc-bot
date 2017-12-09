@@ -20,6 +20,7 @@ var Response = require('./dialogs/entities/response');
 let Dialog = require('./dialogs/dialog');
 const ShowNearestStoreDialog = require('./dialogs/show-nearest-store-dialog');
 const ShowCartDialog = require('./dialogs/show-cart-dialog');
+const SimpleChangeOrderDialog = require('./dialogs/simple-change-order-dialog');
 const Enums = require('./enum');
 const Util = require('./utils/util');
 
@@ -54,6 +55,8 @@ class Brain {
                     }
                     else if (event.message && event.message.quick_reply) {
                         this.response(event, 'quick_reply');
+                    } else if (event.message && event.message.sticker_id) {
+                        this.response(event, 'sticker');
                     } else if (event.message && event.message.attachments) {
                         this.response(event, 'attachments');
                     }
@@ -76,13 +79,18 @@ class Brain {
         let understood = false;
         const senderId = event.sender.id;
         var message = '';
+        let canResponse = true;
         switch (type) {
             // case 'message': message = this.vietnameseConverter.convert(event.message.text); break;
             case 'message': message = event.message.text; break;
             case 'postback': message = event.postback.payload; break;
             case 'attachments': message = event.message.attachments; break;
-            default: message = event.message.quick_reply.payload; break;
+            case 'quick_reply': message = event.message.quick_reply.payload; break;
+            default: canResponse = false; new Dialog({}).sendTextMessage(senderId, `Gửi tin nhắn thôi ạ. Sticker, hình hay video gì thì chưa hỗ trợ nhé`); break;
         }
+        if (!canResponse)
+            return;
+
         ConsoleLog.log(event, 'brain.js', 79);
 
         this.insertSender(senderId, event.recipient.id)
@@ -110,8 +118,8 @@ class Brain {
                         if (currentDialog.status == "end") {
                             this.removeFromUsingList(usingDialogs, currentDialog);
                             let newCurrentDialog = usingDialogs[usingDialogs.length - 1];
-                            if (newCurrentDialog != null) {
-                                newCurrentDialog.continue(message, senderId);
+                            if (newCurrentDialog != undefined) {
+                                setTimeout(() => newCurrentDialog.continue(message, senderId), 3000);
                             }
                         }
                     } else if (intent.Results != null) {
@@ -120,7 +128,8 @@ class Brain {
                         let matchedDialog = this.removeToUsingList(usingDialogs, dialog);
 
                         if (matchedDialog != null) {
-                            usingDialogs[usingDialogs.length - 1].step -= 1;
+                            let d = usingDialogs[usingDialogs.length - 1];
+                            if (d != undefined) d.pause();
                             usingDialogs.push(matchedDialog[0]);
                             dialog = matchedDialog[0];
 
@@ -143,8 +152,9 @@ class Brain {
                         if (dialog.status == "end") {
                             this.removeFromUsingList(usingDialogs, dialog);
                             let newCurrentDialog = usingDialogs[usingDialogs.length - 1];
-                            if (newCurrentDialog != null) {
-                                newCurrentDialog.continue(message, senderId);
+                            if (newCurrentDialog != undefined) {
+                                setTimeout(() => newCurrentDialog.continue(message, senderId), 3000);
+                                
                             }
                         }
                     }
@@ -404,6 +414,7 @@ class Brain {
             case Enums.SHOW_STORE_DIALOG_ID(): return new ShowStoreDialog(session); break;
             case Enums.SHOW_NEAREST_STORE_DIALOG_ID(): return new ShowNearestStoreDialog(session); break;
             case Enums.SHOW_CART_DIALOG_ID(): return new ShowCartDialog(session); break;
+            case Enums.SIMPLE_CHANGE_DIALOG_ID(): return new SimpleChangeOrderDialog(session); break;
             default: return null;
         }
     }
