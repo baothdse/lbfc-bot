@@ -1137,7 +1137,7 @@ class OrderDialog extends Dialog {
         this.step = 29;
         var that = this;
         this.session.orderDialog.finalPrice = this.session.orderDialog.finalPrice == 0 ? this.session.orderDialog.originalPrice : this.session.orderDialog.finalPrice;
-        this.sendTextMessage(senderId, `${this.session.pronoun} kiểm tra lại đơn hàng giúp em nhé`);
+        this.sendTextMessage(senderId, `${this.session.pronoun} kiểm tra lại đơn hàng giúp em nhé. Nếu đúng thì nhắn ok nhé.`);
         this.getSenderName(senderId)
             .then((sender) => {
                 var recipientName = sender.first_name + " " + sender.last_name + ". \n Phone: " + this.session.orderDialog.phoneNumber;
@@ -1213,7 +1213,7 @@ class OrderDialog extends Dialog {
                 .catch((err) => {
                     console.log(err);
                 })
-            this.step = 26;
+            this.step = 30;
             this.continue(input, senderId);
         } else if (input.match(/(ko|không|hủy|thôi|kg|no|nô)/i)) {
             if (this.session.orderDialog.cancelLoop == 1) {
@@ -1556,17 +1556,18 @@ class OrderDialog extends Dialog {
     order(senderId) {
         let params = {
             'facebookId': senderId,
-            'model': {
-                'OrderDetails': this.session.orderDialog.orderDetails,
-                'originalPrice': this.session.orderDialog.originalPrice,
-                'finalPrice': this.session.orderDialog.finalPrice,
-                'AppliedPromotion': {
-                    'DiscountAmount': this.session.orderDialog.currentPromotion.DiscountAmount,
-                    'DiscountRate': this.session.orderDialog.currentPromotion.DiscountRate,
-                    'PromotionDetailID': this.session.orderDialog.currentPromotion.PromotionDetailID,
-                    'PromotionCode': this.session.orderDialog.currentPromotion.PromotionCode
-                }
-            }
+            // 'model': {
+            //     'OrderDetails': this.session.orderDialog.orderDetails,
+            //     'originalPrice': this.session.orderDialog.originalPrice,
+            //     'finalPrice': this.session.orderDialog.finalPrice,
+            //     'AppliedPromotion': {
+            //         'DiscountAmount': this.session.orderDialog.currentPromotion.DiscountAmount,
+            //         'DiscountRate': this.session.orderDialog.currentPromotion.DiscountRate,
+            //         'PromotionDetailID': this.session.orderDialog.currentPromotion.PromotionDetailID,
+            //         'PromotionCode': this.session.orderDialog.currentPromotion.PromotionCode
+            //     }
+            // }
+            'model': this.session.orderDialog,
         }
 
         return new Request().sendPostRequest("/LBFC/Order/Order", params);
