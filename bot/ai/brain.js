@@ -24,6 +24,8 @@ const SimpleChangeOrderDialog = require('./dialogs/simple-change-order-dialog');
 const SimpleDeleteOrderDialog = require('./dialogs/simple-delete-order-dialog');
 const AskOpenTimeDialog = require('./dialogs/ask-open-time-dialog');
 const AskCloseTimeDialog = require('./dialogs/ask-close-time-dialog');
+let AskBookingDialog = require('./dialogs/booking/ask-booking-dialog')
+let HowToOrderDialog = require('./dialogs/order/how-to-order-dialog')
 const Enums = require('./enum');
 const Util = require('./utils/util');
 
@@ -438,6 +440,9 @@ class Brain {
             case Enums.SIMPLE_DELETE_DIALOG_ID(): return new SimpleDeleteOrderDialog(session); break;
             case Enums.ASK_OPEN_TIME_DIALOG_ID(): return new AskOpenTimeDialog(session); break;
             case Enums.ASK_CLOSING_TIME_DIALOG_ID(): return new AskCloseTimeDialog(session); break;
+            case Enums.ASK_BOOKING_DIALOG_ID(): return new AskBookingDialog(session); break;
+            case Enums.HOW_TO_ORDER_DIALOG_ID(): return new HowToOrderDialog(session); break;
+            case Enums.SHOW_MENU_DIALOG_ID(): return new ShowMenuDialog(session); break;
             default: return null;
         }
     }

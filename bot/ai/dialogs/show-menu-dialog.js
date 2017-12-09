@@ -1,29 +1,26 @@
 let Dialog = require('./dialog');
 let Request = require('../utils/request');
-let ShowMenuIntent = require('../intents/menus/show-menu-intent');
 
 class ShowMenuDialog extends Dialog {
     constructor(session) {
         super(session);
-        this.addIntent(new ShowMenuIntent(1, 0));
     }
 
     continue(input, senderId, info = null) {
         switch (this.step) {
-            case 1:
-                this.showMenu(senderId);
-                break;
+            case 1: this.showMenu(senderId); break;
             case 2: this.end(); break;
-            default:
-                break;
+            default: break;
         }
     }
 
     showMenu(senderId) {
+        console.log(this.session.brandId + " = brand")
+        var skip = Math.floor(Math.random() * 70);
         var url = '/LBFC/Brand/GetMenu';
         var params = {
             'brandId': this.session.brandId,
-            'skip': 0,
+            'skip': skip,
         }
         var that = this;
         this.sendTyping(senderId);
@@ -42,7 +39,7 @@ class ShowMenuDialog extends Dialog {
             var element = {
                 title: d.ProductName,
                 image_url: d.PicURL,
-                subtitle: d.ProductName,
+                subtitle: d.Price,
                 default_action: {
                     "type": "web_url",
                     "url": "https://foody.vn",
@@ -54,11 +51,16 @@ class ShowMenuDialog extends Dialog {
                         type: "postback",
                         title: "Đặt sản phẩm",
                         payload: "Đặt $" + d.ProductID + " $" + d.ProductName + " $" + d.Price + " $" + d.PicURL + " $" + d.ProductCode + " $" + this.session.brandId,
+                    }, {
+                        type: "postback",
+                        title: "Xem tiếp",
+                        payload: "Xem menu"
                     }
                 ]
             }
             elements.push(element);
         });
+        console.log(elements)
         this.sendGenericMessage(senderId, elements);
         this.step = 2;
         this.continue("", "");

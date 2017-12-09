@@ -29,6 +29,9 @@ class Enums {
     static ASK_OPEN_TIME_DIALOG_ID() { return 26; }
     static ASK_CLOSING_TIME_DIALOG_ID() { return 27; }
     static ASK_OPEN_CLOSE_TIME_DIALOG_ID() {return -1;}
+    static ASK_BOOKING_DIALOG_ID() { return 18; }
+    static HOW_TO_ORDER_DIALOG_ID() { return 28; }
+    static SHOW_MENU_DIALOG_ID() { return 25; }
 
 
     static ADD_EXTRA_INTENT_ID() { return 18; }
@@ -58,6 +61,9 @@ class Enums {
     static DELETE_PRODUCT_INTENT_ID() { return 29; }
     static ASK_OPEN_TIME_INTENT_ID() { return 31; }
     static ASK_CLOSE_TIME_INTENT_ID() { return 32; }
+    static ASK_BOOKING_INTENT_ID() { return 20; }
+    static HOW_TO_ORDER_INTENT_ID() { return 33; }
+    static SHOW_MENU_INTENT_ID() { return 30; }
     
     static LIKE_ICON_URL() {return 'https://www.shareicon.net/data/128x128/2016/07/09/119075_thumb_512x512.png';}
     static DISLIKE_ICON_URL() {return 'https://www.shareicon.net/data/128x128/2015/11/05/667168_hand_512x512.png';}

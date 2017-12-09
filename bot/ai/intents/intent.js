@@ -45,6 +45,9 @@ class Intent {
             case Enums.RECEIVE_STORE_NAME_INTENT_ID(): return this.postbackReceivingStore(intent.Step, intent.Exception, intent.Results, intent.PatternGroup); break;
             case Enums.EDIT_PRODUCT_INTENT_ID(): return this.postbackEditProduct(intent.Step, intent.Exception, intent.Results, intent.PatternGroup); break;
             case Enums.DELETE_PRODUCT_INTENT_ID(): return this.postbackDeleteProduct(intent.Step, intent.Exception, intent.Results, intent.PatternGroup); break;
+            case Enums.ASK_BOOKING_INTENT_ID(): return this.replyAskBooking(intent.Step, intent.Exception, intent.Results, intent.PatternGroup); break;
+            case Enums.HOW_TO_ORDER_INTENT_ID(): return this.replyHowToOrder(intent.Step, intent.Exception, intent.Results, intent.PatternGroup); break;
+            case Enums.SHOW_MENU_INTENT_ID(): return this.showMenu(intent.Step, intent.Exception, intent.Results, intent.PatternGroup); break;
             default: return { step: intent.Step, exception: intent.Exception }; break;
         }
     }
@@ -416,6 +419,27 @@ class Intent {
                 };
                 break;
             default: break;
+        }
+    }
+
+    static replyAskBooking(step, exception, results, patternGroup) {
+        return {
+            step,
+            exception,
+        }
+    }
+
+    static replyHowToOrder(step, exception, results, patternGroup) {
+        return {
+            step,
+            exception,
+        }
+    }
+
+    static showMenu(step, exception, results, patternGroup) {
+        return {
+            step,
+            exception,
         }
     }
 }
