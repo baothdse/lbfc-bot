@@ -21,11 +21,14 @@ class Enums {
     static SHOW_ORDER_HISTORY_DIALOG_ID() { return 14; }
     static SHOW_PROMOTION_DIALOG_ID() { return 15; }
     static SHOW_STORE_DIALOG_ID() { return 3; }
-    static ASK_OPEN_CLOSE_TIME_DIALOG_ID() { return -1; }
     static SHOW_POPULAR_PRODUCT_DIALOG_ID() { return -1; }
     static SHOW_NEAREST_STORE_DIALOG_ID() { return 16; }
     static SHOW_CART_DIALOG_ID() { return 22; }
     static SIMPLE_CHANGE_DIALOG_ID() { return 23; }
+    static SIMPLE_DELETE_DIALOG_ID() { return 24; }
+    static ASK_OPEN_TIME_DIALOG_ID() { return 26; }
+    static ASK_CLOSING_TIME_DIALOG_ID() { return 27; }
+    static ASK_OPEN_CLOSE_TIME_DIALOG_ID() {return -1;}
 
 
     static ADD_EXTRA_INTENT_ID() { return 18; }
@@ -53,6 +56,8 @@ class Enums {
     static SHOW_CART_INTENT_ID() { return 27; }
     static EDIT_PRODUCT_INTENT_ID() { return 28; }
     static DELETE_PRODUCT_INTENT_ID() { return 29; }
+    static ASK_OPEN_TIME_INTENT_ID() { return 31; }
+    static ASK_CLOSE_TIME_INTENT_ID() { return 32; }
     
     static LIKE_ICON_URL() {return 'https://www.shareicon.net/data/128x128/2016/07/09/119075_thumb_512x512.png';}
     static DISLIKE_ICON_URL() {return 'https://www.shareicon.net/data/128x128/2015/11/05/667168_hand_512x512.png';}

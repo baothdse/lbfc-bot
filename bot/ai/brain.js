@@ -21,6 +21,9 @@ let Dialog = require('./dialogs/dialog');
 const ShowNearestStoreDialog = require('./dialogs/show-nearest-store-dialog');
 const ShowCartDialog = require('./dialogs/show-cart-dialog');
 const SimpleChangeOrderDialog = require('./dialogs/simple-change-order-dialog');
+const SimpleDeleteOrderDialog = require('./dialogs/simple-delete-order-dialog');
+const AskOpenTimeDialog = require('./dialogs/ask-open-time-dialog');
+const AskCloseTimeDialog = require('./dialogs/ask-close-time-dialog');
 const Enums = require('./enum');
 const Util = require('./utils/util');
 
@@ -120,6 +123,15 @@ class Brain {
                             let newCurrentDialog = usingDialogs[usingDialogs.length - 1];
                             if (newCurrentDialog != undefined) {
                                 setTimeout(() => newCurrentDialog.continue(message, senderId), 3000);
+                                currentDialog = newCurrentDialog;
+                            }
+                        }
+
+                        if (currentDialog != undefined && currentDialog.status == "end") {
+                            this.removeFromUsingList(usingDialogs, currentDialog);
+                            let newCurrentDialog = usingDialogs[usingDialogs.length - 1];
+                            if (newCurrentDialog != undefined) {
+                                setTimeout(() => newCurrentDialog.continue(message, senderId), 3000);
                             }
                         }
                     } else if (intent.Results != null) {
@@ -154,7 +166,15 @@ class Brain {
                             let newCurrentDialog = usingDialogs[usingDialogs.length - 1];
                             if (newCurrentDialog != undefined) {
                                 setTimeout(() => newCurrentDialog.continue(message, senderId), 3000);
-                                
+                                currentDialog = newCurrentDialog;
+                            }
+                        }
+
+                        if (currentDialog != undefined && currentDialog.status == "end") {
+                            this.removeFromUsingList(usingDialogs, currentDialog);
+                            let newCurrentDialog = usingDialogs[usingDialogs.length - 1];
+                            if (newCurrentDialog != undefined) {
+                                setTimeout(() => newCurrentDialog.continue(message, senderId), 3000);
                             }
                         }
                     }
@@ -415,6 +435,9 @@ class Brain {
             case Enums.SHOW_NEAREST_STORE_DIALOG_ID(): return new ShowNearestStoreDialog(session); break;
             case Enums.SHOW_CART_DIALOG_ID(): return new ShowCartDialog(session); break;
             case Enums.SIMPLE_CHANGE_DIALOG_ID(): return new SimpleChangeOrderDialog(session); break;
+            case Enums.SIMPLE_DELETE_DIALOG_ID(): return new SimpleDeleteOrderDialog(session); break;
+            case Enums.ASK_OPEN_TIME_DIALOG_ID(): return new AskOpenTimeDialog(session); break;
+            case Enums.ASK_CLOSING_TIME_DIALOG_ID(): return new AskCloseTimeDialog(session); break;
             default: return null;
         }
     }

@@ -15,12 +15,18 @@ class SimpleChangeOrderDialog extends Dialog {
     }
 
     continue(input, senderId, info = null) {
-        switch (this.step) {
-            case 1: this.receiveProduct(input, senderId, info); break;
-            case 2: this.askForNewQuantity(input, senderId, info); break;
-            case 3: this.receiveNewQuantity(input, senderId, info); break;
-            case 4: this.thankyou(input, senderId, info); break;
-            default: this.end();
+        let found = this.checkProductAvailable(info);
+        if (!found) {
+            this.end();
+        } else {
+            switch (this.step) {
+                case 1: this.receiveProduct(input, senderId, info); break;
+                case 2: this.askForNewQuantity(input, senderId, info); break;
+                case 3: this.receiveNewQuantity(input, senderId, info); break;
+                case 4: this.thankyou(input, senderId, info); break;
+                default: this.end();
+            }
+
         }
     }
 
@@ -98,6 +104,19 @@ class SimpleChangeOrderDialog extends Dialog {
             this.step = step;
             this.continue('', senderId, undefined);
         });
+    }
+
+    checkProductAvailable(info) {
+        let orderDetails = this.session.orderDialog.orderDetails;
+        let found = false;
+        orderDetails.some((detail) => {
+            if (detail.productID == info.productId) {
+                found = true;
+                return true;
+            }
+        });
+        
+        return found;
     }
 
     getName() {
