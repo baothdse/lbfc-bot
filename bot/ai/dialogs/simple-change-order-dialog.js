@@ -15,7 +15,7 @@ class SimpleChangeOrderDialog extends Dialog {
     }
 
     continue(input, senderId, info = null) {
-        let found = this.checkProductAvailable(info);
+        let found = /*this.checkProductAvailable(info);*/ true;
         if (!found) {
             this.end();
         } else {

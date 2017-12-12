@@ -43,7 +43,7 @@ class OrderDialog extends Dialog {
             this.session.orderDialog.currentProduct = {};
         }
 
-        
+
         this.push();
     }
 
@@ -157,7 +157,7 @@ class OrderDialog extends Dialog {
             }
         ];
         this.sendTextMessage(senderId, this.session.pronoun + ' muốn gọi món gì? ^.^')
-        .catch((err) => ConsoleLog.log(err, this.getName(), 164));
+            .catch((err) => ConsoleLog.log(err, this.getName(), 164));
 
     }
 
@@ -194,11 +194,11 @@ class OrderDialog extends Dialog {
                                 type: "postback",
                                 title: "Đặt sản phẩm",
                                 payload: "Đặt $" + data[i].ProductID +
-                                " $" + data[i].ProductName +
-                                " $" + data[i].Price +
-                                " $" + data[i].PicURL +
-                                " $" + data[i].ProductCode +
-                                " $" + that.session.brandId,
+                                    " $" + data[i].ProductName +
+                                    " $" + data[i].Price +
+                                    " $" + data[i].PicURL +
+                                    " $" + data[i].ProductCode +
+                                    " $" + that.session.brandId,
 
                             }
                         ]
@@ -393,7 +393,7 @@ class OrderDialog extends Dialog {
         if (input.match(/\d+/g)) {
             if (input <= 0) {
                 this.requireGreaterThanZero(8, senderId);
-            } 
+            }
             else {
                 this.step = 9;
                 currentExtra.quantity = input;
@@ -470,14 +470,14 @@ class OrderDialog extends Dialog {
             } else if (info.confirmExtraQuantityByWord) {
                 let confirmExtraQuantity = this.convertWordToNumber(info.confirmExtraQuantityByWord);
                 currentExtra.quantity = parseInt(confirmExtraQuantity * currentProduct.quantity);
-                currentProduct.note =`${currentProduct.quantity} phần ${currentProduct.productName} thêm ${currentExtra.quantity} phần ${currentExtra.productName}`
+                currentProduct.note = `${currentProduct.quantity} phần ${currentProduct.productName} thêm ${currentExtra.quantity} phần ${currentExtra.productName}`
                 this.step = 11;
                 this.continue(input, senderId);
             } else if (info.confirmProductHaveExtra) {
-                if(typeof info.confirmProductHaveExtra == 'number') {
+                if (typeof info.confirmProductHaveExtra == 'number') {
                     console.log("TYPE OF CONFIRM PRODUCT EXTRA IS NUMBER")
                     currentExtra.quantity = parseInt(info.confirmProductHaveExtra * currentExtra.quantity)
-                    currentProduct.note =`${info.confirmProductHaveExtra} phần ${currentProduct.productName} thêm ${currentExtra.quantity} phần ${currentExtra.productName}`;
+                    currentProduct.note = `${info.confirmProductHaveExtra} phần ${currentProduct.productName} thêm ${currentExtra.quantity} phần ${currentExtra.productName}`;
                     this.step = 11;
                     this.continue(input, senderId);
                 } else {
@@ -541,11 +541,11 @@ class OrderDialog extends Dialog {
 
         this.step = 14;
 
-        
+
         this.session.orderDialog.originalPrice = this.calculateTotalPrice(this.session.orderDialog.orderDetails);
         if (this.session.orderDialog.originalPrice == 0) {
             this.sendTextMessage(senderId, `${this.session.pronoun} đã đặt gì đâu???`)
-            .then((res) => this.sendImage(senderId, Enums.USAGI_URL()));
+                .then((res) => this.sendImage(senderId, Enums.USAGI_URL()));
             this.step = 40;
             this.continue('', '');
             return;
@@ -692,9 +692,9 @@ class OrderDialog extends Dialog {
      */
     askCurrentLocation(input, senderId) {
         this.sendTextMessage(senderId, `Để em kiếm cửa hàng gần nhất cho ${this.session.pronoun.toLowerCase()} cho.`)
-        .then((res) => {
-            this.sendLocation(senderId);
-        })
+            .then((res) => {
+                this.sendLocation(senderId);
+            })
         this.step = 18;
     }
 
@@ -910,28 +910,28 @@ class OrderDialog extends Dialog {
             key: GOOGLE_API_KEY
         }
         new Request().sendUniversalGetRequest(URL, params, '')
-        .then((response) => {
-            let places = JSON.parse(response);
-            let topPlace = places.predictions[0].description;
-            let elements = [
-                {
-                    content_type: "text",
-                    title: "Đúng rồi",
-                    payload: `address use ${topPlace}`,
-                    image_url: Enums.LIKE_ICON_URL(),
-                 },
-                 {
-                     content_type: "text",
-                     title: "Hông phải",
-                     payload: `address refuse`,
-                     image_url: Enums.DISLIKE_ICON_URL()
-                 }
-             ];
-             this.sendQuickReply(senderId, `Có phải ý ${this.session.pronoun} là ${topPlace}?`, elements);
-         })
-         .catch((err) => {
-             ConsoleLog.log(err, this.getName(), 789);
-         })
+            .then((response) => {
+                let places = JSON.parse(response);
+                let topPlace = places.predictions[0].description;
+                let elements = [
+                    {
+                        content_type: "text",
+                        title: "Đúng rồi",
+                        payload: `address use ${topPlace}`,
+                        image_url: Enums.LIKE_ICON_URL(),
+                    },
+                    {
+                        content_type: "text",
+                        title: "Hông phải",
+                        payload: `address refuse`,
+                        image_url: Enums.DISLIKE_ICON_URL()
+                    }
+                ];
+                this.sendQuickReply(senderId, `Có phải ý ${this.session.pronoun} là ${topPlace}?`, elements);
+            })
+            .catch((err) => {
+                ConsoleLog.log(err, this.getName(), 789);
+            })
     }
 
     /**
@@ -941,15 +941,19 @@ class OrderDialog extends Dialog {
      * @param {{address}} info 
      */
     receiveAdrressConfirmation(input, senderId, info) {
-        if (info.address == null) {
-            this.sendTextMessage(senderId, `${this.session.pronoun} có thể nhập lại địa chỉ mà rõ hơn xíu được hông?`)
-                .then((response) => {
-                    this.step = 20.4;
-                })
-        } else {
-            this.session.orderDialog.address = info.address;
-            this.step = 21;
-            this.continue(input, senderId);
+        if (info != null) {
+
+            if (info.address == null) {
+                this.step = 20.4;
+                this.sendTextMessage(senderId, `${this.session.pronoun} có thể nhập lại địa chỉ mà rõ hơn xíu được hông?`)
+                    .then((response) => {
+                        this.step = 20.4;
+                    })
+            } else {
+                this.session.orderDialog.address = info.address;
+                this.step = 21;
+                this.continue(input, senderId);
+            }
         }
     }
 

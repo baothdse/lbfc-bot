@@ -28,12 +28,13 @@ class SimpleDeleteOrderDialog extends Dialog {
             let productName = "";
             for(var i = 0; i < orderDetails.length; ++i) {
                 if (orderDetails[i].productID == info.productId) {
+                    productName = orderDetails[i].productName;
                     orderDetails.splice(i, 1);
                     break;
                 }
             }
             this.step = 2;
-            this.continue(input, senderId, info);
+            this.continue(productName, senderId, info);
         } else {
             this.sendTextMessage(senderId, `${this.session.pronoun} ơi, ${this.session.pronoun} mở giỏ hàng lên rồi hãy bấm nút sửa nha.`);
             this.step = 5;
@@ -42,7 +43,7 @@ class SimpleDeleteOrderDialog extends Dialog {
     }
 
     thankyou(input, senderId, info) {
-        this.sendTextMessage(senderId, `Ok đã xóa ${this.session.simpleChangeOrderDialog.newQuantity}`);
+        this.sendTextMessage(senderId, `Ok đã xóa ${input}`);
         this.step = 3;
         this.continue('', '');
     }

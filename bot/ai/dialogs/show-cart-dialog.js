@@ -25,6 +25,11 @@ class ShowCartDialog extends Dialog {
             return;
         }
         let orderDetails = this.session.orderDialog.orderDetails;
+        if (orderDetails.length == 0) {
+            this.sendTextMessage(senderId, `${this.session.pronoun} chưa mua gì cả :3`);
+            this.end();
+            return;
+        }
         let elements = [];
         orderDetails.forEach((orderDetail) => {
             let element = {
