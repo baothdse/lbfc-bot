@@ -119,21 +119,13 @@ class Brain {
 
                         let currentStep = currentDialog.step;
                         currentDialog.continue(message, senderId);
-                        understood = currentDialog.step > currentStep;
+                        understood = currentDialog.step != currentStep;
                         if (currentDialog.status == "end") {
                             this.removeFromUsingList(usingDialogs, currentDialog);
                             let newCurrentDialog = usingDialogs[usingDialogs.length - 1];
                             if (newCurrentDialog != undefined) {
                                 setTimeout(() => newCurrentDialog.continue(message, senderId), 3000);
                                 currentDialog = newCurrentDialog;
-                            }
-                        }
-
-                        if (currentDialog != undefined && currentDialog.status == "end") {
-                            this.removeFromUsingList(usingDialogs, currentDialog);
-                            let newCurrentDialog = usingDialogs[usingDialogs.length - 1];
-                            if (newCurrentDialog != undefined) {
-                                setTimeout(() => newCurrentDialog.continue(message, senderId), 3000);
                             }
                         }
                     } else if (intent.Results != null) {
@@ -169,14 +161,6 @@ class Brain {
                             if (newCurrentDialog != undefined) {
                                 setTimeout(() => newCurrentDialog.continue(message, senderId), 3000);
                                 currentDialog = newCurrentDialog;
-                            }
-                        }
-
-                        if (currentDialog != undefined && currentDialog.status == "end") {
-                            this.removeFromUsingList(usingDialogs, currentDialog);
-                            let newCurrentDialog = usingDialogs[usingDialogs.length - 1];
-                            if (newCurrentDialog != undefined) {
-                                setTimeout(() => newCurrentDialog.continue(message, senderId), 3000);
                             }
                         }
                     }

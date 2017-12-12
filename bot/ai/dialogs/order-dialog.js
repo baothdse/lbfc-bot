@@ -325,7 +325,7 @@ class OrderDialog extends Dialog {
             if (input.match(/^(không|ko|nô|không muốn|không áp dụng|ko mua|không mua|kg)/i)) {
                 this.step = 11;
                 this.continue(input, senderId);
-            } else {
+            } else if (info.productId) {
                 console.log(info)
                 this.step = 8;
                 let currentProduct = this.session.orderDialog.currentProduct
@@ -524,7 +524,7 @@ class OrderDialog extends Dialog {
         if (input.match(/(hết rồi|hết|không|không còn|ko|kg)/i)) {
             this.step = 13;
             this.continue(input, senderId);
-        } else {
+        } else if (input.match(/(có|muốn|đặt thêm|ok|ừ|gọi thêm món)/i)) {
             this.sendEmoji(senderId);
             this.step = 2;
             this.continue(input, senderId);
