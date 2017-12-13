@@ -226,15 +226,17 @@ class Intent {
         switch (patternGroup) {
             case 1:
                 ConsoleLog.log(results, 'intent.js', 48);
-                var extraId = results[POSTBACK_NUT_CHON_EXTRA].split("$")[1].trim();
-                var info = results[CUM_TU].split("$");
-                var productName = info[1].trim();
-                var price = info[2].trim();
+                let extraId = results[POSTBACK_NUT_CHON_EXTRA].split("$")[1].trim();
+                let info = results[CUM_TU].split("$");
+                let productName = info[1].trim();
+                let price = info[2].trim();
+                let picUrl = info[3].trim();
 
                 return {
                     productId: parseInt(extraId),
                     productName: productName,
                     price: price,
+                    picUrl: picUrl,
                     step: this.step,
                     exception: this.exception,
                 }

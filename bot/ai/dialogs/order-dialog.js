@@ -249,7 +249,7 @@ class OrderDialog extends Dialog {
                 this.whenUserOrderTooMuch(currentProduct.quantity, senderId)
                     .then((response) => {
                         this.step = 6;
-                        this.insertProductToOrder(currentProduct.simplify());
+
                         ConsoleLog.log(currentProduct, this.getName(), 214);
                         this.sendTextMessage(senderId, 'Ok ' + input + ' phần ' + currentProduct.productName)
                             .then(function (data) {
@@ -296,7 +296,7 @@ class OrderDialog extends Dialog {
                                 {
                                     type: "postback",
                                     title: "Thêm extra",
-                                    payload: "Thêm extra $" + listExtraProduct[i].ProductID + " $" + listExtraProduct[i].ProductName + " $" + listExtraProduct[i].Price
+                                    payload: "Thêm extra $" + listExtraProduct[i].ProductID + " $" + listExtraProduct[i].ProductName + " $" + listExtraProduct[i].Price + " $" + listExtraProduct[i].PicURL
                                 }
                             ]
                         }
@@ -304,7 +304,7 @@ class OrderDialog extends Dialog {
                     }
                     that.sendGenericMessage(senderId, top4Product)
                 } else {
-                    that.step = 9;
+                    that.step = 11;
                     that.continue(input, senderId);
                 }
             })
@@ -333,7 +333,8 @@ class OrderDialog extends Dialog {
                 let extra = {
                     productId: info.productId,
                     productName: info.productName,
-                    price: info.price
+                    price: info.price,
+                    picUrl: info.picUrl
                 }
 
                 currentProduct.extras.push(extra);
@@ -388,11 +389,15 @@ class OrderDialog extends Dialog {
      */
     receiveExtraQuantity(input, senderId) {
         let currentProduct = this.session.orderDialog.currentProduct;
+        console.log("======391=====")
+        console.log(currentProduct)
+        this.insertProductToOrder(currentProduct.simplify());
         let that = this;
         let currentExtra = currentProduct.extras[currentProduct.extras.length - 1];
         if (input.match(/\d+/g)) {
             if (input <= 0) {
                 this.requireGreaterThanZero(8, senderId);
+                this.step = 7;
             }
             else {
                 this.step = 9;
@@ -1020,8 +1025,8 @@ class OrderDialog extends Dialog {
                             `Em thấy ${this.session.pronoun} có tạo thẻ thành viên này,  ${this.session.pronoun} có muốn xài không?`,
                             elements);
                     } else {
-                        this.step = 24;
-                        this.continue('', senderId);
+                        this.step = 27;
+                        this.continue('', senderId, {isUsed: false});
                     }
                 } else {
                     ConsoleLog.log("Card not founddddddddd", this.getName(), 811);
@@ -1170,21 +1175,32 @@ class OrderDialog extends Dialog {
                         }
                     ]
                 }
-                var elements = [];
-                for (var i = 0; i < that.session.orderDialog.orderDetails.length; i++) {
-                    var element = {
+                let elements = [];
+                for (let i = 0; i < that.session.orderDialog.orderDetails.length; i++) {
+                    let element = {
                         title: that.session.orderDialog.orderDetails[i].productName,
                         // subtitle: that.session.orderDialog.orderDetails[i].,
                         quantity: parseInt(that.session.orderDialog.orderDetails[i].quantity),
                         price: that.session.orderDialog.orderDetails[i].price,
                         currency: "VND",
-                        image_url: that.session.orderDialog.orderDetails[i].productUrl
+                        image_url: that.session.orderDialog.orderDetails[i].picURL
                     }
-                    ConsoleLog.log(element, this.getName(), 655);
                     elements.push(element)
+                    if (that.session.orderDialog.orderDetails[i].extras.length > 0) {
+                        let extra = {
+                            title: that.session.orderDialog.orderDetails[i].extras[0].productName,
+                            quantity: that.session.orderDialog.orderDetails[i].extras[0].quantity,
+                            price: that.session.orderDialog.orderDetails[i].extras[0].price,
+                            currency: "VND",
+                            image_url: that.session.orderDialog.orderDetails[i].extras[0].picUrl
+                        }
+                        elements.push(extra)
+
+                    }
                 }
+                ConsoleLog.log(elements, this.getName(), 1196);
                 let paymentMethod = this.session.orderDialog.membershipCardCode == null ? "Tiền mặt" : "Thẻ thành viên";
-                ConsoleLog.log(summary, this.getName(), 656);
+                ConsoleLog.log(this.session.orderDialog, this.getName(), 656);
                 that.sendReceipt(senderId, recipientName, orderNumber, orderUrl, address, summary, adjustments, elements, paymentMethod)
                     .then((data) => {
                         that.step = 29;
@@ -1205,20 +1221,22 @@ class OrderDialog extends Dialog {
      */
     receiveConfirmation(input, senderId, info) {
         ConsoleLog.log(info, this.getName(), 1044);
+        this.step = 30;
         if (input.match(/(ok|đồng ý|đúng rồi|có|yes|đúng|ừ|tốt|gút|good|đặt hàng|okie|okay|oke)/i)) {
             this.order(senderId)
                 .then((data) => {
+                    this.step = 30;
+                    
                     this.sendTextMessage(senderId, 'Đơn hàng của ' + this.session.pronoun.toLowerCase() + ' đã thành công.')
                         .then((res) => {
                             return this.sendTextMessage(senderId, `Vui lòng đợi trong ít phút nhân viên cửa hàng sẽ gọi điện cho ${this.session.pronoun.toLowerCase()}`)
                         })
                         .then((res) => this.sendTextMessage(senderId, 'Chúc ' + this.session.pronoun.toLowerCase() + ' một ngày vui vẻ'));
+                        this.continue(input, senderId);
                 })
                 .catch((err) => {
                     console.log(err);
                 })
-            this.step = 30;
-            this.continue(input, senderId);
         } else if (input.match(/(ko|không|hủy|thôi|kg|no|nô)/i)) {
             if (this.session.orderDialog.cancelLoop == 1) {
                 this.sendTextMessage(senderId, `Ủa là sao ${this.session.pronoun.toLowerCase()}?`)
@@ -1284,10 +1302,12 @@ class OrderDialog extends Dialog {
                 var result = JSON.parse(data);
                 if (result.length == 1) {
                     var product = new ProductModel(result[0]);
+                    console.log("======1287=====")
+                    console.log(product)
                     product.quantity = parseInt(info.quantity);
                     that.whenUserOrderTooMuch(product.quantity, senderId)
                         .then((response) => {
-                            that.insertProductToOrder(product.simplify());
+                            //that.insertProductToOrder(product.simplify());
                             that.session.orderDialog.currentProduct = product;
                             that.step = 6;
                             that.reply(senderId,
@@ -1489,7 +1509,9 @@ class OrderDialog extends Dialog {
      * @param {[{productId, productName, price, discountPrice, quantity, productCode, extras: [ProductModel]}]} listProduct 
      */
     calculateTotalPrice(listProduct) {
-        var total = 0;
+        console.log("===================1497=================")
+        console.log(listProduct)
+        let total = 0;
         let condition = listProduct.length;
         for (let i = 0; i < condition; i++) {
             total += (parseInt(listProduct[i].discountPrice) * listProduct[i].quantity)
@@ -1558,23 +1580,28 @@ class OrderDialog extends Dialog {
     }
 
     order(senderId) {
-        let params = {
-            'facebookId': senderId,
-            // 'model': {
-            //     'OrderDetails': this.session.orderDialog.orderDetails,
-            //     'originalPrice': this.session.orderDialog.originalPrice,
-            //     'finalPrice': this.session.orderDialog.finalPrice,
-            //     'AppliedPromotion': {
-            //         'DiscountAmount': this.session.orderDialog.currentPromotion.DiscountAmount,
-            //         'DiscountRate': this.session.orderDialog.currentPromotion.DiscountRate,
-            //         'PromotionDetailID': this.session.orderDialog.currentPromotion.PromotionDetailID,
-            //         'PromotionCode': this.session.orderDialog.currentPromotion.PromotionCode
-            //     }
-            // }
-            'model': this.session.orderDialog,
-        }
+        return this.getSenderName(senderId)
+            .then((res) => {
+                let params = {
+                    'facebookId': senderId,
+                    // 'model': {
+                    //     'OrderDetails': this.session.orderDialog.orderDetails,
+                    //     'originalPrice': this.session.orderDialog.originalPrice,
+                    //     'finalPrice': this.session.orderDialog.finalPrice,
+                    //     'AppliedPromotion': {
+                    //         'DiscountAmount': this.session.orderDialog.currentPromotion.DiscountAmount,
+                    //         'DiscountRate': this.session.orderDialog.currentPromotion.DiscountRate,
+                    //         'PromotionDetailID': this.session.orderDialog.currentPromotion.PromotionDetailID,
+                    //         'PromotionCode': this.session.orderDialog.currentPromotion.PromotionCode
+                    //     }
+                    // }
+                    'model': this.session.orderDialog,
+                    'customerName': res.first_name
+                }
 
-        return new Request().sendPostRequest("/LBFC/Order/Order", params);
+                ConsoleLog.log(this.session.orderDialog, this.getName(), 1599);
+                return new Request().sendPostRequest("/LBFC/Order/Order", params);
+            })
 
     }
 
